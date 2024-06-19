@@ -1,0 +1,229 @@
+﻿@using System.Text.RegularExpressions;
+@model BliviPedidos.Models.ViewModels.StoreViewModel;
+@{
+    ViewData["Title"] = "Lista de Pedido | Store (Loja)";
+}
+<div class="pagetitle">
+    <h1>Detalhes do Pedidos</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Página Inicial</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Store" asp-action="ProdutoLista">Pedidos</a></li>
+            <li class="breadcrumb-item active">Detalhes Pedido</li>
+        </ol>
+    </nav>
+</div>
+<section class="section dashboard">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="row">
+                @{
+                    var pa = 0;
+                    var valorPrevisto = Convert.ToDecimal(0);
+                    var valorPago = Convert.ToDecimal(0);
+
+                    if (Model.Pedidos.Count != 0)
+                    {
+                        valorPrevisto = Model.Pedidos.Sum(x => Convert.ToDecimal(x.ValorTotalPedido));
+                        valorPago = Model.Pedidos.Where(p => p.Pago).Sum(x => Convert.ToDecimal(x.ValorTotalPedido));
+
+                        if (valorPago != 0)
+                            pa = Convert.ToInt32(Math.Abs((valorPago / valorPrevisto) * 100));
+                        else
+                            pa = 0;
+                    }
+                }
+                <div class="col-xxl-6 col-md-3">
+                    <div class="card info-card sales-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Pedidos<span> | Ativos</span></h5>
+
+                            <div class="d-flex align-items-center">
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-cart"></i>
+                                </div>
+                                <div class="ps-3">
+                                    <h6>@Model.Pedidos.Where(p => p.Ativo).Count()</h6>
+                                    <span class="text-success small pt-1 fw-bold">Ativos</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-6 col-md-3">
+                    <div class="card info-card sales-card">
+                        <div class="card-body">
+                            <h5 class="card-title">%<span> | Pagamentos</span></h5>
+                            <div class="d-flex align-items-center">
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-percent"></i>
+                                </div>
+                                <div class="ps-3">
+                                    <h6>@pa.ToString()%</h6>
+                                    <span class="text-secondary small pt-1 fw-bold">% Pagos</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-6 col-md-3">
+                    <div class="card info-card customers-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Recebidos<span> | Pagos</span></h5>
+                            <div class="d-flex align-items-center">
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-currency-dollar"></i>
+                                </div>
+                                <div class="ps-3">
+                                    <h6>@string.Format("{0:0.00}", valorPago)</h6>
+                                    <span class="text-secondary small pt-1 fw-bold">Recebidos</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-6 col-md-3">
+                    <div class="card info-card revenue-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Total<span> | Soma</span></h5>
+                            <div class="d-flex align-items-center">
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-currency-dollar"></i>
+                                </div>
+                                <div class="ps-3">
+                                    <h6>@(Model.Pedidos.Sum(x => Convert.ToDecimal(x.ValorTotalPedido)).ToString("0.00"))</h6>
+                                    <span class="text-secondary small pt-1 fw-bold">Total</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="row">
+                <div class="card">
+                    <br />
+                    <div class="card-body">
+                        <h5 class="card-title">Lista de pedidos</h5>
+                        <p>
+                            A lista de pedidos contém exclusivamente os pedidos ativos. Nela, é possível alterar tanto o status de pagamento quanto a situação do pedido conforme necessário.
+                        </p>
+
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col d-flex justify-content-start">
+                                <a asp-action="PedidoPreparacao" class="btn btn-primary">
+                                    <i class="bi bi-cart-plus"></i> Novo pedido
+                                </a>
+                            </div>
+                            <div class="col d-flex justify-content-end">
+                                <div>
+                                    @{
+                                        var cssFiltro = Model.FiltroRegistros == 2 ? "btn btn-primary btn-sm" : "btn btn-light btn-sm";
+                                    }
+                                    <a asp-action="PedidoLista" asp-route-filtro="2" class="@cssFiltro">
+                                        Meus Pedidos
+                                    </a>
+                                    @{
+                                        cssFiltro = Model.FiltroRegistros == 2 ? "btn btn-light btn-sm" : "btn btn-primary btn-sm";
+                                    }
+                                    <a asp-action="PedidoLista" asp-route-filtro="1" class="@cssFiltro">
+                                        Todos Pedidos
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="table datatable">
+                            <thead>
+                                <tr>
+                                    <th>Ação</th>
+                                    <th>N°</th>
+                                    <th>
+                                        Pago
+                                    </th>
+                                    <th>
+                                        Nome
+                                    </th>
+                                    <th>
+                                        Telefone
+                                    </th>
+                                    <th>
+                                        Total
+                                    </th>
+                                    <th>
+                                        Vendedor
+                                    </th>
+                                    <th>
+                                        Feito
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var p in Model.Pedidos)
+                                {
+                                    string numeroTelefone = new String(p.Cadastro.Telefone.Where(Char.IsDigit).ToArray());
+                                    string linkWhatsApp = "https://api.whatsapp.com/send?phone=55" + numeroTelefone +
+                                    "&text=Recebemos%20seu%20pedido%20número%20" + p.Id.ToString();
+
+                                    <tr>
+                                        <td>
+                                            <a asp-action="PedidoDetalhe" asp-route-id="@p.Id" class="btn btn-primary btn-sm">
+                                                <i class="bi bi-info-circle"></i>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => p.Id)
+                                        </td>
+                                        <td>
+                                            @if (p.Pago)
+                                            {
+                                                <span class="badge rounded-pill bg-success">Pago</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge rounded-pill bg-warning text-dark">Pendente</span>
+                                            }
+                                        </td>
+
+                                        <td>
+                                            @Html.DisplayFor(modelItem => p.Cadastro.Nome)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => p.Cadastro.Telefone)
+                                            <a href="@linkWhatsApp" target="_blank"><i class="bi bi-whatsapp bi-1x"></i></a>
+                                        </td>
+                                        <td>
+                                            @{
+                                                var subTotal = p.Itens.Sum(x => Convert.ToDecimal(x.Subtotal));
+                                            }
+                                            @Html.DisplayFor(modelItem => subTotal)
+                                        </td>
+                                        <td style="font-size: 10px;">
+                                            @Html.DisplayFor(modelItem => p.EmailResponsavel)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => p.DataPedido)
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card-footer">
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary btn-sm">
+                            <i class="bi bi-house"></i> Voltar ao inicío
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+

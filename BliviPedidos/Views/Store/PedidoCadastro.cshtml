@@ -1,0 +1,232 @@
+﻿@{
+    ViewData["Title"] = "Controle | Store (Loja)";
+}
+
+@model BliviPedidos.Models.Cadastro
+
+@if (!string.IsNullOrEmpty(ViewBag.QuantidadeInsuficienteMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @ViewBag.QuantidadeInsuficienteMessage
+    </div>
+}
+
+<div class="pagetitle">
+    <h1>Cadastro de Pedidos</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Página Inicial</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Store" asp-action="ProdutoLista">Pedidos</a></li>
+            <li class="breadcrumb-item active">Cadastrar Pedido</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section dashboard">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    Informe os dados do responsavel do pedido
+                </div>
+                <div class="card-body">
+                    <br />
+                    <form asp-action="PedidoResumo" class="form-horizontal">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="@Model.Pedido.Id" />
+
+                        <div class="row">
+
+
+                            <div class="row mb-3">
+                                <label asp-for="@Model.Nome" class="col-sm-2 col-form-label"></label>
+                                <div class="col-sm-10">
+                                    <input asp-for="@Model.Nome" type="text" placeholder="Nome" class="form-control">
+                                </div>
+                                <span asp-validation-for="@Model.Nome" class="text-danger"></span>
+                            </div>
+                            <div class="row mb-3">
+                                <label asp-for="@Model.Email" class="col-sm-2 col-form-label"></label>
+                                <div class="col-sm-10">
+                                    <input asp-for="@Model.Email" type="text" placeholder="E-mail" class="form-control">
+                                </div>
+                                <span asp-validation-for="@Model.Email" class="text-danger"></span>
+                            </div>
+                            <div class="row mb-3">
+                                <label asp-for="@Model.Telefone" class="col-sm-2 col-form-label"></label>
+                                <div class="col-sm-10">
+                                    <input asp-for="@Model.Telefone" type="text" placeholder="Telefone" class="form-control">
+                                </div>
+                                <span asp-validation-for="@Model.Telefone" class="text-danger"></span>
+                            </div>
+                            <div class="row mb-3">
+                                <label asp-for="@Model.CEP" class="col-sm-2 col-form-label"></label>
+                                <div class="col-sm-10">
+                                    <input id="cep" asp-for="@Model.CEP" type="text" placeholder="CEP" class="form-control">
+                                </div>
+                                <span asp-validation-for="@Model.CEP" class="text-danger"></span>
+                            </div>
+                            <div class="row mb-3">
+                                <label asp-for="@Model.Endereco" class="col-sm-2 col-form-label"></label>
+                                <div class="col-sm-10">
+                                    <input id="logradouro" asp-for="@Model.Endereco" type="text" placeholder="Endereco" class="form-control">
+                                </div>
+                                <span asp-validation-for="@Model.Endereco" class="text-danger"></span>
+                            </div>
+                            <div class="row mb-3">
+                                <label asp-for="@Model.Complemento" class="col-sm-2 col-form-label"></label>
+                                <div class="col-sm-10">
+                                    <input id="logradouro" asp-for="@Model.Complemento" type="text" placeholder="Complemento" class="form-control">
+                                </div>
+                                <span asp-validation-for="@Model.Complemento" class="text-danger"></span>
+                            </div>
+                            <div class="row mb-3">
+                                <label asp-for="@Model.Bairro" class="col-sm-2 col-form-label"></label>
+                                <div class="col-sm-10">
+                                    <input id="bairro" asp-for="@Model.Bairro" type="text" placeholder="Bairro" class="form-control">
+                                </div>
+                                <span asp-validation-for="@Model.Bairro" class="text-danger"></span>
+                            </div>
+                            <div class="row mb-3">
+                                <label asp-for="@Model.Municipio" class="col-sm-2 col-form-label"></label>
+                                <div class="col-sm-10">
+                                    <input id="cidade" asp-for="@Model.Municipio" type="text" placeholder="Cidade" class="form-control">
+                                </div>
+                                <span asp-validation-for="@Model.Municipio" class="text-danger"></span>
+                            </div>
+                            <div class="row mb-3">
+                                <label asp-for="@Model.UF" class="col-sm-2 control-label"></label>
+                                <div class="col-sm-10">
+                                    <select id="uf" asp-for="@Model.UF" class="form-control">
+                                        <option value="">Selecione um estado</option>
+                                        <option value="AC">Acre</option>
+                                        <option value="AL">Alagoas</option>
+                                        <option value="AP">Amapá</option>
+                                        <option value="AM">Amazonas</option>
+                                        <option value="BA">Bahia</option>
+                                        <option value="CE">Ceará</option>
+                                        <option value="DF">Distrito Federal</option>
+                                        <option value="ES">Espírito Santo</option>
+                                        <option value="GO">Goiás</option>
+                                        <option value="MA">Maranhão</option>
+                                        <option value="MT">Mato Grosso</option>
+                                        <option value="MS">Mato Grosso do Sul</option>
+                                        <option value="MG">Minas Gerais</option>
+                                        <option value="PA">Pará</option>
+                                        <option value="PB">Paraíba</option>
+                                        <option value="PR">Paraná</option>
+                                        <option value="PE">Pernambuco</option>
+                                        <option value="PI">Piauí</option>
+                                        <option value="RJ">Rio de Janeiro</option>
+                                        <option value="RN">Rio Grande do Norte</option>
+                                        <option value="RS">Rio Grande do Sul</option>
+                                        <option value="RO">Rondônia</option>
+                                        <option value="RR">Roraima</option>
+                                        <option value="SC">Santa Catarina</option>
+                                        <option value="SP">São Paulo</option>
+                                        <option value="SE">Sergipe</option>
+                                        <option value="TO">Tocantins</option>
+                                    </select>
+                                </div>
+                                <span asp-validation-for="@Model.UF" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                                <div class="form-group">
+                                    <a class="btn btn-primary btn-sm" asp-action="PedidoPreparacao">
+                                        Continuar Comprando
+                                    </a>
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        Finalizar Pedido
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5> # @Model.Pedido.Id <small> Informações do Pedido </small></h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <br />
+                            <div class="card info-card revenue-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Valor Total<span> | This Month</span></h5>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-currency-dollar"></i>
+                                        </div>
+                                        <div class="d-flex justify-content-right ps-3">
+                                            <h6>@string.Format("{0:0.00}", Model.Pedido.ValorTotalPedido)</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card info-card sales-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Situação<span> | pagamento</span></h5>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-cash-coin"></i>
+                                        </div>
+                                        <div class="d-flex justify-content-right ps-3">
+                                            <input asp-for="Pedido.Pago" type="checkbox" value="" onchange="atualizarEstadoPedido(@Model.Pedido.Id, this.checked)" /> Pago
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card info-card sales-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Itens<span> | resumo</span></h5>
+                                    <div class="row">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                                <i class="bi bi-receipt"></i>
+                                            </div>
+                                            <div class="d-flex justify-content-right ps-3">
+                                                <h6>@Model.Pedido.Itens.Count</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <div class="row">
+                                        <table id="tblPedidos" class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Item</th>
+                                                    <th>Unidade</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var i in Model.Pedido.Itens)
+                                                {
+                                                    <tr>
+                                                        <td>@i.Quantidade</td>
+                                                        <td>@i.Produto.Nome</td>
+                                                        <td>@string.Format("{0:0.00}", i.PrecoUnitario)</td>
+                                                        <td>@string.Format("{0:0.00}", i.Subtotal)</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script src="~/js/controllers/Store-Cadastro.js"></script>

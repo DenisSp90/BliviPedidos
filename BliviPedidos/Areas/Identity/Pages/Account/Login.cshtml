@@ -1,0 +1,61 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+    Layout = "_LayoutLogin";
+}
+
+<section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
+                <div class="d-flex justify-content-center py-4">
+                    <a href="#" class="logo d-flex align-items-center w-auto">
+                        <img src="~/img/logo.png" alt="">
+                        <span class="d-none d-lg-block">Blivi</span>
+                    </a>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="pt-4 pb-2">
+                            <h5 class="card-title text-center pb-0 fs-4">Acesse a sua Conta</h5>
+                            <p class="text-center small">Entrer com seu email & senha para acessar</p>
+                        </div>
+                        <form id="account" method="post">
+                            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                            <div class="col-12">
+                                <label asp-for="Input.Email" class="form-label">Email</label>
+                                <div class="input-group has-validation">
+                                    <span class="input-group-text" id="inputGroupPrepend">@@</span>
+                                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="Input.Password" class="form-label">Password</label>
+                                <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                                <span asp-validation-for="Input.Password" class="text-danger"></span>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <label asp-for="Input.RememberMe" class="form-label">
+                                        <input class="form-check-input" asp-for="Input.RememberMe" />
+                                        @Html.DisplayNameFor(m => m.Input.RememberMe)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Acessar</button>
+                            </div>
+                            <div class="col-12">
+                                <p class="small mb-0">Não tem ? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Criar um Acesso</a></p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+

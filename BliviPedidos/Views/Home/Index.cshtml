@@ -1,0 +1,152 @@
+﻿@{
+    ViewData["Title"] = "Página Inicial";
+}
+@model BliviPedidos.Models.ViewModels.StoreViewModel;
+
+<div class="pagetitle">
+    <h1>Dashboard</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item active">Dashboard</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section dashboard">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="row">
+                @{
+                    var pa = 0;
+                    var valorPrevisto = Convert.ToDecimal(0);
+                    var valorPago = Convert.ToDecimal(0);
+
+                    if (Model.Pedidos.Count != 0)
+                    {
+                        valorPrevisto = Model.Pedidos.Sum(x => Convert.ToDecimal(x.ValorTotalPedido));
+                        valorPago = Model.Pedidos.Where(p => p.Pago).Sum(x => Convert.ToDecimal(x.ValorTotalPedido));
+
+                        if (valorPago != 0)
+                            pa = Convert.ToInt32(Math.Abs((valorPago / valorPrevisto) * 100));
+                        else
+                            pa = 0;
+                    }
+                }
+                <div class="col-xxl-4 col-md-6">
+                    <a href="@Url.Action("ProdutoLista", "Store", new { filtro = 1 })" class="text-decoration-none">
+                        <div class="card info-card sales-card">
+                            <div class="card-body">
+                                <h5 class="card-title">Produtos <span>|</span></h5>
+
+                                <div class="d-flex align-items-center">
+                                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                        <i class="ri ri-barcode-box-line"></i>
+                                    </div>
+                                    <div class="ps-3">
+                                        <h6>@Model.Produtos.Count</h6>
+                                        <span class="text-muted small pt-2 ps-1">Produtos em estoque</span>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-xxl-4 col-md-6">
+                    <a href="@Url.Action("PedidoLista", "Store", new { filtro = 1 })" class="text-decoration-none">
+                        <div class="card info-card sales-card">
+
+                            <div class="card-body">
+                                <h5 class="card-title">Pedidos <span>| Ativos</span></h5>
+
+                                <div class="d-flex align-items-center">
+                                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-cart-check"></i>
+                                    </div>
+                                    <div class="ps-3">
+                                        <h6>@Model.Pedidos.Count</h6>
+                                        <span class="text-success small pt-1 fw-bold">@pa.ToString()%</span> <span class="text-muted small pt-2 ps-1">Pagos</span>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Gráficos <span>/Pedidos</span></h5>
+
+                            <div class="flot-chart">
+                                <div id="bar_chart"></div>
+                            </div>
+
+                            <div class="row text-left">
+                                <div class="col-xs-12 col-md-4 col-lg-4">
+                                    <div class="m-l-md">
+                                        <span id="total-valor-pedidos" class="h4 font-bold m-t block">$ @String.Format("{0:0.00}", Model.TotalValorPedidos)</span>
+                                        <small class="text-muted m-b block">Total pedidos</small>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-md-4 col-lg-4">
+                                    <div class="m-l-md">
+                                        <span id="valor-pedidos-pagos" class="h4 font-bold m-t block">$ @Model.ValorPedidosPagos.ToString("0.00")</span>
+                                        <small class="text-muted m-b block">Pedidos Pagos</small>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-md-4 col-lg-4">
+                                    <div class="m-l-md">
+                                        <span id="valor-pedidos-nao-pagos" class="h4 font-bold m-t block">$ @Model.ValorPedidosNaoPagos.ToString("0.00")</span>
+                                        <small class="text-muted m-b block">Valores não pagos</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Pedidos Recentes <span>| Ultimas</span></h5>
+
+                    <div class="activity">
+
+                        @{
+                            var startIndex = Math.Max(0, Model.Pedidos.Count - 10);
+                            var endIndex = Model.Pedidos.Count - 1;
+                        }
+
+                        @for (int i = endIndex; i >= startIndex; i--)
+                        {
+                            var pedido = Model.Pedidos[i];
+                            <div class="activity-item d-flex">
+                                <div class="activite-label">R$@pedido.ValorTotalPedido.ToString("N2")</div>
+
+                                @if (pedido.Pago)
+                                {
+                                    <i class='bi bi-circle-fill activity-badge text-success align-self-start'></i>
+                                }
+                                else
+                                {
+                                    <i class='bi bi-circle-fill activity-badge text-warning align-self-start'></i>
+                                }
+
+                                <div class="activity-content">
+                                    <a href="@Url.Action("PedidoDetalhe", "Store", new { id = pedido.Id })" class="text-decoration-none">
+                                        @pedido.Cadastro.Nome
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script src="~/js/controllers/Store-Grafico.js"></script>

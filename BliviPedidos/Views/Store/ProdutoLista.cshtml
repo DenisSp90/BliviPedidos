@@ -1,0 +1,87 @@
+﻿@model IEnumerable<BliviPedidos.Models.Produto>
+@{
+    ViewData["Title"] = "Lista de Produtos";
+}
+<div class="pagetitle">
+    <h1>Lista de Produtos</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Página de Inicial</a></li>
+            <li class="breadcrumb-item">Produtos</li>
+            <li class="breadcrumb-item active">Lista</li>
+        </ol>
+    </nav>
+</div>
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Produtos</h5>
+                    <p>
+                        Após salvar os dados, o produto estará disponível para ser incluído nos pedidos. É importante garantir que todas as informações estejam corretas para evitar problemas no processo de vendas e entrega.
+                    </p>
+                    <div class="">
+                        <a class="btn btn-primary" asp-action="ProdutoCadastro"><i class="bi bi-plus"></i>&nbsp;Novo Produto</a>
+                    </div>
+                    <br />
+                    <table class="table datatable">
+                        <thead>
+                            <tr>
+                                <th>Opções</th>
+                                <th>@Html.DisplayNameFor(model => model.Codigo)</th>
+                                <th>@Html.DisplayNameFor(model => model.Nome)</th>
+                                <th>@Html.DisplayNameFor(model => model.Preco)</th>
+                                <th>@Html.DisplayNameFor(model => model.Quantidade)</th>
+                                <th>@Html.DisplayNameFor(model => model.Tamanho)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var produto in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a class="btn btn btn-primary btn-sm" asp-action="ProdutoEditar" asp-route-id="@produto.Id"><i class="bi bi-pencil-square"></i></a>
+                                            <a class="btn btn-info btn-sm" asp-action="ProdutoDetalhe" asp-route-id="@produto.Id"><i class="bi bi-info-circle"></i></a>
+                                            <a class="btn btn btn-danger btn-sm delete-btn" data-id="@produto.Id" href="/Store/ProdutoDelete/@produto.Id"><i class="bi bi-trash"></i></a>
+                                        </div>
+                                    </td>
+                                    <td>@produto.Codigo</td>
+                                    <td>@produto.Nome</td>
+                                    <td>@produto.Preco.ToString("C2")</td>
+                                    <td class="text-center">
+                                        @if (produto.Quantidade == 0)
+                                        {
+                                            @produto.Quantidade
+                                            <br />
+                                            <span class="badge bg-danger"><i class="bi bi-exclamation-octagon me-1"></i> Produto Esgotado</span>
+                                        }
+                                        else if (produto.Quantidade < 10)
+                                        {
+                                            @produto.Quantidade
+                                            <br />
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Poucas unidades</span>
+                                        }
+                                        else
+                                        {
+                                            @produto.Quantidade
+                                        }
+                                    </td>
+
+                                    <td>@produto.Tamanho</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-house"></i> Voltar ao inicío
+                    </a>
+                </div>
+            </div>            
+        </div>
+    </div>
+</section>
+<script src="~/js/controllers/Store-ProdutoLista.js"></script>
