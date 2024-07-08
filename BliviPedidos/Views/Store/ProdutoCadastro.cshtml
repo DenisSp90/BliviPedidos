@@ -18,69 +18,64 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Cadastro de Produtos</h5>
-                    <form id="formulario" method="post" enctype="multipart/form-data" asp-action="ProdutoCadastro">
-
-                        <div class="row mb-3">
+                    <form class="row g-3" id="formulario" method="post" enctype="multipart/form-data" asp-action="ProdutoCadastro">
+                        <div class="col-12">
                             <label asp-for="Codigo" class="col-sm-2 col-form-label"></label>
-                            <div class="col-sm-10">
-                                <input asp-for="Codigo" type="text" placeholder="Código" class="form-control">
-                            </div>
+                            <input asp-for="Codigo" type="text" placeholder="Código" class="form-control">
                             <span asp-validation-for="Codigo" class="text-danger"></span>
                         </div>
-                        <div class="row mb-3">
+                        <div class="col-12">
                             <label asp-for="Nome" class="col-sm-2 col-form-label"></label>
-                            <div class="col-sm-10">
-                                <input asp-for="Nome" type="text" placeholder="Nome do Produto" class="form-control">
-                            </div>
+                            <input asp-for="Nome" type="text" placeholder="Nome do Produto" class="form-control">
                             <span asp-validation-for="Nome" class="text-danger"></span>
                         </div>
-                        <div class="row mb-3">
-                            <label asp-for="Preco" class="col-sm-2 col-form-label"></label>
-                            <div class="col-sm-10">
-                                <input id="Preco" name="Preco" type="text" placeholder="Preço do Produto" class="form-control">
-                            </div>
-                            <span asp-validation-for="Preco" class="text-danger"></span>
+
+                        <div class="col-12">
+                            <label asp-for="PrecoPago" class="col-sm-2 col-form-label"></label>
+                            <input id="PrecoPago" name="PrecoPago" placeholder="Preço pago no Produto" class="form-control Preco">
+                            <span asp-validation-for="PrecoPago" class="text-danger"></span>
                         </div>
-                        <div class="row mb-3">
+                        <div class="col-12">
+                            <label asp-for="PrecoVenda" class="col-sm-2 col-form-label"></label>
+                            <input id="PrecoVenda" name="PrecoVenda" placeholder="Preço venda do Produto" class="form-control Preco">
+                            <span asp-validation-for="PrecoVenda" class="text-danger"></span>
+                        </div>
+
+
+                        <div class="col-12">
                             <label asp-for="Quantidade" class="col-sm-2 col-form-label"></label>
-                            <div class="col-sm-10">
-                                <input asp-for="Quantidade" type="text" placeholder="Quantidade de Produto" class="form-control">
-                            </div>
+                            <input asp-for="Quantidade" type="text" placeholder="Quantidade de Produto" class="form-control">
                             <span asp-validation-for="Quantidade" class="text-danger"></span>
                         </div>
-                        <div class="row mb-3">
+                        <div class="col-12">
                             <label asp-for="Tamanho" class="col-sm-2 col-form-label"></label>
-                            <div class="col-sm-10">
-                                <input asp-for="Tamanho" type="text" placeholder="Tamanho do Produto" class="form-control">
-                            </div>
+                            <input asp-for="Tamanho" type="text" placeholder="Tamanho do Produto" class="form-control">
                             <span asp-validation-for="Tamanho" class="text-danger"></span>
                         </div>
-                        <div class="row mb-3">
+                        <div class="col-12">
                             <label asp-for="CodeBar" class="col-sm-2 col-form-label"></label>
-                            <div class="col-sm-10">
-                                <input asp-for="CodeBar" type="text" placeholder="Codigo de barras" class="form-control">
-                            </div>
+                            <input asp-for="CodeBar" type="text" placeholder="Codigo de barras" class="form-control">
                             <span asp-validation-for="CodeBar" class="text-danger"></span>
                         </div>
-                        <div class="row mb-3">
+
+                        <div class="col-12">
                             <label asp-for="Foto" class="col-sm-2 col-form-label"></label>
-                            <div class="col-sm-10">
-                                <input id="inputFoto" name="foto" type="file" class="form-control" accept="image/*" />
-                            </div>
                             <span asp-validation-for="Foto" class="text-danger"></span>
+                            <input id="inputFoto" name="foto" type="file" class="form-control" accept="image/*" />
                         </div>
+                        
                         <div class="col-lg-12">
                             <div class="panel panel-default">
                                 <div class="panel-heading">
                                     <i class="fa fa-file-picture-o"></i> Pré-visualização
                                 </div>
-                                <div class="panel-body">
-                                    <img id="imagemPreview" src="#" style="max-width: 100px; max-height: 100px;" />
+                                <div class="panel-body" style="text-align: center; height: 200px; display: flex; justify-content: center; align-items: center;">
+                                    <img id="imagemPreview" src="#" alt="Product Image" style="max-width: 100%; max-height: 100%;" />
                                 </div>
                             </div>
                         </div>
+
                         <div class="text-center">
-                            
                         </div>
                         <div class="card-footer d-flex justify-content-between">
                             <div>
@@ -89,7 +84,7 @@
                                 </a>
                             </div>
 
-                            <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i>&nbsp;Salvar</button>
+                            <button type="submit" class="btn btn-primary"><i class="ri-save-3-fill"></i>&nbsp;&nbsp;Salvar</button>
                         </div>
                     </form>
                 </div>
@@ -149,7 +144,6 @@
         </div>
     </div>
 </section>
-
 <script src="~/js/controllers/Produto-Cadastro.js"></script>
 
 @section Scripts {

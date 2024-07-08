@@ -1,6 +1,6 @@
 ﻿namespace BliviPedidos.Services.Interfaces
 {
-    public interface IEmailSenderService
+    public interface IEmailEnviarService
     {
         Task SendEmailAsync(string email, string subject, string message);
     }

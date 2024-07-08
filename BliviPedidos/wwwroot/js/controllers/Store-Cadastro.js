@@ -1,3 +1,71 @@
+$(document).ready(function () {
+
+    $('#telefoneInput').val('+55 11 ');
+    $('#telefoneInput').mask('+00 00 00000-0000');
+
+    $('#telefoneInput').blur(function () {
+        var telefone = $(this).val();
+
+        // Fazendo a requisição AJAX para buscar o cliente pelo telefone
+        $.ajax({
+            url: '/Store/ClienteGetByTelefone', // Ajuste a URL conforme necessário
+            type: 'GET',
+            data: { telefone: telefone },
+            success: function (data) {
+                debugger;
+                $('#nomeInput').val(data.nome);
+                $('#emailInput').val(data.email);
+                $('#cep').val(data.cep);
+
+
+
+
+                // Faça algo com os dados retornados
+                console.log(data);
+                // Você pode atualizar o formulário ou exibir os dados do cliente
+            },
+            error: function (error) {
+                debugger;
+                console.error('Erro ao buscar cliente:', error);
+            }
+        });
+    });
+
+    // Quando a página carregar, verifique o estado inicial da checkbox
+    if ($('#avulsoCheckbox').is(':checked')) {
+        $('#nomeInput').prop('disabled', true).val('AVULSO');
+        $('#emailInput').prop('disabled', true).val('email@email.com.br');
+        $('#telefoneInput').prop('disabled', true).val('+00 00 00000-0000');
+    } else {
+        $('#nomeInput').prop('disabled', false).val('');
+        $('#emailInput').prop('disabled', false).val('');
+        $('#telefoneInput').prop('disabled', false).val('+55 11 ');
+    }
+
+    // Adiciona um ouvinte de evento de mudança à checkbox
+    $('#avulsoCheckbox').change(function () {
+        if (this.checked) {
+            $('#nomeInput').prop('disabled', true).val('AVULSO');
+            $('#emailInput').prop('disabled', true).val('email@email.com.br');
+            $('#telefoneInput').prop('disabled', true).val('+00 00 00000-0000');
+
+            $('#nomeInputHidden').val('AVULSO');
+            $('#emailInputHidden').val('email@email.com.br');
+            $('#telefoneInputHidden').val('+00 00 00000-0000');           
+
+        } else {
+            $('#nomeInput').prop('disabled', false).val('');
+            $('#emailInput').prop('disabled', false).val('');
+            $('#telefoneInput').prop('disabled', false).val('+55 11 ');
+
+            $('#nomeInputHidden').val('AVULSO');
+            $('#emailInputHidden').val('email@email.com.br');
+            $('#telefoneInputHidden').val('+00 00 00000-0000');
+
+        }
+    });
+});
+
 function atualizarEstadoPedido(idPedido, novoEstado) {
 
     $.ajax({
@@ -5,7 +73,11 @@ function atualizarEstadoPedido(idPedido, novoEstado) {
         url: "/Store/AtualizarEstadoPagamento",
         data: { idPedido: idPedido, pago: novoEstado },
         success: function (data) {
-            debugger;
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Pagamento do pedido atualizado com sucesso.',
+            });
 
             console.log("Estado do pedido atualizado com sucesso.");
 
@@ -19,6 +91,8 @@ function atualizarEstadoPedido(idPedido, novoEstado) {
                 console.log("O pedido não está pago.");
                 $('.widget:eq(1)').removeClass('navy-bg red-bg').addClass('yellow-bg');
             }
+
+            location.reload();
         },
         error: function (xhr, status, error) {
             console.error("Erro ao atualizar estado do pedido:", error);
@@ -63,18 +137,12 @@ function cancelarPedido(idPedido, novoEstado) {
                 }
             });            
         }
+        else {
+            location.reload();
+        }
     });    
 }
-$(document).ready(function () {
-    var elements = $('[data-imask]');
 
-    elements.each(function () {
-        var maskOptions = {
-            mask: $(this).data('imask')
-        };
-        var mask = IMask(this, maskOptions);
-    });
-});
 $('#cep').blur(function () {
     var cep = $('#cep').val();
 

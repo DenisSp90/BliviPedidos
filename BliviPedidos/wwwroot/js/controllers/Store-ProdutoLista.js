@@ -29,7 +29,6 @@ $(document).ready(function () {
                                 showConfirmButton: false,
                                 timer: 1500
                             });
-                            debugger;
                             location.reload();                            
                         } else {
                             console.log('Erro: ' + response.errorMessage);

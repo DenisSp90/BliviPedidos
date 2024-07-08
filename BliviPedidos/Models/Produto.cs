@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BliviPedidos.Models
 {
@@ -8,12 +9,13 @@ namespace BliviPedidos.Models
         {
         }
 
-        public Produto(int id, string codigo, string nome, decimal preco, int quantidade, string tamanho, string codeBar, byte[] foto, string tipoArquivoFoto)
+        public Produto(int id, string codigo, string nome, decimal precoVenda, decimal precoPago, int quantidade, string? tamanho, string? codeBar, byte[]? foto, string? tipoArquivoFoto)
         {
             Id = id;
             Codigo = codigo;
             Nome = nome;
-            Preco = preco;
+            PrecoVenda = precoVenda;
+            PrecoPago = precoPago;
             Quantidade = quantidade;
             Tamanho = tamanho;
             CodeBar = codeBar;
@@ -23,17 +25,34 @@ namespace BliviPedidos.Models
 
         public int Id { get; protected set; }
 
+        public string? Codigo { get; set; } = string.Empty;
+
         [Required]
-        public string Codigo { get; private set; } = string.Empty;
+        [Display(Name = "Nome")]
+        public string Nome { get; set; } = string.Empty;
+
         [Required]
-        public string Nome { get; private set; } = string.Empty;
-        [Required]
+        [Column(TypeName = "decimal(10, 2)")]
         [Range(0, double.MaxValue, ErrorMessage = "O campo Preço do produto deve ser um número.")]
-        public decimal Preco { get; private set; }
+        [Display(Name = "Preço Venda")]
+        public decimal PrecoVenda { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(10, 2)")]
+        [Range(0, double.MaxValue, ErrorMessage = "O campo Preço do produto deve ser um número.")]
+        [Display(Name = "Preço Pago")]
+        public decimal PrecoPago { get; set; }
+
+        [Display(Name = "Quantidade")]
         public int Quantidade { get; set; }
+
+        [Display(Name = "Tamanho")]
         public string? Tamanho { get; set; }
+
         public string? CodeBar { get; set; }
+        
         public byte[]? Foto { get; set; }
+        
         public string? TipoArquivoFoto { get; set; }
     }
 }

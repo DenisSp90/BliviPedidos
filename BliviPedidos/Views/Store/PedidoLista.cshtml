@@ -4,7 +4,7 @@
     ViewData["Title"] = "Lista de Pedido | Store (Loja)";
 }
 <div class="pagetitle">
-    <h1>Detalhes do Pedidos</h1>
+    <h1>Lista do Pedidos</h1>
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Página Inicial</a></li>
@@ -21,6 +21,12 @@
                     var pa = 0;
                     var valorPrevisto = Convert.ToDecimal(0);
                     var valorPago = Convert.ToDecimal(0);
+
+                    decimal totalLucroTodosPedidos = Model.Pedidos.Sum(p => p.Itens.Sum(item => (item.PrecoUnitario - item.Produto.PrecoPago) * item.Quantidade));
+
+                    var totalLucroPedidosPagos = Model.Pedidos
+                    .Where(p => p.Pago) // Filtra apenas os pedidos pagos
+                    .Sum(p => p.Itens.Sum(item => (item.PrecoUnitario - item.Produto.PrecoPago) * item.Quantidade));
 
                     if (Model.Pedidos.Count != 0)
                     {
@@ -53,30 +59,30 @@
                 <div class="col-xxl-6 col-md-3">
                     <div class="card info-card sales-card">
                         <div class="card-body">
-                            <h5 class="card-title">%<span> | Pagamentos</span></h5>
+                            <h5 class="card-title">Lucro<span> | Recebido</span></h5>
                             <div class="d-flex align-items-center">
                                 <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-percent"></i>
+                                    <i class="bi bi-sort-numeric-up-alt"></i>
                                 </div>
                                 <div class="ps-3">
-                                    <h6>@pa.ToString()%</h6>
-                                    <span class="text-secondary small pt-1 fw-bold">% Pagos</span>
+                                    <h6>@string.Format("{0:0.00}", totalLucroPedidosPagos)</h6>
+                                    <span class="text-secondary small pt-1 fw-bold">Lucro recebido</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-xxl-6 col-md-3">
-                    <div class="card info-card customers-card">
+                    <div class="card info-card sales-card">
                         <div class="card-body">
-                            <h5 class="card-title">Recebidos<span> | Pagos</span></h5>
+                            <h5 class="card-title">Valores<span> | Recebidos</span></h5>
                             <div class="d-flex align-items-center">
                                 <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                                     <i class="bi bi-currency-dollar"></i>
                                 </div>
                                 <div class="ps-3">
                                     <h6>@string.Format("{0:0.00}", valorPago)</h6>
-                                    <span class="text-secondary small pt-1 fw-bold">Recebidos</span>
+                                    <span class="text-secondary small pt-1 fw-bold">@pa.ToString()% pagos</span>                                    
                                 </div>
                             </div>
                         </div>
@@ -85,14 +91,14 @@
                 <div class="col-xxl-6 col-md-3">
                     <div class="card info-card revenue-card">
                         <div class="card-body">
-                            <h5 class="card-title">Total<span> | Soma</span></h5>
+                            <h5 class="card-title">Total<span> | previsto</span></h5>
                             <div class="d-flex align-items-center">
                                 <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                                     <i class="bi bi-currency-dollar"></i>
                                 </div>
                                 <div class="ps-3">
                                     <h6>@(Model.Pedidos.Sum(x => Convert.ToDecimal(x.ValorTotalPedido)).ToString("0.00"))</h6>
-                                    <span class="text-secondary small pt-1 fw-bold">Total</span>
+                                    <span class="text-secondary small pt-1 fw-bold">Total previsto</span>
                                 </div>
                             </div>
                         </div>
@@ -168,7 +174,7 @@
                                 @foreach (var p in Model.Pedidos)
                                 {
                                     string numeroTelefone = new String(p.Cadastro.Telefone.Where(Char.IsDigit).ToArray());
-                                    string linkWhatsApp = "https://api.whatsapp.com/send?phone=55" + numeroTelefone +
+                                    string linkWhatsApp = "https://api.whatsapp.com/send?phone=" + numeroTelefone +
                                     "&text=Recebemos%20seu%20pedido%20número%20" + p.Id.ToString();
 
                                     <tr>

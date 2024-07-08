@@ -6,11 +6,11 @@ using System.Net;
 
 namespace BliviPedidos.Services.Implementations
 {
-    public class EmailSenderService : IEmailSenderService
+    public class EmailEnviarService : IEmailEnviarService
     {
         private readonly EmailSettings _emailSettings;
 
-        public EmailSenderService(IOptions<EmailSettings> emailSettings)
+        public EmailEnviarService(IOptions<EmailSettings> emailSettings)
         {
             _emailSettings = emailSettings.Value;
         }

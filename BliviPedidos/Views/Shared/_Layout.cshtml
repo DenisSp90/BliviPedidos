@@ -23,6 +23,8 @@
     <link href="~/vendor/simple-datatables/style.css" rel="stylesheet">
 
     <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.7.0.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Referência à biblioteca imask -->
@@ -129,6 +131,19 @@
                     <li >
                         <a class="nav-link" asp-area="" asp-controller="Store" asp-action="PedidoPreparacao">
                             <i class="bi bi-circle"></i><span>Fazer um novo pedido</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" data-bs-target="#components-nav-2" data-bs-toggle="collapse" href="#">
+                    <i class="bi bi-people"></i><span>Clientes</span><i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <ul id="components-nav-2" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+                    <li>
+                        <a asp-area="" asp-controller="Store" asp-action="ClienteLista">
+                            <i class="bi bi-circle"></i><span>Lista de Clientes</span>
                         </a>
                     </li>
                 </ul>

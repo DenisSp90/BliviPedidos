@@ -21,26 +21,31 @@ namespace BliviPedidos.Models
 
         [MinLength(5, ErrorMessage = "Nome deve ter no minimo 5 caracteres")]
         [MaxLength(50, ErrorMessage = "Nome deve ter no minimo 50 caracteres")]
-        [Required(ErrorMessage = "Nome √© obrigat√≥rio")]
+        [Required(ErrorMessage = "Nome È obrigat?rio")]
         public string Nome { get; set; } = "";
 
-        [EmailAddress(ErrorMessage = "E-mail inv√°lido")]
-        public string? Email { get; set; } = "";
+        [Required(ErrorMessage = "E-mail È obrigat?rio")]
+        public string Email { get; set; } = "";
 
-        [Required(ErrorMessage = "Telefone √© obrigat?rio")]
+        [Required(ErrorMessage = "Telefone È obrigat?rio")]
         public string Telefone { get; set; } = "";
 
-        public string? Endereco { get; set; } = "";
+        [Required(ErrorMessage = "Endere?o È obrigat?rio")]
+        public string Endereco { get; set; } = "";
 
-        public string? Complemento { get; set; } = "";
+        public string Complemento { get; set; } = "";
 
-        public string? Bairro { get; set; } = "";
+        [Required(ErrorMessage = "Bairro È obrigat?rio")]
+        public string Bairro { get; set; } = "";
 
-        public string? Municipio { get; set; } = "";
+        [Required(ErrorMessage = "Municipio È obrigat?rio")]
+        public string Municipio { get; set; } = "";
 
-        public string? UF { get; set; } = "";
+        [Required(ErrorMessage = "UF È obrigat?rio")]
+        public string UF { get; set; } = "";
 
-        public string? CEP { get; set; } = "";
+        [Required(ErrorMessage = "CEP È obrigat?rio")]
+        public string CEP { get; set; } = "";
 
         internal void Update(Cadastro novoCadastro)
         {
@@ -123,7 +128,7 @@ namespace BliviPedidos.Models
 
         public decimal ValorTotalPedido { get; set; }
 
-        [EmailAddress(ErrorMessage = "E-mail em formato inv√°lido.")]
+        [EmailAddress(ErrorMessage = "E-mail em formato inv·lido.")]
         public string? EmailResponsavel { get; set; } = string.Empty;
     }
 }

@@ -32,9 +32,11 @@ namespace BliviPedidos.Data
 
             modelBuilder.Entity<Cadastro>().HasKey(t => t.Id);
             modelBuilder.Entity<Cadastro>().HasOne(t => t.Pedido);
+
         }
 
         public DbSet<BliviPedidos.Models.Produto> Produto { get; set; } = default!;
+        public DbSet<BliviPedidos.Models.Cliente> Cliente { get; set; } = default!;
 
     }
 }

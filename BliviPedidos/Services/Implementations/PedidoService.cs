@@ -46,7 +46,7 @@ namespace BliviPedidos.Services.Implementations
 
             if (itemPedido == null)
             {
-                itemPedido = new ItemPedido(pedido, produto, 1, produto.Preco);
+                itemPedido = new ItemPedido(pedido, produto, 1, produto.PrecoVenda);
                 _context.Set<ItemPedido>()
                     .Add(itemPedido);
 

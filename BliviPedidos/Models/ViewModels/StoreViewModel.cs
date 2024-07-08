@@ -5,9 +5,12 @@
         public StoreViewModel() { }
 
         public List<Produto>? Produtos { get; set; }
+        public List<ClienteViewModel>? Clientes { get; set; }
         public CarrinhoViewModel? CarrinhoViewModel { get; set; }
         public Pedido? Pedido { get; set; }
         public IList<Pedido>? Pedidos { get; set; }
+
+        public ClienteViewModel? Cliente { get; set; }
 
         public decimal TotalValorPedidos { get; set; }
         public decimal ValorPedidosPagos { get; set; }

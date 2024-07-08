@@ -12,7 +12,68 @@
         </ol>
     </nav>
 </div>
-<section class="section">
+<section class="section dashboard">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="row">
+                @{
+                    var produtosTotal = Model.Count();
+                    decimal valorTotalPrecoPago = Model.Sum(produto => produto.PrecoPago * produto.Quantidade);
+                    decimal lucroTotal = Model.Sum(produto => (produto.PrecoVenda - produto.PrecoPago) * produto.Quantidade);
+                }
+
+                <div class="col-xxl-6 col-md-4">
+                    <div class="card info-card sales-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Produtos<span> | Total</span></h5>
+
+                            <div class="d-flex align-items-center">
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-collection"></i>
+                                </div>
+                                <div class="ps-3">
+                                    <h6>@produtosTotal</h6>
+                                    <span class="small pt-1 fw-bold">Registrados no estoque</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-6 col-md-4">
+                    <div class="card info-card sales-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Valor<span> | Estoque</span></h5>
+                            <div class="d-flex align-items-center">
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-currency-exchange"></i>
+                                </div>
+                                <div class="ps-3">
+                                    <h6>@valorTotalPrecoPago</h6>
+                                    <span class="small pt-1 fw-bold">Valor gasto no estoque</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-6 col-md-4">
+                    <div class="card info-card sales-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Valor<span> | Lucro</span></h5>
+                            <div class="d-flex align-items-center">
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-sort-numeric-up-alt"></i>
+                                </div>
+                                <div class="ps-3">
+                                    <h6>@lucroTotal</h6>
+                                    <span class="small pt-1 fw-bold">Valor do lucro previsto</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-lg-12">
             <div class="card">
@@ -23,15 +84,16 @@
                     </p>
                     <div class="">
                         <a class="btn btn-primary" asp-action="ProdutoCadastro"><i class="bi bi-plus"></i>&nbsp;Novo Produto</a>
+                        <a class="btn btn-light" asp-action="ProdutoImportar"><i class="bi bi-upload"></i>&nbsp;Importar Produto</a>
                     </div>
                     <br />
                     <table class="table datatable">
                         <thead>
                             <tr>
                                 <th>Opções</th>
-                                <th>@Html.DisplayNameFor(model => model.Codigo)</th>
                                 <th>@Html.DisplayNameFor(model => model.Nome)</th>
-                                <th>@Html.DisplayNameFor(model => model.Preco)</th>
+                                <th>@Html.DisplayNameFor(model => model.PrecoPago)</th>
+                                <th>@Html.DisplayNameFor(model => model.PrecoVenda)</th>
                                 <th>@Html.DisplayNameFor(model => model.Quantidade)</th>
                                 <th>@Html.DisplayNameFor(model => model.Tamanho)</th>
                             </tr>
@@ -47,9 +109,9 @@
                                             <a class="btn btn btn-danger btn-sm delete-btn" data-id="@produto.Id" href="/Store/ProdutoDelete/@produto.Id"><i class="bi bi-trash"></i></a>
                                         </div>
                                     </td>
-                                    <td>@produto.Codigo</td>
                                     <td>@produto.Nome</td>
-                                    <td>@produto.Preco.ToString("C2")</td>
+                                    <td>@produto.PrecoPago.ToString("C2")</td>
+                                    <td>@produto.PrecoVenda.ToString("C2")</td>
                                     <td class="text-center">
                                         @if (produto.Quantidade == 0)
                                         {

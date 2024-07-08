@@ -3,6 +3,7 @@ using BliviPedidos.Data;
 using BliviPedidos.Models;
 using BliviPedidos.Models.ViewModels;
 using BliviPedidos.Services.Interfaces;
+using DocumentFormat.OpenXml.InkML;
 using Microsoft.EntityFrameworkCore;
 
 namespace BliviPedidos.Services.Implementations
@@ -85,6 +86,11 @@ namespace BliviPedidos.Services.Implementations
             {
                 return false;
             }
+        }
+
+        public Task<bool> VerificarExistenciaProdutoNoBanco(string nome, decimal precoPago)
+        {
+            return _context.Produto.AnyAsync(p => p.Nome.Trim().ToUpper() == nome.Trim().ToUpper() && p.PrecoPago == precoPago);
         }
 
         public bool VerificarProdutoVinculadoPedido(int produtoId)
