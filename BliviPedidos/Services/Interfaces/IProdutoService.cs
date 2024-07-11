@@ -11,5 +11,6 @@ namespace BliviPedidos.Services.Interfaces
         bool VerificarProdutoVinculadoPedido(int produtoId);
         bool UpdateQuantidade(List<ItemPedido> itens);
         Task<bool> VerificarExistenciaProdutoNoBanco(string nome, decimal precoPago);
+        Task RegistrarCancelamentoProdutos(ItemPedido itemPedido);
     }
 }

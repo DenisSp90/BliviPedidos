@@ -7,7 +7,7 @@
     <h1>Dashboard</h1>
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Início</a></li>
             <li class="breadcrumb-item active">Dashboard</li>
         </ol>
     </nav>
@@ -15,7 +15,7 @@
 
 <section class="section dashboard">
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-12 col-lg-8">
             <div class="row">
                 @{
                     var pa = 0;
@@ -33,7 +33,7 @@
                             pa = 0;
                     }
                 }
-                <div class="col-xxl-4 col-md-6">
+                <div class="col-12 col-md-6 col-xxl-6">
                     <a href="@Url.Action("ProdutoLista", "Store", new { filtro = 1 })" class="text-decoration-none">
                         <div class="card info-card sales-card">
                             <div class="card-body">
@@ -46,17 +46,15 @@
                                     <div class="ps-3">
                                         <h6>@Model.Produtos.Count</h6>
                                         <span class="text-muted small pt-2 ps-1">Produtos em estoque</span>
-
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
-                <div class="col-xxl-4 col-md-6">
+                <div class="col-12 col-md-6 col-xxl-6">
                     <a href="@Url.Action("PedidoLista", "Store", new { filtro = 1 })" class="text-decoration-none">
                         <div class="card info-card sales-card">
-
                             <div class="card-body">
                                 <h5 class="card-title">Pedidos <span>| Ativos</span></h5>
 
@@ -67,7 +65,6 @@
                                     <div class="ps-3">
                                         <h6>@Model.Pedidos.Count</h6>
                                         <span class="text-success small pt-1 fw-bold">@pa.ToString()%</span> <span class="text-muted small pt-2 ps-1">Pagos</span>
-
                                     </div>
                                 </div>
                             </div>
@@ -84,19 +81,19 @@
                             </div>
 
                             <div class="row text-left">
-                                <div class="col-xs-12 col-md-4 col-lg-4">
+                                <div class="col-12 col-md-4 col-lg-4">
                                     <div class="m-l-md">
                                         <span id="total-valor-pedidos" class="h4 font-bold m-t block">$ @String.Format("{0:0.00}", Model.TotalValorPedidos)</span>
                                         <small class="text-muted m-b block">Total pedidos</small>
                                     </div>
                                 </div>
-                                <div class="col-xs-12 col-md-4 col-lg-4">
+                                <div class="col-12 col-md-4 col-lg-4">
                                     <div class="m-l-md">
                                         <span id="valor-pedidos-pagos" class="h4 font-bold m-t block">$ @Model.ValorPedidosPagos.ToString("0.00")</span>
                                         <small class="text-muted m-b block">Pedidos Pagos</small>
                                     </div>
                                 </div>
-                                <div class="col-xs-12 col-md-4 col-lg-4">
+                                <div class="col-12 col-md-4 col-lg-4">
                                     <div class="m-l-md">
                                         <span id="valor-pedidos-nao-pagos" class="h4 font-bold m-t block">$ @Model.ValorPedidosNaoPagos.ToString("0.00")</span>
                                         <small class="text-muted m-b block">Valores não pagos</small>
@@ -108,6 +105,7 @@
                 </div>
             </div>
         </div>
+
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-body">
@@ -145,6 +143,12 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-8">
+        </div>
+        <div class="col-lg-4">
         </div>
     </div>
 </section>

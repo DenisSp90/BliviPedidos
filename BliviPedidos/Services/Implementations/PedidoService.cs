@@ -130,6 +130,35 @@ namespace BliviPedidos.Services.Implementations
                 .SingleOrDefaultAsync();
         }
 
+        public async Task RegistrarCancelamentoPedido(int pedidoId)
+        {
+            var pedido = await GetPedidoByIdAsync(pedidoId);
+
+
+            if (pedido == null)
+            {
+                throw new Exception("Pedido não encontrado");
+            }
+
+            pedido.ValorTotalPedido = 0;
+            pedido.Pago = false;
+            pedido.Ativo = false;
+
+            foreach (var item in pedido.Itens)
+            {
+                var produto = item.Produto;
+
+                if (produto != null)
+                {
+                    produto.Quantidade += item.Quantidade;
+                    _context.Entry(produto).State = EntityState.Modified;
+                }
+            }
+            _context.Entry(pedido).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
+
+
         public Pedido UpdateCadastro(Cadastro cadastro)
         {
             var pedido = GetPedido();

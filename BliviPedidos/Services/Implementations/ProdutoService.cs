@@ -36,6 +36,18 @@ namespace BliviPedidos.Services.Implementations
             return _mapper.Map<ProdutoViewModel>(produto);
         }
 
+        public async Task RegistrarCancelamentoProdutos(ItemPedido itemPedido)
+        {
+            var produto = _context.Produto.FirstOrDefault(p => p.Id == itemPedido.Produto.Id);
+
+            if (produto != null)
+            {
+                produto.Quantidade += itemPedido.Quantidade;
+                _context.Produto.Update(produto);
+                await _context.SaveChangesAsync();
+            }
+        }
+
         public async Task<bool> RegistrarProdutoAsync(Produto produto)
         {
             try

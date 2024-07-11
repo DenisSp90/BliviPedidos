@@ -6,9 +6,9 @@
     <h1>Lista de Produtos</h1>
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="index.html">Página de Inicial</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Página de Inicial</a></li>
             <li class="breadcrumb-item">Produtos</li>
-            <li class="breadcrumb-item active">Lista</li>
+            <li class="breadcrumb-item active">Lista de produtos em estoque</li>
         </ol>
     </nav>
 </div>
@@ -19,10 +19,11 @@
                 @{
                     var produtosTotal = Model.Count();
                     decimal valorTotalPrecoPago = Model.Sum(produto => produto.PrecoPago * produto.Quantidade);
+                    decimal valorTotalPrecoVenda = Model.Sum(produto => produto.PrecoVenda * produto.Quantidade);
                     decimal lucroTotal = Model.Sum(produto => (produto.PrecoVenda - produto.PrecoPago) * produto.Quantidade);
                 }
 
-                <div class="col-xxl-6 col-md-4">
+                <div class="col-lg-6 col-md-6">
                     <div class="card info-card sales-card">
                         <div class="card-body">
                             <h5 class="card-title">Produtos<span> | Total</span></h5>
@@ -39,7 +40,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xxl-6 col-md-4">
+                <div class="col-lg-6 col-md-6">
                     <div class="card info-card sales-card">
                         <div class="card-body">
                             <h5 class="card-title">Valor<span> | Estoque</span></h5>
@@ -49,13 +50,29 @@
                                 </div>
                                 <div class="ps-3">
                                     <h6>@valorTotalPrecoPago</h6>
-                                    <span class="small pt-1 fw-bold">Valor gasto no estoque</span>
+                                    <span class="small pt-1 fw-bold">Valor do estoque</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-xxl-6 col-md-4">
+                <div class="col-lg-6 col-md-6">
+                    <div class="card info-card sales-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Valor<span> | Venda</span></h5>
+                            <div class="d-flex align-items-center">
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-currency-exchange"></i>
+                                </div>
+                                <div class="ps-3">
+                                    <h6>@valorTotalPrecoVenda</h6>
+                                    <span class="small pt-1 fw-bold">Valor de venda</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6">
                     <div class="card info-card sales-card">
                         <div class="card-body">
                             <h5 class="card-title">Valor<span> | Lucro</span></h5>
@@ -73,6 +90,7 @@
                 </div>
             </div>
         </div>
+
     </div>
     <div class="row">
         <div class="col-lg-12">
@@ -82,68 +100,70 @@
                     <p>
                         Após salvar os dados, o produto estará disponível para ser incluído nos pedidos. É importante garantir que todas as informações estejam corretas para evitar problemas no processo de vendas e entrega.
                     </p>
-                    <div class="">
-                        <a class="btn btn-primary" asp-action="ProdutoCadastro"><i class="bi bi-plus"></i>&nbsp;Novo Produto</a>
+                    <div class="d-md-flex justify-content-between align-items-center">
+                        <a class="btn btn-primary mb-3 mb-md-0" asp-action="ProdutoCadastro"><i class="bi bi-plus"></i>&nbsp;Novo Produto</a>
                         <a class="btn btn-light" asp-action="ProdutoImportar"><i class="bi bi-upload"></i>&nbsp;Importar Produto</a>
                     </div>
                     <br />
-                    <table class="table datatable">
-                        <thead>
-                            <tr>
-                                <th>Opções</th>
-                                <th>@Html.DisplayNameFor(model => model.Nome)</th>
-                                <th>@Html.DisplayNameFor(model => model.PrecoPago)</th>
-                                <th>@Html.DisplayNameFor(model => model.PrecoVenda)</th>
-                                <th>@Html.DisplayNameFor(model => model.Quantidade)</th>
-                                <th>@Html.DisplayNameFor(model => model.Tamanho)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var produto in Model)
-                            {
+                    <div class="table-responsive">
+                        <table class="table datatable">
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <a class="btn btn btn-primary btn-sm" asp-action="ProdutoEditar" asp-route-id="@produto.Id"><i class="bi bi-pencil-square"></i></a>
-                                            <a class="btn btn-info btn-sm" asp-action="ProdutoDetalhe" asp-route-id="@produto.Id"><i class="bi bi-info-circle"></i></a>
-                                            <a class="btn btn btn-danger btn-sm delete-btn" data-id="@produto.Id" href="/Store/ProdutoDelete/@produto.Id"><i class="bi bi-trash"></i></a>
-                                        </div>
-                                    </td>
-                                    <td>@produto.Nome</td>
-                                    <td>@produto.PrecoPago.ToString("C2")</td>
-                                    <td>@produto.PrecoVenda.ToString("C2")</td>
-                                    <td class="text-center">
-                                        @if (produto.Quantidade == 0)
-                                        {
-                                            @produto.Quantidade
-                                            <br />
-                                            <span class="badge bg-danger"><i class="bi bi-exclamation-octagon me-1"></i> Produto Esgotado</span>
-                                        }
-                                        else if (produto.Quantidade < 10)
-                                        {
-                                            @produto.Quantidade
-                                            <br />
-                                            <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Poucas unidades</span>
-                                        }
-                                        else
-                                        {
-                                            @produto.Quantidade
-                                        }
-                                    </td>
-
-                                    <td>@produto.Tamanho</td>
+                                    <th>Opções</th>
+                                    <th>@Html.DisplayNameFor(model => model.Nome)</th>
+                                    <th>@Html.DisplayNameFor(model => model.PrecoPago)</th>
+                                    <th>@Html.DisplayNameFor(model => model.PrecoVenda)</th>
+                                    <th>@Html.DisplayNameFor(model => model.Quantidade)</th>
+                                    <th>@Html.DisplayNameFor(model => model.Tamanho)</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var produto in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="btn-group">
+                                                @* <a class="btn btn btn-primary btn-sm" asp-action="ProdutoEditar" asp-route-id="@produto.Id"><i class="bi bi-pencil-square"></i></a> *@
+                                                <a class="btn btn-info btn-sm" asp-action="ProdutoDetalhe" asp-route-id="@produto.Id"><i class="bi bi-info-circle"></i></a>
+                                                <a class="btn btn btn-danger btn-sm delete-btn" data-id="@produto.Id" href="/Store/ProdutoDelete/@produto.Id"><i class="bi bi-trash"></i></a>
+                                            </div>
+                                        </td>
+                                        <td>@produto.Nome</td>
+                                        <td>@produto.PrecoPago.ToString("C2")</td>
+                                        <td>@produto.PrecoVenda.ToString("C2")</td>
+                                        <td class="text-center">
+                                            @if (produto.Quantidade == 0)
+                                            {
+                                                @produto.Quantidade
+                                                <br />
+                                                <span class="badge bg-danger"><i class="bi bi-exclamation-octagon me-1"></i> Produto Esgotado</span>
+                                            }
+                                            else if (produto.Quantidade < 10)
+                                            {
+                                                @produto.Quantidade
+                                                <br />
+                                                <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Poucas unidades</span>
+                                            }
+                                            else
+                                            {
+                                                @produto.Quantidade
+                                            }
+                                        </td>
+                                        <td>@produto.Tamanho</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div class="card-footer">
                     <a asp-controller="Home" asp-action="Index" class="btn btn-secondary btn-sm">
-                        <i class="bi bi-house"></i> Voltar ao inicío
+                        <i class="bi bi-house"></i> Voltar ao início
                     </a>
                 </div>
-            </div>            
+            </div>
         </div>
+
     </div>
 </section>
 <script src="~/js/controllers/Store-ProdutoLista.js"></script>

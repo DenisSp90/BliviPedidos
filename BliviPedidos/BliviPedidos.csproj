@@ -28,11 +28,14 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.12" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
+    <PackageReference Include="QRCoder" Version="1.4.1" />
     <PackageReference Include="Selenium.WebDriver" Version="4.20.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="uploads\" />
+    <Folder Include="wwwroot\img\produtos\" />
+    <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
 </Project>

@@ -8,14 +8,14 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Página Inicial</a></li>
-            <li class="breadcrumb-item"><a asp-controller="Store" asp-action="ProdutoLista">Pedidos</a></li>
-            <li class="breadcrumb-item active">Detalhes Pedido</li>
+            <li class="breadcrumb-item"><a asp-controller="Store" asp-action="PedidoLista" asp-route-filtro="1">Pedidos</a></li>
+            <li class="breadcrumb-item active">Lista de pedidos registrados</li>
         </ol>
     </nav>
 </div>
 <section class="section dashboard">
     <div class="row">
-        <div class="col-lg-12">
+        <div class="col-12 col-lg-12">
             <div class="row">
                 @{
                     var pa = 0;
@@ -39,7 +39,7 @@
                             pa = 0;
                     }
                 }
-                <div class="col-xxl-6 col-md-3">
+                <div class="col-xxl-6 col-md-6">
                     <div class="card info-card sales-card">
                         <div class="card-body">
                             <h5 class="card-title">Pedidos<span> | Ativos</span></h5>
@@ -56,7 +56,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xxl-6 col-md-3">
+                <div class="col-xxl-6 col-md-6">
                     <div class="card info-card sales-card">
                         <div class="card-body">
                             <h5 class="card-title">Lucro<span> | Recebido</span></h5>
@@ -72,7 +72,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xxl-6 col-md-3">
+                <div class="col-xxl-6 col-md-6">
                     <div class="card info-card sales-card">
                         <div class="card-body">
                             <h5 class="card-title">Valores<span> | Recebidos</span></h5>
@@ -88,7 +88,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xxl-6 col-md-3">
+                <div class="col-xxl-6 col-md-6">
                     <div class="card info-card revenue-card">
                         <div class="card-body">
                             <h5 class="card-title">Total<span> | previsto</span></h5>
@@ -108,84 +108,72 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-lg-12">
-            <div class="row">
-                <div class="card">
-                    <br />
-                    <div class="card-body">
-                        <h5 class="card-title">Lista de pedidos</h5>
-                        <p>
-                            A lista de pedidos contém exclusivamente os pedidos ativos. Nela, é possível alterar tanto o status de pagamento quanto a situação do pedido conforme necessário.
-                        </p>
+        <div class="col-12 col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Lista de pedidos</h5>
+                    <p>
+                        A lista de pedidos contém exclusivamente os pedidos ativos. Nela, é possível alterar tanto o status de pagamento quanto a situação do pedido conforme necessário.
+                    </p>
+                </div>
 
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col d-flex justify-content-start">
-                                <a asp-action="PedidoPreparacao" class="btn btn-primary">
-                                    <i class="bi bi-cart-plus"></i> Novo pedido
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <a asp-action="PedidoPreparacao" class="btn btn-primary">
+                                <i class="bi bi-cart-plus"></i> Novo pedido
+                            </a>
+                        </div>
+                        <div class="col-md-6 d-flex justify-content-md-end">
+                            <div>
+                                @{
+                                    var cssFiltro = Model.FiltroRegistros == 2 ? "btn btn-primary btn-sm" : "btn btn-light btn-sm";
+                                }
+                                <a asp-action="PedidoLista" asp-route-filtro="2" class="@cssFiltro">
+                                    Meus Pedidos
                                 </a>
-                            </div>
-                            <div class="col d-flex justify-content-end">
-                                <div>
-                                    @{
-                                        var cssFiltro = Model.FiltroRegistros == 2 ? "btn btn-primary btn-sm" : "btn btn-light btn-sm";
-                                    }
-                                    <a asp-action="PedidoLista" asp-route-filtro="2" class="@cssFiltro">
-                                        Meus Pedidos
-                                    </a>
-                                    @{
-                                        cssFiltro = Model.FiltroRegistros == 2 ? "btn btn-light btn-sm" : "btn btn-primary btn-sm";
-                                    }
-                                    <a asp-action="PedidoLista" asp-route-filtro="1" class="@cssFiltro">
-                                        Todos Pedidos
-                                    </a>
-                                </div>
+                                @{
+                                    cssFiltro = Model.FiltroRegistros == 1 ? "btn btn-primary btn-sm" : "btn btn-light btn-sm";
+                                }
+                                <a asp-action="PedidoLista" asp-route-filtro="1" class="@cssFiltro">
+                                    Todos Pedidos
+                                </a>
                             </div>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <table class="table datatable">
+                </div>
+
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="datatable table">
                             <thead>
                                 <tr>
                                     <th>Ação</th>
                                     <th>N°</th>
-                                    <th>
-                                        Pago
-                                    </th>
-                                    <th>
-                                        Nome
-                                    </th>
-                                    <th>
-                                        Telefone
-                                    </th>
-                                    <th>
-                                        Total
-                                    </th>
-                                    <th>
-                                        Vendedor
-                                    </th>
-                                    <th>
-                                        Feito
-                                    </th>
+                                    <th>Pago</th>
+                                    <th>Nome</th>
+                                    <th>Total</th>
+                                    <th>Vendedor</th>
+                                    <th>Feito</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach (var p in Model.Pedidos)
                                 {
+                                    var hoje = DateTime.Now;
+                                    var classeLinha = (!p.Pago && p.DataPedido < hoje) ? "table-danger" : "";
+
                                     string numeroTelefone = new String(p.Cadastro.Telefone.Where(Char.IsDigit).ToArray());
                                     string linkWhatsApp = "https://api.whatsapp.com/send?phone=" + numeroTelefone +
                                     "&text=Recebemos%20seu%20pedido%20número%20" + p.Id.ToString();
 
-                                    <tr>
+                                    <tr class="@classeLinha">
                                         <td>
                                             <a asp-action="PedidoDetalhe" asp-route-id="@p.Id" class="btn btn-primary btn-sm">
                                                 <i class="bi bi-info-circle"></i>
                                             </a>
                                         </td>
-                                        <td>
-                                            @Html.DisplayFor(modelItem => p.Id)
-                                        </td>
+                                        <td>@Html.DisplayFor(modelItem => p.Id)</td>
                                         <td>
                                             @if (p.Pago)
                                             {
@@ -196,40 +184,30 @@
                                                 <span class="badge rounded-pill bg-warning text-dark">Pendente</span>
                                             }
                                         </td>
-
-                                        <td>
-                                            @Html.DisplayFor(modelItem => p.Cadastro.Nome)
-                                        </td>
-                                        <td>
-                                            @Html.DisplayFor(modelItem => p.Cadastro.Telefone)
-                                            <a href="@linkWhatsApp" target="_blank"><i class="bi bi-whatsapp bi-1x"></i></a>
-                                        </td>
+                                        <td>@Html.DisplayFor(modelItem => p.Cadastro.Nome)</td>
                                         <td>
                                             @{
                                                 var subTotal = p.Itens.Sum(x => Convert.ToDecimal(x.Subtotal));
                                             }
                                             @Html.DisplayFor(modelItem => subTotal)
                                         </td>
-                                        <td style="font-size: 10px;">
-                                            @Html.DisplayFor(modelItem => p.EmailResponsavel)
-                                        </td>
-                                        <td>
-                                            @Html.DisplayFor(modelItem => p.DataPedido)
-                                        </td>
+                                        <td style="font-size: 10px;">@Html.DisplayFor(modelItem => p.EmailResponsavel)</td>
+                                        <td>@Html.DisplayFor(modelItem => p.DataPedido)</td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
                     </div>
+                </div>
 
-                    <div class="card-footer">
-                        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary btn-sm">
-                            <i class="bi bi-house"></i> Voltar ao inicío
-                        </a>
-                    </div>
+                <div class="card-footer">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-house"></i> Voltar ao início
+                    </a>
                 </div>
             </div>
         </div>
+
     </div>
 </section>
 

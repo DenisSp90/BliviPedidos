@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BliviPedidos.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240708162357_InicialBanco")]
-    partial class InicialBanco
+    [Migration("20240709194515_InicialBancoDados")]
+    partial class InicialBancoDados
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -182,8 +182,8 @@ namespace BliviPedidos.Migrations
                     b.Property<string>("Codigo")
                         .HasColumnType("longtext");
 
-                    b.Property<byte[]>("Foto")
-                        .HasColumnType("longblob");
+                    b.Property<string>("Foto")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -199,9 +199,6 @@ namespace BliviPedidos.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Tamanho")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("TipoArquivoFoto")
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");

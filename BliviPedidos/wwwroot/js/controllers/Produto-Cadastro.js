@@ -59,6 +59,5 @@ $(document).ready(function () {
         var file = $(this)[0].files[0];
         var formData = new FormData();
         formData.append('Foto', file);
-
     });
 });

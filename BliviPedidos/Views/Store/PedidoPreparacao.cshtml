@@ -3,6 +3,13 @@
 }
 
 @model BliviPedidos.Models.ViewModels.StoreViewModel
+<style>
+    @@media (max-width: 767.98px) {
+        .d-none {
+            display: none !important;
+        }
+    }
+</style>
 
 <div class="pagetitle">
     <h1>Registrar Pedido</h1>
@@ -16,65 +23,48 @@
 </div>
 <section class="section dashboard">
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-12 col-lg-8">
             <div class="card">
-                <div class="card-header">
-                    Selecione o produto para adicionar ao pedido
-                </div>
-                <div class="card-body">
-
-                    <table class="table datatable">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>
-                                    Nome
-                                </th>
-                                <th>
-                                    Tamanho
-                                </th>
-                                <th>
-                                    Preço
-                                </th>
-                                <th>
-                                    Estoque
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model.Produtos)
-                            {
+                <div class="card-body pb-0">
+                    <h5 class="card-title">Registrar um pedido <span>| Selecione o produto e informe a quantidade de itens</span></h5>
+                    <div class="card-body table-responsive">
+                        <table class="datatable table table-striped table-hover">
+                            <thead>
                                 <tr>
-                                    <td>
-                                        @{
-                                            if (item.Quantidade != 0)
-                                            {
-                                                <a href="#" class="btn btn-primary btn-sm adicionar-produto" data-produto-id="@item.Id">
-                                                    <i class="bi bi-cart-plus"></i>
-                                                </a>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-danger"><i class="bi bi-exclamation-octagon me-1"></i> Não disponivel</span>
-                                            }
-                                        }
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Nome)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Tamanho)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.PrecoVenda)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Quantidade)
-                                    </td>
+                                    <th></th>
+                                    <th>Nome</th>
+                                    <th class="d-none d-md-table-cell">Tamanho</th>
+                                    <th>Preço</th>
+                                    <th>Estoque</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Produtos)
+                                {
+                                    <tr>
+                                        <td>
+                                            @{
+                                                if (item.Quantidade != 0)
+                                                {
+                                                    <a href="#" class="btn btn-primary btn-sm adicionar-produto" data-produto-id="@item.Id">
+                                                        <i class="bi bi-cart-plus"></i>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger"><i class="bi bi-exclamation-octagon me-1"></i> Não disponível</span>
+                                                }
+                                            }
+                                        </td>
+                                        <td>@Html.DisplayFor(modelItem => item.Nome)</td>
+                                        <td class="d-none d-md-table-cell">@Html.DisplayFor(modelItem => item.Tamanho)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.PrecoVenda)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Quantidade)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div class="card-footer">
                     <a asp-action="PedidoLista" asp-route-filtro="1" class="btn btn-secondary btn-sm">
@@ -83,106 +73,103 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-4">
+        <div class="col-12 col-lg-4">
             <div class="card">
-                <div class="card-header">
-                    Informações do Pedido
-                </div>
-                <div class="card-body">
+                <div class="card-body pb-0">
+                    <h5 class="card-title">Resumo do pedido <span>| Valor e itens do pedido</span></h5>
+                    <div class="card-body">
 
-                    <br />
-                    <div class="row">
-                        <div class="col-xxl-4 col-md-6">
-                            <div class="card info-card sales-card">
-                                <div class="card-body">
-                                    <h5 class="card-title">Pedido</h5>
-                                    <div class="d-flex align-items-left">
-                                        <div class="ps-3">
-                                            <h6 id="numeroPedido">@Model.Pedido.Id</h6>
+                        <br />
+                        <div class="row">
+                            <div class="col-12 col-md-6">
+                                <div class="card info-card sales-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Pedido</h5>
+                                        <div class="d-flex align-items-left">
+                                            <div class="ps-3">
+                                                <h6 id="numeroPedido">@Model.Pedido.Id</h6>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-xxl-4 col-md-6">
-                            <div class="card info-card sales-card">
-                                <div class="card-body">
-                                    <h5 class="card-title">Itens</h5>
-                                    <div class="d-flex align-items-center">
-                                        <div class="ps-3">
-                                            <h6 id="quantidadeItens">@Model.Pedido.Itens.Count</h6>
+                            <div class="col-12 col-md-6">
+                                <div class="card info-card sales-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Itens</h5>
+                                        <div class="d-flex align-items-center">
+                                            <div class="ps-3">
+                                                <h6 id="quantidadeItens">@Model.Pedido.Itens.Count</h6>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-xxl-4 col-xl-12">
-                            <div class="card info-card revenue-card">
-                                <div class="card-body">
-                                    <h5 class="card-title">Total de Pedidos</h5>
-                                    <div class="d-flex align-items-center">
-                                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                            <i class="bi bi-currency-dollar"></i>
-                                        </div>
-                                        <div class="ps-3">
-                                            @{
-                                                decimal totalPedido = 0;
+                            <div class="col-12">
+                                <div class="card info-card revenue-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Total de Pedidos</h5>
+                                        <div class="d-flex align-items-center">
+                                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                                <i class="bi bi-currency-dollar"></i>
+                                            </div>
+                                            <div class="ps-3">
+                                                @{
+                                                    decimal totalPedido = 0;
 
-                                                foreach (var item in Model.Pedido.Itens)
-                                                {
-                                                    totalPedido += item.Subtotal;
+                                                    foreach (var item in Model.Pedido.Itens)
+                                                    {
+                                                        totalPedido += item.Subtotal;
+                                                    }
                                                 }
-                                            }
-                                            <h6 id="total">
-                                                @totalPedido.ToString("N2")
-                                            </h6>
+                                                <h6 id="total">@totalPedido.ToString("N2")</h6>
+                                            </div>
                                         </div>
                                     </div>
+                                    
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-xxl-4 col-xl-12">
-                            <div class="row">
-                                <table id="tblPedidos" class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Item</th>
-                                            <th>Quantidade</th>
-                                            <th>Valor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var i in Model.Pedido.Itens)
-                                        {
-                                            <tr item-id="@i.Id">
-                                                <td>@i.Produto.Nome</td>
-                                                <td>
-                                                    <input type="text"
-                                                           asp-for="@i.Quantidade"
-                                                           style="width: 4em; text-align: center;"
-                                                           class="form-control text-center col-md-4 update-quantidade"
-                                                           oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-                                                           pattern="\d*" />
-                                                </td>
-                                                <td class="subtotal">@string.Format("{0:0.00}", i.Subtotal)</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="col-xxl-4 col-xl-12">
-                            <div class="row d-flex justify-content-center">
-                                <a class="btn btn-primary btn-sm" asp-action="PedidoCadastro">
-                                    Preencher cadastro e finalizar pedido
-                                </a>
+                                <div class="col-xxl-4 col-xl-12">
+                                    <div class="row">
+                                        <table id="tblPedidos" class="table">
+                                            <thead>
+                                                <tr class="table-secondary">
+                                                    <th>Item</th>
+                                                    <th>Quantidade</th>
+                                                    <th>Valor</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var i in Model.Pedido.Itens)
+                                                {
+                                                    <tr item-id="@i.Id" class="table-primary">
+                                                        <td>@i.Produto.Nome</td>
+                                                        <td>
+                                                            <input type="text"
+                                                                   asp-for="@i.Quantidade"
+                                                                   style="width: 4em; text-align: center;"
+                                                                   class="form-control text-center col-md-4 update-quantidade"
+                                                                   oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                                                                   pattern="\d*" />
+                                                        </td>
+                                                        <td class="subtotal">@string.Format("{0:0.00}", i.Subtotal)</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="row d-flex justify-content-center">
+                                        <a class="btn btn-primary btn-sm" asp-action="PedidoCadastro">
+                                            Preencher cadastro e finalizar pedido
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 </section>
 <script src="~/js/controllers/Store-Pedido.js"></script>
 <script>

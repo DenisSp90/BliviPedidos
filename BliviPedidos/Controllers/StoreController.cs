@@ -5,9 +5,13 @@ using BliviPedidos.Models.ViewModels;
 using BliviPedidos.Services.Interfaces;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using QRCoder;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+
 
 namespace BliviPedidos.Controllers;
 
@@ -38,14 +42,12 @@ public class StoreController : Controller
     }
 
     [HttpPost]
-    public IActionResult AtualizarEstadoPagamento(int idPedido, bool pago)
+    public async Task<IActionResult> AtualizarEstadoPagamento(int idPedido, bool pago)
     {
         var pedido = _pedidoService.GetPedidoById(idPedido);
 
         if (pedido == null)
-        {
             return NotFound();
-        }
 
         if (pedido.Pago)
             pedido.DataPagamento = DateTime.Now;
@@ -56,11 +58,19 @@ public class StoreController : Controller
 
         _context.SaveChanges();
 
+        if (!string.IsNullOrEmpty(pedido.Cadastro.Nome) && pedido.Cadastro.Nome != "AVULSO")
+        {
+            var cliente = await _clienteService.ProcurarClienteByTelefoneAsync(pedido.Cadastro.Telefone.Trim());
+
+            if (!string.IsNullOrEmpty(cliente.Email) && cliente.Email != "email@email.com.br")
+                await EnviarEmailPagamento(pedido.Cadastro);
+        }
+
         return Ok(new { Ativo = pedido.Ativo, Pago = pago });
     }
 
     [HttpPost]
-    public IActionResult CancelarPedido(int idPedido, bool ativo)
+    public async Task<IActionResult> CancelarPedido(int idPedido, bool ativo)
     {
         var pedido = _pedidoService.GetPedidoById(idPedido);
 
@@ -69,12 +79,10 @@ public class StoreController : Controller
             return NotFound();
         }
 
-        pedido.Ativo = ativo;
-        _context.SaveChanges();
+        await _pedidoService.RegistrarCancelamentoPedido(pedido.Id);
 
-        bool pago = pedido.Pago;
-
-        return Ok(new { Ativo = pedido.Ativo, Pago = pago });
+        // Retornar o estado atualizado do pedido
+        return Ok(new { Ativo = pedido.Ativo, Pago = pedido.Pago });
     }
 
     public async Task<IActionResult> ClienteGetByTelefone(string telefone)
@@ -213,9 +221,47 @@ public class StoreController : Controller
             if (pedido == null)
                 return View("PedidoNaoEncontrado");
 
+            if (!pedido.Ativo)
+                return RedirectToAction("PedidoLista", "Store");
+
+            PixModel.PixType pixType = PixModel.PixType.chaveAleatoria;
+            string chavePixTipo = "5";
+
+            switch (chavePixTipo)
+            {
+                case "2":
+                    pixType = PixModel.PixType.cpf;
+                    break;
+                case "3":
+                    pixType = PixModel.PixType.cnpj;
+                    break;
+                case "4":
+                    pixType = PixModel.PixType.email;
+                    break;
+                case "5":
+                    pixType = PixModel.PixType.celular;
+                    break;
+                case "6":
+                    pixType = PixModel.PixType.chaveAleatoria;
+                    break;
+            }
+
+            Pix pixObj = new Pix(
+                "DOUGLAS DENIS NERIS MENESES",
+                pixType,
+                "11994846638",
+                "OSASCO",
+                "_boleto.NumeroTitulo",
+                String.Format("{0:C}", pedido.ValorTotalPedido));
+
+            string qrCodeValue = pixObj.GetPayLoad();
+            string qrCodeImageBase64 = GenerateQrCode(qrCodeValue);
+
             StoreViewModel viewModel = new StoreViewModel
             {
-                Pedido = pedido
+                Pedido = pedido,
+                PixKey = qrCodeValue,
+                PixQRCodeUrl = qrCodeImageBase64 // Substitua pela URL real do QR code
             };
 
             return View(viewModel);
@@ -236,9 +282,11 @@ public class StoreController : Controller
             StoreViewModel storeViewModel = new StoreViewModel();
 
             if (filtro == 1)
-                storeViewModel.Pedidos = _pedidoService.GetListaPedidosAtivos();
+                storeViewModel.Pedidos = _pedidoService.GetListaPedidosAtivos()
+                    .OrderByDescending(p => p.Id).ToList();
             else if (filtro == 2)
-                storeViewModel.Pedidos = _pedidoService.GetListaPedidosAtivosByEmail(HttpContext.User.Identity.Name);
+                storeViewModel.Pedidos = _pedidoService.GetListaPedidosAtivosByEmail(HttpContext.User.Identity.Name)
+                    .OrderByDescending(p => p.Id).ToList();
 
             storeViewModel.FiltroRegistros = filtro;
 
@@ -323,10 +371,29 @@ public class StoreController : Controller
         {
             Produto p = _mapper.Map<Produto>(model);
 
+            string defaultPhotoPath = "/img/default.png";
+            string photoPath = defaultPhotoPath;
+
             if (foto != null && foto.Length > 0)
             {
-                p.Foto = await ObterBytesDaImagem(foto);
+                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/img/produtos/");
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + foto.FileName;
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    await foto.CopyToAsync(fileStream);
+
+                photoPath = "/img/produtos/" + uniqueFileName;
             }
+            else if (string.IsNullOrEmpty(p.Foto))
+            {
+                photoPath = defaultPhotoPath;
+            }
+
+            p.Foto = photoPath;
 
             await _produtoService.RegistrarProdutoAsync(p);
 
@@ -377,8 +444,12 @@ public class StoreController : Controller
         var produto = await _produtoService.ProcurarProdutoAsync(id);
 
         if (produto == null)
-        {
             return NotFound();
+
+        if (string.IsNullOrEmpty(produto.Foto))
+        {
+            // Usar uma foto padrão do servidor
+            produto.Foto = "/img/default.png";
         }
 
         return View(produto);
@@ -393,10 +464,29 @@ public class StoreController : Controller
             {
                 Produto p = _mapper.Map<Produto>(model);
 
+                string defaultPhotoPath = "/img/default.png";
+                string photoPath = defaultPhotoPath;
+
                 if (foto != null && foto.Length > 0)
                 {
-                    p.Foto = await ObterBytesDaImagem(foto);
+                    string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/img/produtos/");
+                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + foto.FileName;
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        await foto.CopyToAsync(fileStream);
+
+                    photoPath = "/img/produtos/" + uniqueFileName;
                 }
+                else if (string.IsNullOrEmpty(p.Foto))
+                {
+                    photoPath = defaultPhotoPath;
+                }
+
+                p.Foto = photoPath;
 
                 await _produtoService.RegistrarProdutoAsync(p);
 
@@ -449,7 +539,7 @@ public class StoreController : Controller
             using (var workbook = new XLWorkbook(path))
             {
                 var worksheet = workbook.Worksheet(1);
-                var rows = worksheet.RowsUsed().Skip(1); // Assuming the first row is the header
+                var rows = worksheet.RowsUsed().Skip(1);
 
                 foreach (var row in rows)
                 {
@@ -461,21 +551,21 @@ public class StoreController : Controller
                         PrecoVenda = row.Cell(4).GetValue<decimal>(),
                         Quantidade = row.Cell(5).GetValue<int>(),
                         Tamanho = row.Cell(6).GetValue<string>(),
-                        CodeBar = row.Cell(7).GetValue<string>()
+                        CodeBar = row.Cell(7).GetValue<string>(),
+                        Foto = "/img/default.png"
                     };
 
-                    // Realizar validações
                     if (produto.PrecoPago == 0 || produto.PrecoVenda == 0 || produto.Quantidade == 0 || string.IsNullOrWhiteSpace(produto.Nome))
                     {
                         produto.Nome += " não inserido";
-                        continue; // Não insere o produto e passa para o próximo
+                        continue;
                     }
 
                     bool produtoJaExiste = await _produtoService.VerificarExistenciaProdutoNoBanco(produto.Nome.Trim(), produto.PrecoPago);
                     if (produtoJaExiste)
                     {
                         produto.Nome += " já registrado";
-                        continue; // Não insere o produto se já existir
+                        continue;
                     }
                     else
                     {
@@ -510,19 +600,43 @@ public class StoreController : Controller
 
     }
 
-    private async Task<byte[]> ObterBytesDaImagem(IFormFile foto)
-    {
-        using (var stream = new MemoryStream())
-        {
-            await foto.CopyToAsync(stream);
-            return stream.ToArray();
-        }
-    }
-
     [HttpPost]
     public UpdateQuantidadeResponse UpdateQuantidade([FromBody] ItemPedido itemPedido)
     {
         return _pedidoService.UpdateQuantidade(itemPedido);
+    }
+
+    private async Task EnviarEmailPagamento(Cadastro cadastro)
+    {
+        string email = cadastro.Email.Trim();
+        string assunto = "Pagamento Registrado - Número do pedido " + cadastro.Pedido.Id.ToString();
+
+        string mensagem = $@"
+                                <p>Pagamento Registrado de pedido do site #{cadastro.Pedido.Id}</p>
+                                <hr />
+                                <p>Nome do cliente: {(string.IsNullOrEmpty(cadastro.Nome) ? "<valor não informado>" : cadastro.Nome.Trim())}</p>
+                                <p>E-mail do cliente: {(string.IsNullOrEmpty(cadastro.Email) ? "<valor não informado>" : cadastro.Email.Trim())}</p>
+                                <p>Telefone do cliente: {(string.IsNullOrEmpty(cadastro.Telefone) ? "<valor não informado>" : cadastro.Telefone.Trim())}</p>
+                                <p>Endereço do cliente: 
+                                    {(string.IsNullOrEmpty(cadastro.Endereco) ? "<valor não informado>" : cadastro.Endereco.Trim())} - 
+                                    {(string.IsNullOrEmpty(cadastro.Bairro) ? "<valor não informado>" : cadastro.Bairro.Trim())} - 
+                                    {(string.IsNullOrEmpty(cadastro.Municipio) ? "<valor não informado>" : cadastro.Municipio.Trim())} - 
+                                    {(string.IsNullOrEmpty(cadastro.CEP) ? "<valor não informado>" : cadastro.CEP.Trim())} - 
+                                    {(string.IsNullOrEmpty(cadastro.UF) ? "<valor não informado>" : cadastro.UF.Trim())}
+                                </p>
+                                <p>Lista de itens solicitados:</p>
+                            ";
+
+        foreach (var item in cadastro.Pedido.Itens)
+        {
+            mensagem += $@"<p>- {item.Produto.Nome.Trim()} - {item.Quantidade} - R$ {item.PrecoUnitario:N2}</p>";
+        }
+
+        mensagem += $@"
+            <p>Total: R$ {cadastro.Pedido.ValorTotalPedido.ToString("N2")}</p>";
+
+        if (!string.IsNullOrEmpty(email))
+            await TesteEnvioEmail(email, assunto, mensagem);
     }
 
     private async Task EnviarEmailPedido(Cadastro cadastro)
@@ -567,6 +681,26 @@ public class StoreController : Controller
         catch (Exception ex)
         {
             throw ex;
+        }
+    }
+
+    private string GenerateQrCode(string text)
+    {
+        using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
+        {
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
+            using (QRCode qrCode = new QRCode(qrCodeData))
+            {
+                using (Bitmap qrCodeImage = qrCode.GetGraphic(2)) // Tamanho do pixel ajustado para 2
+                {
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        qrCodeImage.Save(ms, ImageFormat.Png);
+                        byte[] byteImage = ms.ToArray();
+                        return Convert.ToBase64String(byteImage);
+                    }
+                }
+            }
         }
     }
 }

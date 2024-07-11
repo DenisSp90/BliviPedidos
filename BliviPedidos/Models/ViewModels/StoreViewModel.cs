@@ -17,7 +17,8 @@
         public decimal ValorPedidosNaoPagos { get; set; }
 
         public int FiltroRegistros { get; set; }
-
+        public string PixKey { get; set; }
+        public string PixQRCodeUrl { get; set; }
         //public ControleInternoWeb.Areas.Identity.Pages.Account.Manage IndexModel { get; set; }   
     }
 

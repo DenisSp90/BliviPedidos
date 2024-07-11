@@ -9,7 +9,7 @@ namespace BliviPedidos.Models
         {
         }
 
-        public Produto(int id, string codigo, string nome, decimal precoVenda, decimal precoPago, int quantidade, string? tamanho, string? codeBar, byte[]? foto, string? tipoArquivoFoto)
+        public Produto(int id, string codigo, string nome, decimal precoVenda, decimal precoPago, int quantidade, string? tamanho, string? codeBar)
         {
             Id = id;
             Codigo = codigo;
@@ -18,9 +18,7 @@ namespace BliviPedidos.Models
             PrecoPago = precoPago;
             Quantidade = quantidade;
             Tamanho = tamanho;
-            CodeBar = codeBar;
-            Foto = foto;
-            TipoArquivoFoto = tipoArquivoFoto;
+            CodeBar = codeBar;           
         }
 
         public int Id { get; protected set; }
@@ -50,9 +48,7 @@ namespace BliviPedidos.Models
         public string? Tamanho { get; set; }
 
         public string? CodeBar { get; set; }
-        
-        public byte[]? Foto { get; set; }
-        
-        public string? TipoArquivoFoto { get; set; }
+
+        public string? Foto { get; set; }
     }
 }

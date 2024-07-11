@@ -41,4 +41,12 @@ public class Cliente : BaseModel
     
     public IList<Pedido>? Pedidos { get; set; }
 
+    public int PedidosNaoPagosCount
+    {
+        get
+        {
+            return Pedidos.Count(p => !p.Pago);
+        }
+    }
+
 }

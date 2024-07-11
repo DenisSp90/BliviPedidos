@@ -5,6 +5,7 @@ namespace BliviPedidos.Services.Interfaces
     public interface IPedidoService
     {
         void AddItem(int id);
+        Task RegistrarCancelamentoPedido(int pedidoId);
         void ClearPedido();
         Pedido GetPedidoById(int id);
         Task<Pedido> GetPedidoByIdAsync(int id);

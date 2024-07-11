@@ -22,7 +22,7 @@ $(document).ready(function () {
                     valoresDoCampo = item.pedido.id;
                     total += parseFloat(item.subtotal);
 
-                    var row = '<tr item-id=' + item.id + '>' +
+                    var row = '<tr item-id=' + item.id + ' class="table-primary">' +
                         '<td>' + item.produto.nome + '</td>' +
                         '<td>' +
                         '<input type="text" value="' + item.quantidade + '" style="width: 4em; text-align: center;" class="form-control text-center col-md-4 update-quantidade" onblur="updateQuantidade(this)" oninput="this.value = this.value.replace(/[^0-9]/g, \'\');" pattern="\d*"/>' +
@@ -37,6 +37,12 @@ $(document).ready(function () {
                 $('#quantidadeItens').text(quantidadeItensPedido);
                 $('#numeroPedido').text(valoresDoCampo);
                 $('#total').text(carrinhoViewModel.total.toFixed(2));
+
+                Swal.fire({
+                    position: "top-end",
+                    icon: "success",
+                    title: "Produto adicionado ao pedido com sucesso"
+                });
             },
             error: function (xhr, status, error) {
                 var mensagemErro = xhr.responseJSON ? xhr.responseJSON : "Ocorreu um erro ao adicionar o produto ao carrinho. Por favor, tente novamente mais tarde.";

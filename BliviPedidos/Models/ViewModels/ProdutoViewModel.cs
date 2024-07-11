@@ -11,7 +11,7 @@ public class ProdutoViewModel
 
     [Required(ErrorMessage = "O campo 'Nome' é obrigatório.")]
     [Display(Name = "Nome")]
-    public string Nome { get; set; }
+    public string Nome { get; set; } = string.Empty;
            
     [Required(ErrorMessage = "O campo 'Preco de venda' é obrigatório.")]
     [Range(0, double.MaxValue, ErrorMessage = "O campo Preço do produto deve ser um número.")]
@@ -29,7 +29,5 @@ public class ProdutoViewModel
 
     public string? CodeBar { get; set; }
 
-    public byte[]? Foto { get; set; }
-
-    public string? TipoArquivoFoto { get; set; }
+    public string? Foto { get; set; } = string.Empty;
 }

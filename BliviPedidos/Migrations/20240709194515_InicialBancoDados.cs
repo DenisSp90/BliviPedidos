@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BliviPedidos.Migrations
 {
     /// <inheritdoc />
-    public partial class InicialBanco : Migration
+    public partial class InicialBancoDados : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -117,8 +117,7 @@ namespace BliviPedidos.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CodeBar = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Foto = table.Column<byte[]>(type: "longblob", nullable: true),
-                    TipoArquivoFoto = table.Column<string>(type: "longtext", nullable: true)
+                    Foto = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
