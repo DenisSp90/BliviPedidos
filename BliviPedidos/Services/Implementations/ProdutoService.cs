@@ -19,6 +19,17 @@ namespace BliviPedidos.Services.Implementations
             _mapper = mapper;
         }
 
+        public async Task AtualizarImagemProdutoAsync(int produtoId, string nomeArquivoNovo)
+        {
+            var produto = await _context.Produto.FindAsync(produtoId); // Substitua pelo nome da sua DbSet
+            if (produto != null)
+            {
+                produto.Foto = nomeArquivoNovo;
+                _context.Produto.Update(produto);
+                await _context.SaveChangesAsync();
+            }
+        }
+
         public async Task<List<Produto>> GetProdutosAsync()
         {
             return await _context.Produto.ToListAsync();

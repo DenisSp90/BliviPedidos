@@ -5,6 +5,7 @@ namespace BliviPedidos.Services.Interfaces
 {
     public interface IProdutoService
     {
+        Task AtualizarImagemProdutoAsync(int produtoId, string nomeArquivoNovo);
         Task<List<Produto>> GetProdutosAsync();
         Task<ProdutoViewModel> ProcurarProdutoAsync(int id);
         Task<bool> RegistrarProdutoAsync(Produto produto);

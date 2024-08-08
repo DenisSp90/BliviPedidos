@@ -10,8 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using QRCoder;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.IO;
-
 
 namespace BliviPedidos.Controllers;
 
@@ -24,6 +22,7 @@ public class StoreController : Controller
     private readonly IProdutoService _produtoService;
     private readonly IEmailEnviarService _emailSender;
     private readonly IClienteService _clienteService;
+    private readonly string _imagemPasta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "imagens/produtos");
 
     public StoreController(
         ApplicationDbContext context,
@@ -39,6 +38,11 @@ public class StoreController : Controller
         _produtoService = produtoService;
         _emailSender = emailSender;
         _clienteService = clienteService;
+
+        if (!Directory.Exists(_imagemPasta))
+        {
+            Directory.CreateDirectory(_imagemPasta);
+        }
     }
 
     [HttpPost]
@@ -376,7 +380,7 @@ public class StoreController : Controller
 
             if (foto != null && foto.Length > 0)
             {
-                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/img/produtos/");
+                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/imagens/produtos/");
                 string uniqueFileName = Guid.NewGuid().ToString() + "_" + foto.FileName;
                 string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
@@ -386,7 +390,7 @@ public class StoreController : Controller
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                     await foto.CopyToAsync(fileStream);
 
-                photoPath = "/img/produtos/" + uniqueFileName;
+                photoPath = "/imagens/produtos/" + uniqueFileName;
             }
             else if (string.IsNullOrEmpty(p.Foto))
             {
@@ -448,7 +452,6 @@ public class StoreController : Controller
 
         if (string.IsNullOrEmpty(produto.Foto))
         {
-            // Usar uma foto padrão do servidor
             produto.Foto = "/img/default.png";
         }
 
@@ -456,37 +459,13 @@ public class StoreController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> ProdutoEditar([FromForm] ProdutoViewModel model, IFormFile foto)
+    public async Task<IActionResult> ProdutoEditar([FromForm] ProdutoViewModel model)
     {
         try
         {
             if (ModelState.IsValid)
             {
-                Produto p = _mapper.Map<Produto>(model);
-
-                string defaultPhotoPath = "/img/default.png";
-                string photoPath = defaultPhotoPath;
-
-                if (foto != null && foto.Length > 0)
-                {
-                    string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/img/produtos/");
-                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + foto.FileName;
-                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                    if (!Directory.Exists(uploadsFolder))
-                        Directory.CreateDirectory(uploadsFolder);
-
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                        await foto.CopyToAsync(fileStream);
-
-                    photoPath = "/img/produtos/" + uniqueFileName;
-                }
-                else if (string.IsNullOrEmpty(p.Foto))
-                {
-                    photoPath = defaultPhotoPath;
-                }
-
-                p.Foto = photoPath;
+                Produto p = _mapper.Map<Produto>(model);                
 
                 await _produtoService.RegistrarProdutoAsync(p);
 
@@ -598,6 +577,35 @@ public class StoreController : Controller
                      View(await _context.Produto.ToListAsync()) :
                      Problem("Entity set 'ApplicationDbContext.Produto'  is null.");
 
+    }
+
+    [HttpPost]
+    [Route("Store/UploadImagem/{produtoId}")]
+    public async Task<IActionResult> UploadImagem(string produtoId)
+    {
+        if (Request.Form.Files.Count > 0 && !string.IsNullOrEmpty(produtoId))
+        {
+            var arquivo = Request.Form.Files[0];
+
+            var nomeArquivo = Path.GetFileNameWithoutExtension(arquivo.FileName);
+            var extensaoArquivo = Path.GetExtension(arquivo.FileName);
+            var nomeArquivoNovo = $"{nomeArquivo}_{System.Guid.NewGuid()}{extensaoArquivo}";
+
+            var caminhoArquivo = Path.Combine(_imagemPasta, nomeArquivoNovo);
+
+            using (var stream = new FileStream(caminhoArquivo, FileMode.Create))
+            {
+                await arquivo.CopyToAsync(stream);
+            }
+
+            var urlImagem = $"/imagens/produtos/{nomeArquivoNovo}";
+
+            await _produtoService.AtualizarImagemProdutoAsync(int.Parse(produtoId), urlImagem);            
+
+            return Json(new { imagemUrl = urlImagem });
+        }
+
+        return BadRequest("Arquivo ou ID do produto não encontrados.");
     }
 
     [HttpPost]

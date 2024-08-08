@@ -19,7 +19,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Editar o Produto</h5>
                     <form id="formulario" class="row g-3" method="post" enctype="multipart/form-data" asp-action="ProdutoEditar">
-                        <input type="hidden" asp-for="Id" />
+                        <input id="hiddenProdutoId" type="hidden" asp-for="Id" />
                         <div class="col-12">
                             <label asp-for="Codigo" class="col-sm-2 col-form-label"></label>
                             <input asp-for="Codigo" type="text" placeholder="Código" class="form-control">
@@ -27,9 +27,11 @@
                         </div>
                         <div class="col-12">
                             <label asp-for="Nome" class="col-sm-2 col-form-label"></label>
-                            <input asp-for="Nome" type="text" placeholder="Nome do Produto" class="form-control">
+                            <input asp-for="Nome" type="hidden" placeholder="Nome do Produto" class="form-control" id="NomeHidden">
+                            <input id="NomeProduto" name="NomeProdutoFormatted" type="text" placeholder="Nome do Produto" class="form-control" disabled>
                             <span asp-validation-for="Nome" class="text-danger"></span>
                         </div>
+
 
                         <div class="col-12">
                             <label asp-for="PrecoPago" class="col-sm-2 col-form-label"></label>
@@ -50,38 +52,11 @@
                             <span asp-validation-for="Quantidade" class="text-danger"></span>
                         </div>
                         <div class="col-12">
-                            <label asp-for="Tamanho" class="col-sm-2 col-form-label"></label>
-                            <input asp-for="Tamanho" type="text" placeholder="Tamanho do Produto" class="form-control">
-                            <span asp-validation-for="Tamanho" class="text-danger"></span>
-                        </div>
-                        <div class="col-12">
-                            <label asp-for="CodeBar" class="col-sm-2 col-form-label"></label>
-                            <input asp-for="CodeBar" type="text" placeholder="Codigo de barras" class="form-control">
-                            <span asp-validation-for="CodeBar" class="text-danger"></span>
-                        </div>
-                        <div class="col-12">
-                            <label asp-for="Foto" class="col-sm-2 col-form-label"></label>
-                            <span asp-validation-for="Foto" class="text-danger"></span>
-                            <input id="inputFoto" name="foto" type="file" class="form-control" accept="image/*" />
-                        </div>
-                        <div class="col-lg-12">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <i class="fa fa-file-picture-o"></i> Pré-visualização
-                                </div>
-                                <div class="panel-body" style="text-align: center; height: 200px; display: flex; justify-content: center; align-items: center;">
-                                    @if (Model.Foto != null && Model.Foto.Length > 0)
-                                    {
-                                        <img id="imagemPreview" src="@Model.Foto" alt="Product Image" style="max-width: 100%; max-height: 100%;" />
-                                    }
-                                    else
-                                    {
-                                        <img id="imagemPreview" src="~/img/default.png" style="max-width: 100px; max-height: 100px;" />
-                                    }
-                                </div>
-                            </div>
-                        </div>
-
+                            <input asp-for="CodeBar" type="hidden" placeholder="Codigo de barras" class="form-control">
+                            <input asp-for="Tamanho" type="hidden" placeholder="Tamanho do Produto" class="form-control">
+                            <input asp-for="Foto" type="hidden" placeholder="Tamanho do Produto" class="form-control">
+                        </div>                        
+                        
                         <div class="card-footer d-flex justify-content-between">
                             <div>
                                 <a asp-action="ProdutoLista" class="btn btn-secondary btn-sm">
@@ -97,7 +72,28 @@
 
             </div>
         </div>
-        <div class="col-lg-4">
+        <div class="col-lg-4">            
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fa fa-file-picture-o"></i> Pré-visualização</h5>
+                    <div class="panel panel-default">
+                        <div class="panel-body" style="text-align: center; height: 200px; display: flex; justify-content: center; align-items: center;">
+                            @if (Model.Foto != null && Model.Foto.Length > 0)
+                            {
+                                <img id="imagemPreview" src="@Model.Foto" alt="Product Image" style="max-width: 100%; max-height: 100%;" />
+                            }
+                            else
+                            {
+                                <img id="imagemPreview" src="~/img/default.png" style="max-width: 100px; max-height: 100px;" />
+                            }
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center mt-3">
+                        <button id="openModal" class="btn btn-primary">Substituir Imagem</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="card">
 
                 <div class="card-body">
@@ -143,10 +139,27 @@
                     </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Informações adicionais sobre informação do produto</h5>
+            
 
+            <!-- Modal HTML -->
+            <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="imageModalLabel">Substituir Imagem do Produto</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <input id="inputFoto" name="foto" type="file" class="form-control" accept="image/*" />
+                            <img id="modalPreview" src="" alt="Preview da Imagem" style="display: none; max-width: 100%; max-height: 100%; margin-top: 10px;" />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                            <button type="button" id="saveImage" class="btn btn-primary">Salvar Imagem</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

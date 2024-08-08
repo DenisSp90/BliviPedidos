@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Detalhe do Produto";
 }
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 <div class="pagetitle">
     <h1>Detalhes do Produtos</h1>
@@ -18,17 +19,7 @@
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Detalhes do produto</h5>
-                    <div class="row mb-3" style="text-align: center;">
-                        <div class="product-images">
-                            <div>
-                                <div class="panel-body">
-                                    <img src="@Model.Foto" alt="Foto do Produto" style="max-width: 100%; max-height: 100%;" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <h4 class="card-title">Informações de estoque</h4>
+                    <h5 class="card-title">Informações de estoque</h5>
                     <h2 class="font-bold m-b-xs">
                         @Model.Nome
                     </h2>
@@ -43,8 +34,18 @@
                         {
                             <br />
                             <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Poucas unidades</span>
-                        }                        
+                        }
                     </div>
+                    <h4 class="card-title">Detalhes do produto</h4>
+                    <div class="row mb-3" style="text-align: center;">
+                        <div class="product-images">
+                            <div>
+                                <div class="panel-body">
+                                    <img src="@Model.Foto" alt="Foto do Produto" style="max-width: 100%; max-height: 100%;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>                    
                 </div>
                 <div class="card-footer d-flex justify-content-between">
                     <div>
@@ -64,8 +65,37 @@
                     decimal valorVendaPrevisto = Model.PrecoVenda * Model.Quantidade;
                     decimal lucroPrevisto = valorVendaPrevisto - valorTotalPago;
                 }
-                <br />
                 <div class="card-body">
+                    <h5 class="card-title">Detalhes adicionais do pedido <span>| Etiquetas e informações de valores </span></h5>
+                    <div class="col-12">
+                        <div class="row d-flex justify-content-center">
+                            <a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#imprimirEtiquetaModal" data-id="@Model.Id">
+                                Imprimir uma etiqueta de identificação
+                            </a>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="imprimirEtiquetaModal" tabindex="-1" role="dialog" aria-labelledby="imprimirEtiquetaModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="imprimirEtiquetaModalLabel">Imprimir Etiqueta de Identificação</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- Conteúdo do modal, pode ser um formulário ou informações da etiqueta -->
+                                    <p>Você deseja imprimir a etiqueta do produto <span id="produtoNome"></span>?</p>
+                                    <!-- Formulário de impressão, se necessário -->
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                    <button type="button" class="btn btn-primary" id="confirmarImpressao">Imprimir</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
                     <div class="card info-card revenue-card">
                         <div class="card-body">
                             <h5 class="card-title">Valor pago no produto</h5>
@@ -110,5 +140,16 @@
                 </div>
             </div>
         </div>
+        
+
     </div>
 </section>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/controllers/Store-ProdutoDetalhe.js"></script>
+
+@section Scripts {
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

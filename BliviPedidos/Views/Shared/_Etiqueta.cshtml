@@ -1,0 +1,46 @@
+﻿@model BliviPedidos.Models.Produto
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etiqueta de Identificação</title>
+    <style>
+        .etiqueta {
+            width: 50.8mm;
+            height: 101.6mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid #000;
+            padding: 10px;
+        }
+
+            .etiqueta h2 {
+                text-align: center;
+            }
+
+            .etiqueta .codigo-barra {
+                display: flex;
+                justify-content: center;
+            }
+
+            .etiqueta .valor {
+                text-align: center;
+                font-weight: bold;
+            }
+    </style>
+</head>
+<body>
+    <div class="etiqueta">
+        <h2>@Model.Nome</h2>
+        <div class="codigo-barra">
+            <img src="@Url.Action("GerarCodigoBarra", new { id = Model.Id })" alt="Código de Barras">
+        </div>
+        <div class="valor">
+            R$ @Model.PrecoVenda.ToString("F2")
+        </div>
+    </div>
+</body>
+</html>

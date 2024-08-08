@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BliviPedidos.Migrations
 {
     /// <inheritdoc />
-    public partial class InicialBancoDados : Migration
+    public partial class inicialBancoDados : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

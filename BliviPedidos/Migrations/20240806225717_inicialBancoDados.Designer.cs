@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BliviPedidos.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240709194515_InicialBancoDados")]
-    partial class InicialBancoDados
+    [Migration("20240806225717_inicialBancoDados")]
+    partial class inicialBancoDados
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -213,8 +213,11 @@
                                 <img src="data:image/png;base64,@Model.PixQRCodeUrl" alt="Código QR PIX" class="img-fluid mb-3">
                                 <div class="alert alert-info" role="alert">
                                     <strong>Pix Copia e Cola:</strong>
-                                    <span id="pixKey">@Model.PixKey</span>
-                                    <button type="button" class="btn btn-primary btn-sm" id="btnCopyPix">Copiar</button>
+                                    <span id="pixKey" style="font-size: smaller;">@Model.PixKey</span>
+                                    <div style="margin-top: 5px;">
+                                        <button type="button" class="btn btn-primary btn-sm" id="btnCopyPix">Copiar</button>
+                                    </div>
+
                                 </div>
                                 <input type="hidden" id="hiddenPixKey" value="@Model.PixKey" />
                             </div>
