@@ -5,9 +5,12 @@ using BliviPedidos.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Syncfusion.Licensing;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NCaF1cWWhBYVJwWmFZfVpgdV9CaVZTTWY/P1ZhSXxXdk1jUH5ddH1XT2RUUkU=");
 
 // Add services to the container.
 // MYSQL

@@ -5,10 +5,8 @@ $(document).ready(function () {
         debugger;
         var button = $(event.relatedTarget); // Botão que acionou o modal
         var produtoId = button.data('id'); // Extrai informação dos atributos data-*
-
-        // Carregar os dados do produto via AJAX ou de outra forma
-        // Por exemplo, você pode definir o nome do produto dinamicamente no modal
         var modal = $(this);
+        modal.find('#confirmarImpressao').data('id', produtoId);
         modal.find('#produtoNome').text('Nome do Produto ' + produtoId);
 
         // Se necessário, você pode fazer uma requisição AJAX para obter os detalhes do produto
@@ -16,7 +14,6 @@ $(document).ready(function () {
             url: '/api/StoreApi/produto/' + produtoId,
             method: 'GET',
             success: function (data) {
-                debugger;
                 modal.find('#produtoNome').text(data.nome);
             },
             error: function () {
@@ -26,7 +23,8 @@ $(document).ready(function () {
     });
 
     $('#confirmarImpressao').click(function () {
-        var produtoId = $('#imprimirEtiquetaModal').find('button[data-id]').data('id');
+        debugger;
+        var produtoId = $(this).data('id');
         var url = '/api/StoreApi/etiqueta/pdf/' + produtoId;
         window.open(url, '_blank');
     });
