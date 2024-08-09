@@ -33,6 +33,8 @@
     <PackageReference Include="QRCoder" Version="1.4.1" />
     <PackageReference Include="Selenium.WebDriver" Version="4.20.0" />
     <PackageReference Include="Syncfusion.DocIO.Net.Core" Version="23.1.43" />
+    <PackageReference Include="Syncfusion.DocIORenderer.Net.Core" Version="23.1.43" />
+    <PackageReference Include="Syncfusion.Pdf.Net.Core" Version="26.2.8" />
     <PackageReference Include="ZXing.Net" Version="0.16.9" />
   </ItemGroup>
 

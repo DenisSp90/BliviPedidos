@@ -11,6 +11,10 @@ using ZXing.Rendering;
 using System.Drawing;
 using System.Drawing.Imaging;
 using Xceed.Words.NET;
+using Syncfusion.DocIO;
+using Syncfusion.DocIO.DLS;
+using Syncfusion.DocIORenderer;
+using Syncfusion.Pdf;
 
 namespace BliviPedidos.Controllers;
 
@@ -39,66 +43,83 @@ public class StoreApiController : Controller
     [HttpGet("etiqueta/pdf/{produtoId}")]
     public async Task<IActionResult> GerarEtiquetaPdf(int produtoId)
     {
-        var produto = await _context.Produto.FindAsync(produtoId);
-
-        if (produto == null)
-            return NotFound();
-
-        // Caminho para o template DOCX
-        var templatePath = Path.Combine(Directory.GetCurrentDirectory(),
-            "wwwroot", "doc", "SL61083 - 6183 - 6283 - 6083 - 2083 - 2283 - 2183 - 4083.docx");
-
-        // Carregar o template DOCX
-        using var doc = DocX.Load(templatePath);
-
-        // Preencher o template com os dados do produto
-        doc.ReplaceText("{Nome}", produto.Nome);
-        doc.ReplaceText("{PrecoVenda}", produto.PrecoVenda.ToString("C"));
-
-        // Gerar o código de barras
-        var barcodeWriter = new BarcodeWriter<Bitmap>
+        try
         {
-            Format = BarcodeFormat.CODE_128,
-            Options = new EncodingOptions
+            var produto = await _context.Produto.FindAsync(produtoId);
+
+            if (produto == null)
+                return NotFound();
+
+            // Caminho para o template DOCX
+            var templatePath = Path.Combine(Directory.GetCurrentDirectory(),
+                "wwwroot", "doc", "SL61083 - 6183 - 6283 - 6083 - 2083 - 2283 - 2183 - 4083.docx");
+
+            // Carregar o template DOCX
+            using var doc = DocX.Load(templatePath);
+
+            // Gerar o código de barras com tamanho ajustado para caber na etiqueta
+            var barcodeWriter = new BarcodeWriter<Bitmap>
             {
-                Width = 300,
-                Height = 150
-            },
-            Renderer = new CustomBitmapRenderer()
-        };
-        var barcodeBitmap = barcodeWriter.Write(produto.Id.ToString());
-        var barcodePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img", "barcode.png");
-        barcodeBitmap.Save(barcodePath, ImageFormat.Png);
+                Format = BarcodeFormat.CODE_128,
+                Options = new EncodingOptions
+                {
+                    Width = 200, // Ajuste a largura do código de barras para caber na etiqueta
+                    Height = 50  // Ajuste a altura do código de barras
+                },
+                Renderer = new CustomBitmapRenderer()
+            };
 
-        // Inserir a imagem do código de barras no DOCX
-        var imageParagraph = doc.InsertParagraph();
-        var image = doc.AddImage(barcodePath);
-        var picture = image.CreatePicture();
-        imageParagraph.AppendPicture(picture);
+            // Assumindo 10 etiquetas por página (2 colunas x 5 linhas)
+            for (int i = 1; i <= 10; i++)
+            {
+                // Preencher os placeholders de texto
+                doc.ReplaceText($"{{Id{i}}}", produto.Id.ToString());
+                doc.ReplaceText($"{{Nome{i}}}", produto.Nome);
+                doc.ReplaceText($"{{PrecoVenda{i}}}", produto.PrecoVenda.ToString("C"));
 
-        // Salvar o DOCX em um MemoryStream
-        using var docStream = new MemoryStream();
-        doc.SaveAs(docStream);
+                // Gerar e salvar a imagem do código de barras
+                var barcodeBitmap = barcodeWriter.Write(produto.Id.ToString());
+                var barcodePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img", $"barcode{i}.png");
+                barcodeBitmap.Save(barcodePath, ImageFormat.Png);
 
-        // Converter o DOCX para PDF usando o OpenXmlPowerTools
-        docStream.Position = 0;
-        byte[] pdfBytes;
+                // Inserir a imagem do código de barras na célula correspondente
+                var image = doc.AddImage(barcodePath);
+                var picture = image.CreatePicture(); // Ajuste o tamanho ao inserir (largura, altura)
 
-        using (var pdfStream = new MemoryStream())
-        {
-            var pdfWriter = new PdfWriter(pdfStream);
-            var pdfDocument = new PdfDocument(pdfWriter);
-            var document = new Document(pdfDocument);
+                // Substituir o placeholder pela imagem
+                var paragraph = doc.Paragraphs.FirstOrDefault(p => p.Text.Contains($"{{Barcode{i}}}"));
+                if (paragraph != null)
+                {
+                    paragraph.ReplaceText($"{{Barcode{i}}}", "");
+                    paragraph.AppendPicture(picture); // Adiciona a imagem na posição exata do placeholder
+                }
+            }
 
-            //// Aqui você pode adicionar conteúdo adicional ao PDF ou processar conforme necessário
-            //document.Add(new Paragraph("Este PDF foi gerado a partir de um documento Word."));
+            // Continuar com a conversão e retorno do PDF
+            using var docStream = new MemoryStream();
+            doc.SaveAs(docStream);
 
-            document.Close();
-            pdfBytes = pdfStream.ToArray();
+            docStream.Position = 0;
+
+            using (var pdfStream = new MemoryStream())
+            {
+                using var wordDocument = new WordDocument(docStream, Syncfusion.DocIO.FormatType.Docx);
+
+                using var renderer = new DocIORenderer();
+                using var pdfDocument = renderer.ConvertToPDF(wordDocument);
+
+                pdfDocument.Save(pdfStream);
+                pdfDocument.Close();
+
+                return File(pdfStream.ToArray(), "application/pdf", "etiqueta.pdf");
+            }
         }
+        catch (Exception ex)
+        {
 
-        // Retornar o PDF na resposta
-        return File(pdfBytes, "application/pdf", "etiqueta.pdf");
+            ModelState.AddModelError("", ex.Message + "Ocorreu um erro ao processar o pedido. Por favor, tente novamente mais tarde.");
+            return RedirectToAction("Error", "Home", new { errorMessage = ex.Message });
+        }
     }
 }
 
