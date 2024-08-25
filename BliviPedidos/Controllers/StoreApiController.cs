@@ -15,6 +15,8 @@ using Syncfusion.DocIO;
 using Syncfusion.DocIO.DLS;
 using Syncfusion.DocIORenderer;
 using Syncfusion.Pdf;
+using BliviPedidos.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace BliviPedidos.Controllers;
 
@@ -23,10 +25,21 @@ namespace BliviPedidos.Controllers;
 public class StoreApiController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly IProdutoService _produtoService;
 
-    public StoreApiController(ApplicationDbContext context)
+    public StoreApiController(
+        ApplicationDbContext context, 
+        IProdutoService produtoService)
     {
         _context = context;
+        _produtoService = produtoService;
+    }
+
+    [HttpGet("produtoList")]
+    public async Task<IActionResult> GetProdutoList()
+    {
+        var p = await _produtoService.GetProdutosAsync();
+        return Ok(p);
     }
 
     [HttpGet("produto/{id}")]
