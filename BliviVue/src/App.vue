@@ -1,6 +1,14 @@
-<script setup lang="ts">
+<script lang="ts">
 import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+// @ts-ignore
+import ProdutoTable from './components/ProdutoTable.vue'
+
+export default {
+    components: {
+      HelloWorld, 
+      ProdutoTable
+    }
+  }
 </script>
 
 <template>
@@ -13,7 +21,7 @@ import TheWelcome from './components/TheWelcome.vue'
   </header>
 
   <main>
-    <TheWelcome />
+    <ProdutoTable />
   </main>
 </template>
 

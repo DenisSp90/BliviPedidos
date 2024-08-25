@@ -10,12 +10,14 @@
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false"
   },
   "dependencies": {
+    "axios": "^1.7.5",
     "vue": "^3.3.4"
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.0",
-    "@types/node": "^18.17.5",
+    "@types/node": "^18.19.45",
     "@vitejs/plugin-vue": "^4.3.1",
+    "@vue/cli-plugin-typescript": "^5.0.8",
     "@vue/tsconfig": "^0.4.0",
     "npm-run-all": "^4.1.5",
     "typescript": "~5.1.6",

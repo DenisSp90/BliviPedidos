@@ -54,7 +54,16 @@ builder.Services.AddSession(opt =>
     opt.Cookie.IsEssential = true;
 });
 
-builder.Services.AddCors();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowVueApp",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5175") // URL do seu frontend Vue.js
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 
 builder.Services.AddHttpClient();
 
@@ -81,12 +90,7 @@ app.UseRequestLocalization(new RequestLocalizationOptions
     SupportedUICultures = supportedCultures
 });
 
-app.UseCors(c =>
-{
-    c.AllowAnyHeader();
-    c.AllowAnyMethod();
-    c.AllowAnyOrigin();
-});
+app.UseCors("AllowVueApp");
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
