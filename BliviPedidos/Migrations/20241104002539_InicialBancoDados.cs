@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BliviPedidos.Migrations
 {
     /// <inheritdoc />
-    public partial class inicialBancoDados : Migration
+    public partial class InicialBancoDados : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -79,6 +79,10 @@ namespace BliviPedidos.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Email = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    ResponsavelCerimar = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Turma = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Telefone = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Endereco = table.Column<string>(type: "longtext", nullable: true)
@@ -118,7 +122,8 @@ namespace BliviPedidos.Migrations
                     CodeBar = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Foto = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsAtivo = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -280,6 +285,32 @@ namespace BliviPedidos.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "ProdutoMovimentacao",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    ProdutoId = table.Column<int>(type: "int", nullable: false),
+                    Data = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Quantidade = table.Column<int>(type: "int", nullable: false),
+                    Tipo = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Observacao = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProdutoMovimentacao", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProdutoMovimentacao_Produto_ProdutoId",
+                        column: x => x.ProdutoId,
+                        principalTable: "Produto",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Cadastro",
                 columns: table => new
                 {
@@ -291,6 +322,10 @@ namespace BliviPedidos.Migrations
                     Email = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Telefone = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ResponsavelCerimar = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Turma = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Endereco = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -403,6 +438,11 @@ namespace BliviPedidos.Migrations
                 name: "IX_Pedido_ClienteId",
                 table: "Pedido",
                 column: "ClienteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProdutoMovimentacao_ProdutoId",
+                table: "ProdutoMovimentacao",
+                column: "ProdutoId");
         }
 
         /// <inheritdoc />
@@ -428,6 +468,9 @@ namespace BliviPedidos.Migrations
 
             migrationBuilder.DropTable(
                 name: "ItemPedido");
+
+            migrationBuilder.DropTable(
+                name: "ProdutoMovimentacao");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

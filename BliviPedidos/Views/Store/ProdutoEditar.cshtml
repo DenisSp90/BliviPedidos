@@ -19,12 +19,8 @@
                 <div class="card-body">
                     <h5 class="card-title">Editar o Produto</h5>
                     <form id="formulario" class="row g-3" method="post" enctype="multipart/form-data" asp-action="ProdutoEditar">
-                        <input id="hiddenProdutoId" type="hidden" asp-for="Id" />
-                        <div class="col-12">
-                            <label asp-for="Codigo" class="col-sm-2 col-form-label"></label>
-                            <input asp-for="Codigo" type="text" placeholder="Código" class="form-control">
-                            <span asp-validation-for="Codigo" class="text-danger"></span>
-                        </div>
+                        <input id="hiddenProdutoId" type="hidden" asp-for="Id" />                        
+                        
                         <div class="col-12">
                             <label asp-for="Nome" class="col-sm-2 col-form-label"></label>
                             <input asp-for="Nome" type="hidden" placeholder="Nome do Produto" class="form-control" id="NomeHidden">
@@ -32,13 +28,13 @@
                             <span asp-validation-for="Nome" class="text-danger"></span>
                         </div>
 
-
                         <div class="col-12">
                             <label asp-for="PrecoPago" class="col-sm-2 col-form-label"></label>
                             <input asp-for="PrecoPago" type="hidden" class="PrecoPagoHidden">
                             <input id="PrecoPagoFormatted" name="PrecoPagoFormatted" type="text" placeholder="Preço pago no Produto" class="form-control Preco" disabled>
                             <span asp-validation-for="PrecoPago" class="text-danger"></span>
                         </div>
+
                         <div class="col-12">
                             <label asp-for="PrecoVenda" class="col-sm-2 col-form-label"></label>
                             <input asp-for="PrecoVenda" type="hidden" class="PrecoVendaHidden">
@@ -55,7 +51,16 @@
                             <input asp-for="CodeBar" type="hidden" placeholder="Codigo de barras" class="form-control">
                             <input asp-for="Tamanho" type="hidden" placeholder="Tamanho do Produto" class="form-control">
                             <input asp-for="Foto" type="hidden" placeholder="Tamanho do Produto" class="form-control">
-                        </div>                        
+                        </div>    
+                        
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input asp-for="IsAtivo" class="form-check-input" type="checkbox">
+                                <label asp-for="IsAtivo" class="form-check-label">
+                                    Ativo
+                                </label>
+                            </div>
+                        </div>
                         
                         <div class="card-footer d-flex justify-content-between">
                             <div>

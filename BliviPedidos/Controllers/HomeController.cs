@@ -34,9 +34,10 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        var produtosTask = _produtoService.GetProdutosAsync();
+        var produtosTask = _produtoService.GetProdutosAtivosAsync();
         var produtos = produtosTask.GetAwaiter().GetResult();
         var pedidos = _pedidoService.GetListaPedidosAtivos();
+        var movimentacoes = _produtoService.GetMovimentacaoEstoque();
 
         decimal totalValorPedidos = pedidos.Sum(pedido => pedido.ValorTotalPedido);
         decimal totalValorPedidosPagos = pedidos.Where(pedido => pedido.Pago).Sum(pedido => pedido.ValorTotalPedido);
@@ -48,7 +49,8 @@ public class HomeController : Controller
             Pedidos = pedidos,
             TotalValorPedidos = totalValorPedidos,
             ValorPedidosPagos = totalValorPedidosPagos,
-            ValorPedidosNaoPagos = valorPedidosNaoPagos
+            ValorPedidosNaoPagos = valorPedidosNaoPagos,
+            Movimentacoes = movimentacoes
         };
 
         return View(storeViewModel);

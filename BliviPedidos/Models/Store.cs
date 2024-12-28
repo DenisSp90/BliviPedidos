@@ -30,6 +30,12 @@ namespace BliviPedidos.Models
         [Required(ErrorMessage = "Telefone é obrigat?rio")]
         public string Telefone { get; set; } = "";
 
+        [Display(Name = "Responsavel Pedido")]
+        public string? ResponsavelCerimar { get; set; } = "";
+
+        [Display(Name = "Turma do Aluno")]
+        public string? Turma { get; set; } = "";
+
         public string? Endereco { get; set; } = "";
 
         public string? Complemento { get; set; } = "";
@@ -54,6 +60,8 @@ namespace BliviPedidos.Models
             this.Nome = novoCadastro.Nome;
             this.Telefone = novoCadastro.Telefone;
             this.UF = novoCadastro.UF;
+            this.ResponsavelCerimar = novoCadastro.ResponsavelCerimar;
+            this.Turma = novoCadastro.Turma;
         }
     }
 
@@ -65,13 +73,13 @@ namespace BliviPedidos.Models
         public Pedido Pedido { get; private set; }
         [Required]
         [DataMember]
-        public Produto Produto { get; private set; }
+        public Produto Produto { get; set; }
         [Required]
         [DataMember]
-        public int Quantidade { get; private set; }
+        public int Quantidade { get; set; }
         [Required]
         [DataMember]
-        public decimal PrecoUnitario { get; private set; }
+        public decimal PrecoUnitario { get; set; }
         [DataMember]
         public decimal Subtotal => Quantidade * PrecoUnitario;
 

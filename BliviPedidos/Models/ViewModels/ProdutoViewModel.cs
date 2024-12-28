@@ -30,4 +30,12 @@ public class ProdutoViewModel
     public string? CodeBar { get; set; }
 
     public string? Foto { get; set; } = string.Empty;
+
+    public bool IsAtivo { get; set; }
+
+    public ICollection<ProdutoMovimentacao>? ProdutoMovimentacao { get; set; }
+
+    public List<Produto>? Produtos { get; set; }
+
+    public int FiltroRegistros { get; set; }
 }

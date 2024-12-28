@@ -2,6 +2,8 @@ using BliviPedidos.Data;
 using BliviPedidos.Models;
 using BliviPedidos.Services.Implementations;
 using BliviPedidos.Services.Interfaces;
+using DinkToPdf.Contracts;
+using DinkToPdf;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NCaF1cWWhBYVJwWmFZfVpgdV9CaVZTTWY/P1ZhSXxXdk1jUH5ddH1XT2RUUkU=");
 
 // Add services to the container.
+
 // MYSQL
 var connectionString = builder.Configuration.GetConnectionString("MySqlConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -20,6 +23,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.Configure<PixAppSettingsModel>(builder.Configuration.GetSection("PixAppSettings"));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -44,6 +48,8 @@ builder.Services.AddTransient<ICadastroService, CadastroService>();
 builder.Services.AddTransient<IEmailEnviarService, EmailEnviarService>();
 builder.Services.AddTransient<IClienteService, ClienteService>();
 
+builder.Services.AddTransient<IRelatorioService, RelatorioService>();
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 
@@ -59,7 +65,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowVueApp",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5175") // URL do seu frontend Vue.js
+            policy.WithOrigins("http://localhost:5174") // URL do seu frontend Vue.js
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -104,14 +110,22 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
-app.MapControllers(); // Necessário para mapear controladores API
+app.MapControllers(); 
 
-// Aplicar migrações automaticamente
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var dbContext = services.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.Migrate();
+    try
+    {
+        var dbContext = services.GetRequiredService<ApplicationDbContext>();
+        dbContext.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        // Log ou tratamento de erro
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Ocorreu um erro ao aplicar as migrações.");
+    }
 }
 
 app.Run();

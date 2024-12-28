@@ -1,7 +1,6 @@
 $(document).ready(function () {
     $('.adicionar-produto').click(function (e) {
         e.preventDefault();
-        debugger;
         var produtoId = $(this).data('produto-id');
 
         $.ajax({
@@ -13,15 +12,17 @@ $(document).ready(function () {
                 $('#tblPedidos tbody').empty();
                 var valoresDoCampo;
                 var total = 0;
-                var quantidadeItensPedido = 0; 
+                var quantidadeItensPedido = 0;
 
                 var listaItens = response.listaItens;
                 var carrinhoViewModel = response.carrinhoViewModel;
 
+                debugger;
+
                 $.each(listaItens, function (index, item) {
                     valoresDoCampo = item.pedido.id;
                     total += parseFloat(item.subtotal);
-
+                    
                     var row = '<tr item-id=' + item.id + ' class="table-primary">' +
                         '<td>' + item.produto.nome + '</td>' +
                         '<td>' +

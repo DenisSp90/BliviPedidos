@@ -25,7 +25,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Itens do pedido <span>| (@Model.Pedido.Itens.Count) Itens</span></h5>
 
-                    <partial name="~/Views/Store/_partialCupomFiscal.cshtml" model="@Model.Pedido" view-data="ViewData" />
+                    <partial name="~/Views/Store/_partialCupomFiscal.cshtml" model="@Model" view-data="ViewData" />
                 </div>
                 <div class="card-body">
                     <h5 class="card-title">Cadastro do pedido <span>| Informações pessoais do responsável</span></h5>
@@ -49,6 +49,18 @@
                             </div>
                         </div>
                         <div class="row mb-3">
+                            <label asp-for="@Model.Pedido.Cadastro.ResponsavelCerimar" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <input asp-for="@Model.Pedido.Cadastro.ResponsavelCerimar" type="text" class="form-control" disabled>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label asp-for="@Model.Pedido.Cadastro.Turma" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <input asp-for="@Model.Pedido.Cadastro.Turma" type="text" class="form-control" disabled>
+                            </div>
+                        </div>
+                        @* <div class="row mb-3">
                             <label asp-for="@Model.Pedido.Cadastro.CEP" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
                                 <input asp-for="@Model.Pedido.Cadastro.CEP" type="text" class="form-control" disabled>
@@ -113,7 +125,7 @@
                                     <option value="TO">Tocantins</option>
                                 </select>
                             </div>
-                        </div>
+                        </div> *@
                     </form>
                 </div>
                 <div class="card-footer">
@@ -171,14 +183,18 @@
 
                                         @if (Model.Pedido.Ativo)
                                         {
-                                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Ativo</span>
-                                        }
 
+                                            <button type="button" class="btn btn-primary mb-2">
+                                                <i class="bi bi-check-circle"></i> Ativo
+                                            </button>
+                                        }
                                     </div>
                                     <div>
                                         @if (Model.Pedido.Pago)
                                         {
-                                            <span class="badge bg-primary"><i class="bi bi-check-circle me-1"></i> Pago</span>
+                                            <button type="button" class="btn btn-success mb-2">
+                                                <i class="bi bi-check-circle me-1"></i> Pago
+                                            </button>
                                         }
                                     </div>
                                 </div>

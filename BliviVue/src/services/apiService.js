@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-    baseURL: 'https://localhost:7277/api/StoreApi/', // URL base do seu API ASP.NET Core
+    baseURL: 'http://localhost:5281/api/StoreApi/', 
     headers: {
       'Content-Type': 'application/json'
     }

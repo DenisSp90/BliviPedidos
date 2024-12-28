@@ -83,11 +83,15 @@ function atualizarEstadoPedido(idPedido, novoEstado) {
     }).then((result) => {
         if (result.isConfirmed) {
             // Realizar requisição AJAX
+            debugger;
+
             $.ajax({
                 type: "POST",
                 url: "/Store/AtualizarEstadoPagamento",
                 data: { idPedido: idPedido, pago: novoEstado },
                 success: function (data) {
+                    debugger;
+
                     Swal.fire({
                         icon: 'success',
                         title: 'Pagamento do pedido atualizado com sucesso.',
@@ -100,6 +104,8 @@ function atualizarEstadoPedido(idPedido, novoEstado) {
                     });
                 },
                 error: function (xhr, status, error) {
+                    debugger;
+
                     console.error("Erro ao atualizar estado do pedido:", error);
                     Swal.fire({
                         icon: 'error',

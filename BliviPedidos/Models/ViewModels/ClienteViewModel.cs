@@ -16,6 +16,10 @@ public class ClienteViewModel
     [Display(Name = "Telefone")]
     public string? Telefone { get; set; } = string.Empty;
 
+    public string? ResponsavelCerimar { get; set; } = "";
+
+    public string? Turma { get; set; } = "";
+
     public string? Endereco { get; set; } = "";
 
     public string? Complemento { get; set; } = "";

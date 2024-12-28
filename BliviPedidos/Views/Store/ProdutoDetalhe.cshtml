@@ -35,6 +35,13 @@
                             <br />
                             <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Poucas unidades</span>
                         }
+                        @if (!Model.IsAtivo)
+                        {
+                            <br />
+                            <span class="badge bg-danger">
+                                <i class="bi bi-exclamation-octagon me-1"></i> Produto desativado
+                            </span>
+                        }
                     </div>
                     <h4 class="card-title">Detalhes do produto</h4>
                     <div class="row mb-3" style="text-align: center;">
@@ -45,7 +52,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>                    
+                    </div>
                 </div>
                 <div class="card-footer d-flex justify-content-between">
                     <div>
@@ -55,6 +62,32 @@
                     </div>
 
                     <a href="@Url.Action("ProdutoEditar", "Store", new { id = Model.Id })" class="btn btn btn-primary btn-sm"><i class="bi bi-pencil-square"></i> Editar Produto</a>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Movimentações no estoque</h4>
+                    <table class="table datatable" style="font-size: 12px;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Data</th>
+                                <th scope="col">Quantidade</th>
+                                <th scope="col">Tipo</th>
+                                <th scope="col">Observação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var mov in Model.ProdutoMovimentacao.OrderByDescending(m => m.Data))
+                            {
+                                <tr class="table-secondary">
+                                    <td>@mov.Data</td>
+                                    <td>@mov.Quantidade</td>
+                                    <td>@mov.Tipo</td>
+                                    <td>@mov.Observacao</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -140,7 +173,7 @@
                 </div>
             </div>
         </div>
-        
+
 
     </div>
 </section>

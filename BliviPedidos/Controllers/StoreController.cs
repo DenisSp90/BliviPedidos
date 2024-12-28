@@ -6,7 +6,6 @@ using BliviPedidos.Services.Interfaces;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using QRCoder;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -18,11 +17,13 @@ public class StoreController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IItemPedidoService _itemPedidoService;
     private readonly IPedidoService _pedidoService;
     private readonly IProdutoService _produtoService;
     private readonly IEmailEnviarService _emailSender;
     private readonly IClienteService _clienteService;
     private readonly string _imagemPasta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "imagens/produtos");
+    private readonly IConfiguration _configuration;
 
     public StoreController(
         ApplicationDbContext context,
@@ -30,7 +31,9 @@ public class StoreController : Controller
         IPedidoService pedidoService,
         IProdutoService produtoService,
         IEmailEnviarService emailSender,
-        IClienteService clienteService)
+        IClienteService clienteService,
+        IItemPedidoService itemPedidoService,
+        IConfiguration configuration)
     {
         _context = context;
         _mapper = mapper;
@@ -43,40 +46,44 @@ public class StoreController : Controller
         {
             Directory.CreateDirectory(_imagemPasta);
         }
+
+        _itemPedidoService = itemPedidoService;
+        _configuration = configuration;
     }
 
     [HttpPost]
     public async Task<IActionResult> AtualizarEstadoPagamento(int idPedido, bool pago)
     {
-        var pedido = _pedidoService.GetPedidoById(idPedido);
-
-        if (pedido == null)
-            return NotFound();
-
-        if (pedido.Pago)
-            pedido.DataPagamento = DateTime.Now;
-        else
-            pedido.DataPagamento = null;
-
-        pedido.Pago = pago;
-
-        _context.SaveChanges();
-
-        if (!string.IsNullOrEmpty(pedido.Cadastro.Nome) && pedido.Cadastro.Nome != "AVULSO")
+        try
         {
-            var cliente = await _clienteService.ProcurarClienteByTelefoneAsync(pedido.Cadastro.Telefone.Trim());
+            var pedido = await _pedidoService.GetPedidoByIdAsync(idPedido);
 
-            if (!string.IsNullOrEmpty(cliente.Email) && cliente.Email != "email@email.com.br")
-                await EnviarEmailPagamento(pedido.Cadastro);
+            if (pedido == null)
+                return NotFound();
+
+            await _pedidoService.AtualizarStatusPagamentoAsync(idPedido, pago);
+
+            if (!string.IsNullOrEmpty(pedido.Cadastro.Nome) && pedido.Cadastro.Nome != "AVULSO")
+            {
+                var cliente = await _clienteService.ProcurarClienteByTelefoneAsync(pedido.Cadastro.Telefone.Trim());
+
+                //if (!string.IsNullOrEmpty(cliente.Email) && cliente.Email != "email@email.com.br")
+                //    await EnviarEmailPagamento(pedido.Cadastro);
+            }
+
+            return Ok(new { Ativo = pedido.Ativo, Pago = pago });
         }
+        catch (Exception ex)
+        {
 
-        return Ok(new { Ativo = pedido.Ativo, Pago = pago });
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpPost]
     public async Task<IActionResult> CancelarPedido(int idPedido, bool ativo)
     {
-        var pedido = _pedidoService.GetPedidoById(idPedido);
+        var pedido = await _pedidoService.GetPedidoByIdAsync(idPedido);
 
         if (pedido == null)
         {
@@ -146,9 +153,52 @@ public class StoreController : Controller
                 return View("PedidoNaoEncontrado");
             }
 
+            var responsavel = _configuration["PixAppSettings:Responsavel"];
+            var pixTipo = _configuration["PixAppSettings:PixTipo"];
+            var pixChave = _configuration["PixAppSettings:PixChave"];
+            var pixCity = _configuration["PixAppSettings:PixCity"];
+
+            PixModel.PixType pixType = PixModel.PixType.cnpj;
+
+            switch (pixTipo)
+            {
+                case "CPF":
+                    pixType = PixModel.PixType.cpf;
+                    break;
+
+                case "CNPJ":
+                    pixType = PixModel.PixType.cnpj;
+                    break;
+
+                case "Telefone":
+                    pixType = PixModel.PixType.celular;
+                    break;
+
+                case "Email":
+                    pixType = PixModel.PixType.email;
+                    break;
+
+                default:
+                    pixType = PixModel.PixType.chaveAleatoria;
+                    break;
+            }
+
+            Pix pixObj = new Pix(
+               responsavel,
+               pixType,
+               pixChave,
+               pixCity,
+               "_boleto.NumeroTitulo",
+               String.Format("{0:C}", pedido.ValorTotalPedido));           
+
+            string qrCodeValue = pixObj.GetPayLoad();
+            string qrCodeImageBase64 = GenerateQrCode(qrCodeValue);
+
             StoreViewModel viewModel = new StoreViewModel
             {
-                Pedido = pedido
+                Pedido = pedido,
+                PixKey = qrCodeValue,
+                PixQRCodeUrl = qrCodeImageBase64 // Substitua pela URL real do QR code
             };
 
             return View(viewModel);
@@ -194,6 +244,17 @@ public class StoreController : Controller
         return View();
     }
 
+    [Route("Store/ItemsSearch/{query?}")]
+    public IActionResult ItemsSearch(string query)
+    {
+        var items = _context.Produto
+            .Where(p => p.Nome.Contains(query))
+            .Select(p => new { p.Id, p.Nome, p.Quantidade, p.PrecoVenda })
+            .ToList();
+
+        return Json(items);
+    }
+
     public IActionResult PedidoCadastro()
     {
         StoreViewModel storeViewModel = new StoreViewModel();
@@ -228,35 +289,51 @@ public class StoreController : Controller
             if (!pedido.Ativo)
                 return RedirectToAction("PedidoLista", "Store");
 
-            PixModel.PixType pixType = PixModel.PixType.chaveAleatoria;
-            string chavePixTipo = "5";
+            var responsavel = _configuration["PixAppSettings:Responsavel"];
+            var pixTipo = _configuration["PixAppSettings:PixTipo"];
+            var pixChave = _configuration["PixAppSettings:PixChave"];
+            var pixCity = _configuration["PixAppSettings:PixCity"];
 
-            switch (chavePixTipo)
+            PixModel.PixType pixType = PixModel.PixType.cnpj;
+            
+            switch (pixTipo)
             {
-                case "2":
+                case "CPF":
                     pixType = PixModel.PixType.cpf;
                     break;
-                case "3":
+
+                case "CNPJ":
                     pixType = PixModel.PixType.cnpj;
                     break;
-                case "4":
-                    pixType = PixModel.PixType.email;
-                    break;
-                case "5":
+
+                case "Telefone":
                     pixType = PixModel.PixType.celular;
                     break;
-                case "6":
+
+                case "Email":
+                    pixType = PixModel.PixType.email;
+                    break;
+
+                default:
                     pixType = PixModel.PixType.chaveAleatoria;
                     break;
             }
 
             Pix pixObj = new Pix(
-                "DOUGLAS DENIS NERIS MENESES",
-                pixType,
-                "11994846638",
-                "OSASCO",
-                "_boleto.NumeroTitulo",
-                String.Format("{0:C}", pedido.ValorTotalPedido));
+               responsavel,
+               pixType,
+               pixChave,
+               pixCity,
+               "_boleto.NumeroTitulo",
+               String.Format("{0:C}", pedido.ValorTotalPedido));
+
+            //Pix pixObj = new Pix(
+            //    "COLEGIO CERIMAR",
+            //    pixType,
+            //    "01904650000124",
+            //    "SAOPAULO",
+            //    "_boleto.NumeroTitulo",
+            //    String.Format("{0:C}", pedido.ValorTotalPedido));
 
             string qrCodeValue = pixObj.GetPayLoad();
             string qrCodeImageBase64 = GenerateQrCode(qrCodeValue);
@@ -306,7 +383,7 @@ public class StoreController : Controller
     {
         StoreViewModel storeViewModel = new StoreViewModel();
 
-        storeViewModel.Produtos = await _produtoService.GetProdutosAsync();
+        storeViewModel.Produtos = await _produtoService.GetProdutosAtivosAsync();
         storeViewModel.Pedido = _pedidoService.GetPedido();
 
         return View(storeViewModel);
@@ -341,8 +418,8 @@ public class StoreController : Controller
 
                 _pedidoService.UpdateCadastro(cadastro);
 
-                if (!string.IsNullOrEmpty(cadastro.Email) && cadastro.Email != "email@email.com.br")
-                    await EnviarEmailPedido(cadastro);
+                //if (!string.IsNullOrEmpty(cadastro.Email) && cadastro.Email != "email@email.com.br")
+                //    await EnviarEmailPedido(cadastro);
 
                 if (!string.IsNullOrEmpty(cadastro.Nome) && cadastro.Nome != "AVULSO")
                     await _clienteService.RegistrarClienteAsync(cadastro);
@@ -369,39 +446,16 @@ public class StoreController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> ProdutoCadastro([FromForm] ProdutoViewModel model, IFormFile foto)
+    public async Task<IActionResult> ProdutoCadastro([FromForm] ProdutoViewModel model)
     {
         if (ModelState.IsValid)
         {
             Produto p = _mapper.Map<Produto>(model);
 
-            string defaultPhotoPath = "/img/default.png";
-            string photoPath = defaultPhotoPath;
-
-            if (foto != null && foto.Length > 0)
-            {
-                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/imagens/produtos/");
-                string uniqueFileName = Guid.NewGuid().ToString() + "_" + foto.FileName;
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    await foto.CopyToAsync(fileStream);
-
-                photoPath = "/imagens/produtos/" + uniqueFileName;
-            }
-            else if (string.IsNullOrEmpty(p.Foto))
-            {
-                photoPath = defaultPhotoPath;
-            }
-
-            p.Foto = photoPath;
-
-            await _produtoService.RegistrarProdutoAsync(p);
-
-            return RedirectToAction("ProdutoLista");
+            if (await _produtoService.RegistrarProdutoAsync(p))
+                return RedirectToAction("ProdutoLista");
+            else
+                return View(model);
         }
 
         return View(model);
@@ -436,9 +490,8 @@ public class StoreController : Controller
         var produto = await _produtoService.ProcurarProdutoAsync(id);
 
         if (produto == null)
-        {
             return NotFound();
-        }
+
 
         return View(produto);
     }
@@ -451,9 +504,7 @@ public class StoreController : Controller
             return NotFound();
 
         if (string.IsNullOrEmpty(produto.Foto))
-        {
             produto.Foto = "/img/default.png";
-        }
 
         return View(produto);
     }
@@ -465,11 +516,10 @@ public class StoreController : Controller
         {
             if (ModelState.IsValid)
             {
-                Produto p = _mapper.Map<Produto>(model);                
-
+                Produto p = _mapper.Map<Produto>(model);
                 await _produtoService.RegistrarProdutoAsync(p);
 
-                return RedirectToAction("ProdutoLista");
+                return RedirectToAction("ProdutoDetalhe", new { id = p.Id });
             }
 
             return View(model);
@@ -571,12 +621,38 @@ public class StoreController : Controller
         return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
     }
 
-    public async Task<IActionResult> ProdutoLista()
+    public async Task<IActionResult> ProdutoLista(int filtro)
     {
-        return _context.Produto != null ?
-                     View(await _context.Produto.ToListAsync()) :
-                     Problem("Entity set 'ApplicationDbContext.Produto'  is null.");
+        try
+        {
+            // Valida o filtro, se não for 1, 2 ou 3, redireciona para Home
+            if (filtro != 1 && filtro != 2 && filtro != 3)
+                return RedirectToAction("Index", "Home");
 
+            IEnumerable<Produto> produtos;
+
+            // Filtra os produtos com base no valor de 'filtro'
+            if (filtro == 1) // Produtos Ativos
+            {
+                produtos = await _produtoService.GetProdutosAtivosAsync();
+            }
+            else if (filtro == 2) // Produtos Desativados
+            {
+                produtos = await _produtoService.GetProdutosDesativadosAsync();
+            }
+            else // Todos os Produtos
+            {
+                produtos = await _produtoService.GetProdutosAsync();
+            }
+
+            // Retorna a view com a lista de produtos filtrada
+            return View(produtos);
+        }
+        catch (Exception ex)
+        {
+            // Retorna a view de erro em caso de exceção
+            return View("Erro");
+        }
     }
 
     [HttpPost]
@@ -600,7 +676,7 @@ public class StoreController : Controller
 
             var urlImagem = $"/imagens/produtos/{nomeArquivoNovo}";
 
-            await _produtoService.AtualizarImagemProdutoAsync(int.Parse(produtoId), urlImagem);            
+            await _produtoService.AtualizarImagemProdutoAsync(int.Parse(produtoId), urlImagem);
 
             return Json(new { imagemUrl = urlImagem });
         }
@@ -612,6 +688,26 @@ public class StoreController : Controller
     public UpdateQuantidadeResponse UpdateQuantidade([FromBody] ItemPedido itemPedido)
     {
         return _pedidoService.UpdateQuantidade(itemPedido);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> UpdateQuantidade2(int itemPedidoId, int produtoId, int quantidade, decimal preco)
+    {
+        try
+        {
+            await _itemPedidoService.UpdateItemPedidoAsync(itemPedidoId, produtoId, quantidade, preco);
+
+            return Json(new { success = true });
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (Exception ex)
+        {
+            // Log.Error(ex.Message); // Caso use um logger
+            return StatusCode(500, new { success = false, message = "Ocorreu um erro ao atualizar a quantidade." });
+        }
     }
 
     private async Task EnviarEmailPagamento(Cadastro cadastro)

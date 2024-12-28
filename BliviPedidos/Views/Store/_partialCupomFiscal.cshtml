@@ -1,4 +1,4 @@
-﻿@model Pedido
+﻿@model BliviPedidos.Models.ViewModels.StoreViewModel
 
 <!DOCTYPE html>
 <html>
@@ -7,48 +7,81 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
 
         .cupom {
             border: 1px solid #000;
-            padding: 10px;
-            width: 60%; /* Aumentando a largura para 60% */
-            margin: 0 auto; /* Centraliza o cupom na página */
+            padding: 5px;
+            width: 300px; /* Ajuste para largura fixa */
+            margin: 0 auto;
         }
 
-        .cabecalho {
-            text-align: center;
-            margin-bottom: 10px;
+        .cabecalho, .rodape {
+            text-align: center; /* Centraliza o texto */
+            margin-bottom: 5px; /* Reduza o espaçamento */
         }
 
         .itens {
-            margin-bottom: 10px;
-        }
-
-        .item {
             margin-bottom: 5px;
         }
 
+        .item {
+            margin-bottom: 2px; /* Reduza o espaçamento */
+            font-size: 11px;
+        }
+
         .subtotal {
-            margin-top: 10px;
+            margin-top: 5px;
             text-align: right;
             font-weight: bold;
         }
 
-        .rodape {
-            margin-top: 10px;
-            text-align: center;
+        /* Estilos específicos para impressão */
+        @@media print {
+            body {
+                margin: 0;
+            }
+
+            .cupom {
+                width: 100%; /* Use toda a largura disponível na impressão */
+                border: none; /* Remova bordas para economizar espaço */
+            }
+
+            .rodape, .subtotal {
+                margin-top: 0;
+            }
+
+            img {
+                max-width: 100%; /* Garantir que o QR code se ajuste à largura da página */
+            }
+            /* Remover elementos desnecessários na impressão */
+            button {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
     <div class="cupom">
-        <div style="text-align: center;" class="cabecalho">
+        <div class="cabecalho">
             <h1>Cupom Fiscal</h1>
-            <p>Data: @DateTime.Now.ToString("dd/MM/yyyy")</p>
+            <p>@DateTime.Now.ToString("dd/MM/yyyy") - ID:@Model.Pedido.Id </p>
+            <p>
+                <span>@Model.Pedido.Cadastro.Nome.Trim()</span>
+            </p>
+            <p>
+                <span>@Model.Pedido.Cadastro.ResponsavelCerimar</span>
+
+            </p>
+            <p>
+                <span>@Model.Pedido.Cadastro.Turma</span>
+            </p>
         </div>
+        <br />
         <div class="itens">
-            @foreach (var i in Model.Itens)
+            @foreach (var i in Model.Pedido.Itens)
             {
                 <div class="item">
                     <span>@i.Quantidade X </span>
@@ -57,12 +90,22 @@
                 </div>
             }
         </div>
-        &nbsp;
+        <br />
+        <br />
         <div class="subtotal">
-            <span style="float: right;">Subtotal: R$ @string.Format("{0:0.00}", Model.Itens.Sum(i => i.Subtotal))</span>
+            <span style="float: right;">Subtotal: R$ @string.Format("{0:0.00}", Model.Pedido.Itens.Sum(i => i.Subtotal))</span>
         </div>
-        <div style="text-align: center;" class="rodape">
+        <br />
+        <div class="rodape">
             <p>Obrigado pela preferência!</p>
+            <p>Escaneie o código QR o pagamento via PIX.</p>
+            <img src="data:image/png;base64,@Model.PixQRCodeUrl" alt="Código QR PIX" class="img-fluid mb-3">
+            <p>
+                Por favor envie o comprovante do Pagamento no número abaixo:
+            </p>
+            <p>
+                +55 11 94578-4933
+            </p>
         </div>
     </div>
     <div style="text-align: center; margin-top: 20px;">

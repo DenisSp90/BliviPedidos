@@ -33,9 +33,15 @@ namespace BliviPedidos.Data
             modelBuilder.Entity<Cadastro>().HasKey(t => t.Id);
             modelBuilder.Entity<Cadastro>().HasOne(t => t.Pedido);
 
+            modelBuilder.Entity<ProdutoMovimentacao>()
+            .HasOne(p => p.Produto)
+            .WithMany(m => m.ProdutoMovimentacao)
+            .HasForeignKey(p => p.ProdutoId);
         }
 
+        public DbSet<Pedido> Pedido { get; set; }
         public DbSet<BliviPedidos.Models.Produto> Produto { get; set; } = default!;
+        public DbSet<BliviPedidos.Models.ProdutoMovimentacao> ProdutoMovimentacao { get; set; } = default!;
         public DbSet<BliviPedidos.Models.Cliente> Cliente { get; set; } = default!;
 
     }

@@ -1,22 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.IO;
-using System.Threading.Tasks;
-using BliviPedidos.Data;
-using iText.Kernel.Pdf;
-using iText.Layout;
-using iText.Layout.Element;
-using ZXing;
-using ZXing.Common;
-using ZXing.Rendering;
+﻿using BliviPedidos.Data;
+using BliviPedidos.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using Syncfusion.DocIO.DLS;
+using Syncfusion.DocIORenderer;
 using System.Drawing;
 using System.Drawing.Imaging;
 using Xceed.Words.NET;
-using Syncfusion.DocIO;
-using Syncfusion.DocIO.DLS;
-using Syncfusion.DocIORenderer;
-using Syncfusion.Pdf;
-using BliviPedidos.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using ZXing;
+using ZXing.Common;
+using ZXing.Rendering;
 
 namespace BliviPedidos.Controllers;
 

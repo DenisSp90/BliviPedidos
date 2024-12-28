@@ -1,0 +1,57 @@
+﻿@* _ModalDetalhesProduto.cshtml *@
+
+
+<div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="itemModalLabel">Detalhes do Produto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                Atenção! Não é possível adicionar ou remover itens do pedido. Esta opção permite apenas a alteração de quantidades ou a troca de itens.
+            </div>
+            <div class="modal-body">
+                <!-- Campo de pesquisa -->
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Pesquisar produto">
+                    <button class="btn btn-outline-secondary" type="button" id="searchButton">Buscar</button>
+                </div>
+
+                <p hidden><strong>Item Pedido:</strong> <span id="modalItemPedidoId"></span></p>
+                <p hidden><strong>Produto Id:</strong> <span id="modalProdutoId"></span></p>
+
+                <!-- Conteúdo dos detalhes do produto -->
+                <p><strong>Produto:</strong> <span id="modalProdutoNome"></span></p>
+
+                <!-- Campo de entrada para quantidade editável -->
+                <p>
+                    <strong>Quantidade:</strong>
+                    <input type="number" id="modalProdutoQuantidade" class="form-control" min="1" />
+                </p>
+
+                <p><strong>Preço Unitário:</strong> <span id="modalProdutoPreco"></span></p>
+                <p><strong>Subtotal:</strong> <span id="modalProdutoSubtotal"></span></p>
+
+                <!-- Área onde os novos itens serão exibidos -->
+                <div id="searchResults" style="display:none;">
+                    <hr />
+                    <h5>Resultados da Pesquisa:</h5>
+                    <ul id="resultsList" class="list-group"></ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="saveButton">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+   
+</script>
+
+
+<script src="~/js/controllers/ModalDetalhesProduto.js"></script>

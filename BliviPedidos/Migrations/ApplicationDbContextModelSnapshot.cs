@@ -51,8 +51,14 @@ namespace BliviPedidos.Migrations
                     b.Property<int>("PedidoId")
                         .HasColumnType("int");
 
+                    b.Property<string>("ResponsavelCerimar")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("Telefone")
                         .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Turma")
                         .HasColumnType("longtext");
 
                     b.Property<string>("UF")
@@ -94,8 +100,14 @@ namespace BliviPedidos.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("ResponsavelCerimar")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("Telefone")
                         .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Turma")
                         .HasColumnType("longtext");
 
                     b.Property<string>("UF")
@@ -182,6 +194,9 @@ namespace BliviPedidos.Migrations
                     b.Property<string>("Foto")
                         .HasColumnType("longtext");
 
+                    b.Property<bool>("IsAtivo")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -201,6 +216,36 @@ namespace BliviPedidos.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Produto");
+                });
+
+            modelBuilder.Entity("BliviPedidos.Models.ProdutoMovimentacao", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Data")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Observacao")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("ProdutoId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantidade")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProdutoId");
+
+                    b.ToTable("ProdutoMovimentacao");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -436,6 +481,17 @@ namespace BliviPedidos.Migrations
                         .HasForeignKey("ClienteId");
                 });
 
+            modelBuilder.Entity("BliviPedidos.Models.ProdutoMovimentacao", b =>
+                {
+                    b.HasOne("BliviPedidos.Models.Produto", "Produto")
+                        .WithMany("ProdutoMovimentacao")
+                        .HasForeignKey("ProdutoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Produto");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -498,6 +554,11 @@ namespace BliviPedidos.Migrations
                         .IsRequired();
 
                     b.Navigation("Itens");
+                });
+
+            modelBuilder.Entity("BliviPedidos.Models.Produto", b =>
+                {
+                    b.Navigation("ProdutoMovimentacao");
                 });
 #pragma warning restore 612, 618
         }

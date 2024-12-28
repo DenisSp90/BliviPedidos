@@ -6,11 +6,12 @@ public class Cliente : BaseModel
 {
     public Cliente() { }
 
-    public Cliente(int id, string nome, string? email, string telefone, string? endereco, string? complemento, string? bairro, string? municipio, string? uF, string? cEP)
+    public Cliente(string nome, string? email, string? responsavelCerimar, string? turma, string telefone, string? endereco, string? complemento, string? bairro, string? municipio, string? uF, string? cEP, IList<Pedido>? pedidos)
     {
-        Id = id;
         Nome = nome;
         Email = email;
+        ResponsavelCerimar = responsavelCerimar;
+        Turma = turma;
         Telefone = telefone;
         Endereco = endereco;
         Complemento = complemento;
@@ -18,12 +19,17 @@ public class Cliente : BaseModel
         Municipio = municipio;
         UF = uF;
         CEP = cEP;
+        Pedidos = pedidos;
     }
 
     public string Nome { get; set; } = "";
 
     [EmailAddress(ErrorMessage = "E-mail inválido")]
     public string? Email { get; set; } = "";
+
+    public string? ResponsavelCerimar { get; set; } = "";
+
+    public string? Turma { get; set; } = "";
 
     public string Telefone { get; set; } = "";
 

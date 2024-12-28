@@ -1,0 +1,32 @@
+﻿@{
+}
+
+<div class="modal fade" id="produtosMovimetacaoGeralModal" tabindex="-1" aria-labelledby="produtosMovimetacaoGeralLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="produtosMovimetacaoGeralLabel">Movimentação em Estoque</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="tabelaProdutosEmEstoque">
+                    <p>Clique em imprimir o relatorio para gerar o PDF com os produtos registrados no estoque ...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="imprimirRelatorio2">Imprimir Relatório</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        // Ação do botão Imprimir
+        $('#imprimirRelatorio2').click(function () {
+            window.location.href = '@Url.Action("MovimentacaoEstoque", "Relatorio")';
+        });
+    });
+</script>

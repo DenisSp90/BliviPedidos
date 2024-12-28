@@ -20,11 +20,6 @@
                     <h5 class="card-title">Cadastro de Produtos</h5>
                     <form class="row g-3" id="formulario" method="post" enctype="multipart/form-data" asp-action="ProdutoCadastro">
                         <div class="col-12">
-                            <label asp-for="Codigo" class="col-sm-2 col-form-label"></label>
-                            <input asp-for="Codigo" type="text" placeholder="Código" class="form-control">
-                            <span asp-validation-for="Codigo" class="text-danger"></span>
-                        </div>
-                        <div class="col-12">
                             <label asp-for="Nome" class="col-sm-2 col-form-label"></label>
                             <input asp-for="Nome" type="text" placeholder="Nome do Produto" class="form-control">
                             <span asp-validation-for="Nome" class="text-danger"></span>
@@ -41,36 +36,30 @@
                             <span asp-validation-for="PrecoVenda" class="text-danger"></span>
                         </div>
 
-
                         <div class="col-12">
                             <label asp-for="Quantidade" class="col-sm-2 col-form-label"></label>
                             <input asp-for="Quantidade" type="text" placeholder="Quantidade de Produto" class="form-control">
                             <span asp-validation-for="Quantidade" class="text-danger"></span>
                         </div>
+
                         <div class="col-12">
                             <label asp-for="Tamanho" class="col-sm-2 col-form-label"></label>
                             <input asp-for="Tamanho" type="text" placeholder="Tamanho do Produto" class="form-control">
                             <span asp-validation-for="Tamanho" class="text-danger"></span>
                         </div>
+
                         <div class="col-12">
-                            <label asp-for="Foto" class="col-sm-2 col-form-label"></label>
-                            <span asp-validation-for="Foto" class="text-danger"></span>
-                            <input id="inputFoto" name="foto" type="file" class="form-control" accept="image/*" />
-                        </div>
-                        
-                        <div class="col-lg-12">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <i class="fa fa-file-picture-o"></i> Pré-visualização
-                                </div>
-                                <div class="panel-body" style="text-align: center; height: 200px; display: flex; justify-content: center; align-items: center;">
-                                    <img id="imagemPreview" src="#" alt="Product Image" style="max-width: 100%; max-height: 100%;" />
-                                </div>
+                            <div class="form-check">
+                                <input asp-for="IsAtivo" class="form-check-input" type="checkbox">
+                                <label asp-for="IsAtivo" class="form-check-label">
+                                    Ativo
+                                </label>
                             </div>
                         </div>
 
                         <div class="text-center">
                         </div>
+
                         <div class="card-footer d-flex justify-content-between">
                             <div>
                                 <a asp-action="ProdutoLista" class="btn btn-secondary btn-sm">

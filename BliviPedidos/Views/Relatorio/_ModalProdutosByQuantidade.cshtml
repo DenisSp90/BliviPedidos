@@ -1,0 +1,36 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div class="modal fade" id="produtosByQuantidadeModal" tabindex="-1" aria-labelledby="produtosByQuantidadeLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="produtosByQuantidadeLabel">Produtos com poucas unidades no estoque</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="quantidadeForm">
+                    <div class="mb-3">
+                        <label for="quantidadeProdutos" class="form-label">Quantidade de Produtos (Abaixo de)</label>
+                        <input type="number" class="form-control" id="quantidadeProdutos" name="quantidadeProdutos" placeholder="Digite a quantidade">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="imprimirRelatorio3">Imprimir Relatório</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('imprimirRelatorio3').addEventListener('click', function () {
+        var quantidade = document.getElementById('quantidadeProdutos').value;
+
+        // Faz a requisição para o controlador passando a quantidade como parâmetro
+        window.location.href = `Relatorio/ProdutosEmEstoqueByQuantidade?quantidade=${quantidade}`;
+    });
+</script>

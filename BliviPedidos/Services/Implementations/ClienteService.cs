@@ -64,6 +64,8 @@ namespace BliviPedidos.Services.Implementations
                 clienteExistente.Nome = cadastro.Nome;
                 clienteExistente.Email = cadastro.Email;
                 clienteExistente.Telefone = cadastro.Telefone;
+                clienteExistente.Turma = cadastro.Turma;
+                clienteExistente.ResponsavelCerimar = cadastro.ResponsavelCerimar;
                 clienteExistente.Endereco = cadastro.Endereco;
                 clienteExistente.Complemento = cadastro.Complemento;
                 clienteExistente.Bairro = cadastro.Bairro;
@@ -79,6 +81,8 @@ namespace BliviPedidos.Services.Implementations
                 {
                     Nome = cadastro.Nome,
                     Email = cadastro.Email,
+                    ResponsavelCerimar = cadastro.ResponsavelCerimar,
+                    Turma = cadastro.Turma,
                     Telefone = cadastro.Telefone,
                     Endereco = cadastro.Endereco,
                     Complemento = cadastro.Complemento,
