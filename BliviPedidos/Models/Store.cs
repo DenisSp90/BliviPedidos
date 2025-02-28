@@ -19,6 +19,9 @@ namespace BliviPedidos.Models
         public int PedidoId { get; set; }
         public virtual Pedido? Pedido { get; set; }
 
+        public int? ClienteId { get; set; }
+        public virtual Cliente? Cliente{ get; set; }
+
         [MinLength(5, ErrorMessage = "Nome deve ter no minimo 5 caracteres")]
         [MaxLength(50, ErrorMessage = "Nome deve ter no minimo 50 caracteres")]
         [Required(ErrorMessage = "Nome é obrigatório")]
@@ -28,6 +31,7 @@ namespace BliviPedidos.Models
         public string? Email { get; set; } = "";
 
         [Required(ErrorMessage = "Telefone é obrigat?rio")]
+        [RegularExpression(@"^55\s\d{2}\s\d{5}-\d{4}$", ErrorMessage = "O telefone deve estar no formato 55 99 99999-9999.")]
         public string Telefone { get; set; } = "";
 
         [Display(Name = "Responsavel Pedido")]
@@ -51,6 +55,7 @@ namespace BliviPedidos.Models
         internal void Update(Cadastro novoCadastro)
         {
             this.Pedido = novoCadastro.Pedido;
+            this.ClienteId = novoCadastro.ClienteId;
             this.Bairro = novoCadastro.Bairro;
             this.CEP = novoCadastro.CEP;
             this.Complemento = novoCadastro.Complemento;
@@ -70,28 +75,37 @@ namespace BliviPedidos.Models
     {
         [Required]
         [DataMember]
-        public Pedido Pedido { get; private set; }
+        public Pedido Pedido { get; private set; }  
+
         [Required]
         [DataMember]
-        public Produto Produto { get; set; }
+        public Produto Produto { get; set; }  
+
         [Required]
         [DataMember]
         public int Quantidade { get; set; }
+
         [Required]
         [DataMember]
         public decimal PrecoUnitario { get; set; }
+
         [DataMember]
         public decimal Subtotal => Quantidade * PrecoUnitario;
 
+        public int PedidoId { get; set; }  
+        public int ProdutoId { get; set; }  
+
+        
         public ItemPedido()
         {
-
         }
 
         public ItemPedido(Pedido pedido, Produto produto, int quantidade, decimal precoUnitario)
         {
             Pedido = pedido;
             Produto = produto;
+            PedidoId = pedido?.Id ?? 0;  
+            ProdutoId = produto?.Id ?? 0;  
             Quantidade = quantidade;
             PrecoUnitario = precoUnitario;
         }

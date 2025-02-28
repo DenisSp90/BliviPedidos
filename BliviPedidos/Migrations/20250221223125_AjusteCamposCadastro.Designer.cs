@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BliviPedidos.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241104002539_InicialBancoDados")]
-    partial class InicialBancoDados
+    [Migration("20250221223125_AjusteCamposCadastro")]
+    partial class AjusteCamposCadastro
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,6 +33,9 @@ namespace BliviPedidos.Migrations
 
                     b.Property<string>("CEP")
                         .HasColumnType("longtext");
+
+                    b.Property<int?>("ClienteId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Complemento")
                         .HasColumnType("longtext");
@@ -68,6 +71,8 @@ namespace BliviPedidos.Migrations
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClienteId");
 
                     b.HasIndex("PedidoId")
                         .IsUnique();
@@ -449,11 +454,17 @@ namespace BliviPedidos.Migrations
 
             modelBuilder.Entity("BliviPedidos.Models.Cadastro", b =>
                 {
+                    b.HasOne("BliviPedidos.Models.Cliente", "Cliente")
+                        .WithMany()
+                        .HasForeignKey("ClienteId");
+
                     b.HasOne("BliviPedidos.Models.Pedido", "Pedido")
                         .WithOne("Cadastro")
                         .HasForeignKey("BliviPedidos.Models.Cadastro", "PedidoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Cliente");
 
                     b.Navigation("Pedido");
                 });

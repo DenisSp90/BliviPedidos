@@ -1,0 +1,107 @@
+﻿@{
+    ViewData["Title"] = "Relatórios de Pedidos";
+}
+
+@model BliviPedidos.Models.ViewModels.RelatorioViewModel;
+
+<div class="pagetitle">
+    <h1>Relatórios de Pedidos</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Página de Inicial</a></li>
+            <li class="breadcrumb-item">Relatórios</li>
+            <li class="breadcrumb-item active">Produtos</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section dashboard">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <a href="javascript:void(0)" class="box has-text-centered" data-bs-toggle="modal" data-bs-target="#produtosEmEstoqueModal">
+                        <div class="card info-card sales-card">
+                            <div class="card-body">
+                                <h5 class="card-title">Tabela<span> | Tabela de produtos no estoque</span></h5>
+                                <div class="d-flex align-items-center">
+                                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-table"></i>
+                                    </div>
+                                    <div class="ps-3">
+                                        <h6></h6>
+                                        <span class="small pt-1 fw-bold">Gerar impressão do documento</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+
+                    @Html.Partial("_ModalProdutosEmEstoque")
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="datatable table">
+                            <thead>
+                                <tr>
+                                    <th>Ação</th>
+                                    <th>N°</th>
+                                    <th>Pago</th>
+                                    <th>Nome</th>
+                                    <th>Total</th>
+                                    <th>Vendedor</th>
+                                    <th>Feito</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var p in Model.Pedidos)
+                                {
+                                    var hoje = DateTime.Now;
+                                    var classeLinha = (!p.Pago && p.DataPedido < hoje) ? "table-danger" : "";
+
+                                    string numeroTelefone = new String(p.Cadastro.Telefone.Where(Char.IsDigit).ToArray());
+                                    string linkWhatsApp = "https://api.whatsapp.com/send?phone=" + numeroTelefone +
+                                    "&text=Recebemos%20seu%20pedido%20número%20" + p.Id.ToString();
+
+                                    <tr class="@classeLinha">
+                                        <td>
+                                            <a asp-action="PedidoDetalhe" asp-route-id="@p.Id" class="btn btn-primary btn-sm">
+                                                <i class="bi bi-info-circle"></i>
+                                            </a>
+                                        </td>
+                                        <td>@Html.DisplayFor(modelItem => p.Id)</td>
+                                        <td>
+                                            @if (p.Pago)
+                                            {
+                                                <span class="badge rounded-pill bg-success">Pago</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge rounded-pill bg-warning text-dark">Pendente</span>
+                                            }
+                                        </td>
+                                        <td>@Html.DisplayFor(modelItem => p.Cadastro.Nome)</td>
+                                        <td>
+                                            @{
+                                                var subTotal = p.Itens.Sum(x => Convert.ToDecimal(x.Subtotal));
+                                            }
+                                            @Html.DisplayFor(modelItem => subTotal)
+                                        </td>
+                                        <td style="font-size: 10px;">@Html.DisplayFor(modelItem => p.EmailResponsavel)</td>
+                                        <td>@Html.DisplayFor(modelItem => p.DataPedido)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

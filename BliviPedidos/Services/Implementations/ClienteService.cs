@@ -49,13 +49,15 @@ namespace BliviPedidos.Services.Implementations
 
         public async Task<ClienteViewModel> ProcurarClienteByTelefoneAsync(string telefone)
         {
-            var c = await _context.Cliente
-                                  .FirstOrDefaultAsync(cliente => cliente.Telefone == telefone);
+            var c = await _context.Cliente.FirstOrDefaultAsync(cliente => cliente.Telefone == telefone);
+
+            if (c == null)
+                return new ClienteViewModel();
 
             return _mapper.Map<ClienteViewModel>(c);
         }
 
-        public async Task RegistrarClienteAsync(Cadastro cadastro)
+        public async Task<ClienteViewModel> RegistrarClienteAsync(Cadastro cadastro)
         {
             var clienteExistente = await ProcurarClienteByTelefoneAsync2(cadastro.Telefone);
 
@@ -74,6 +76,8 @@ namespace BliviPedidos.Services.Implementations
                 clienteExistente.CEP = cadastro.CEP;
 
                 await AtualizarClienteAsync(clienteExistente);
+
+                return _mapper.Map<ClienteViewModel>(clienteExistente);
             }
             else
             {
@@ -93,6 +97,8 @@ namespace BliviPedidos.Services.Implementations
                 };
 
                 await InserirClienteAsync(novoCliente);
+
+                return _mapper.Map<ClienteViewModel>(novoCliente);
             }
         }
 

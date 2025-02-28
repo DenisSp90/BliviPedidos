@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using QRCoder;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Text.RegularExpressions;
 
 namespace BliviPedidos.Controllers;
 
@@ -97,15 +98,13 @@ public class StoreController : Controller
     }
 
     public async Task<IActionResult> ClienteGetByTelefone(string telefone)
-    {
-        // Lógica para buscar o cliente pelo telefone
-        // Isso pode envolver uma consulta ao banco de dados
+    {        
         var cliente = await _clienteService.ProcurarClienteByTelefoneAsync(telefone);
 
-        if (cliente != null)
-            return Json(cliente); // Retorna os dados do cliente como JSON
+        if (cliente != null && cliente.Id != 0)
+            return Json(cliente);
         else
-            return NotFound(); // Retorna um status 404 se o cliente não for encontrado
+            return NotFound();
     }
 
     public async Task<IActionResult> ClienteDetalhe(int id)
@@ -395,12 +394,15 @@ public class StoreController : Controller
     {
         var pedido = _pedidoService.GetPedido();
 
-        pedido.ValorTotalPedido = pedido.Itens.Sum(i => i.Subtotal);
-
         if (pedido == null || pedido.Itens.Count == 0)
             return RedirectToAction("PedidoPreparacao");
 
+        pedido.ValorTotalPedido = pedido.Itens.Sum(i => i.Subtotal);
         cadastro.Pedido = pedido;
+
+        // Validar o telefone antes de verificar ModelState
+        if (!ValidarTelefone(cadastro.Telefone))
+            ModelState.AddModelError("Telefone", "O telefone deve estar no formato '55 11 99999-9999'.");
 
         if (ModelState.IsValid)
         {
@@ -412,17 +414,26 @@ public class StoreController : Controller
                     return RedirectToAction("PedidoCadastro", "Store");
                 }
 
+                var cliente = await _clienteService.ProcurarClienteByTelefoneAsync(cadastro.Telefone);
+
+                if (cliente == null || cliente.Id == 0)
+                {
+                    var clienteNew = await _clienteService.RegistrarClienteAsync(cadastro);
+                    cadastro.Cliente = _mapper.Map<Cliente>(clienteNew);
+                    cadastro.ClienteId = clienteNew.Id;
+
+                }
+                else
+                {
+                    cadastro.Cliente = _mapper.Map<Cliente>(cliente);
+                    cadastro.ClienteId = cliente.Id;
+                }
+
                 cadastro.Pedido.Ativo = true;
                 cadastro.Pedido.EmailResponsavel = HttpContext.User.Identity.Name;
                 cadastro.Pedido.DataPedido = DateTime.Now;
 
                 _pedidoService.UpdateCadastro(cadastro);
-
-                //if (!string.IsNullOrEmpty(cadastro.Email) && cadastro.Email != "email@email.com.br")
-                //    await EnviarEmailPedido(cadastro);
-
-                if (!string.IsNullOrEmpty(cadastro.Nome) && cadastro.Nome != "AVULSO")
-                    await _clienteService.RegistrarClienteAsync(cadastro);
 
                 _pedidoService.ClearPedido();
 
@@ -431,7 +442,7 @@ public class StoreController : Controller
             catch (Exception ex)
             {
                 ModelState.AddModelError("", "Ocorreu um erro ao processar o pedido. Por favor, tente novamente mais tarde.");
-                return RedirectToAction(ex.Message, "Home");
+                return RedirectToAction("Error", "Home", new { message = ex.Message });
             }
         }
         else
@@ -807,4 +818,11 @@ public class StoreController : Controller
             }
         }
     }
+
+    private bool ValidarTelefone(string telefone)
+    {
+        string padrao = @"^55\s\d{2}\s\d{5}-\d{4}$";
+        return Regex.IsMatch(telefone, padrao);
+    }
+
 }

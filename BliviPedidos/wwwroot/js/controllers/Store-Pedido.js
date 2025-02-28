@@ -22,7 +22,7 @@ $(document).ready(function () {
                 $.each(listaItens, function (index, item) {
                     valoresDoCampo = item.pedido.id;
                     total += parseFloat(item.subtotal);
-                    
+
                     var row = '<tr item-id=' + item.id + ' class="table-primary">' +
                         '<td>' + item.produto.nome + '</td>' +
                         '<td>' +
@@ -40,7 +40,6 @@ $(document).ready(function () {
                 $('#total').text(carrinhoViewModel.total.toFixed(2));
 
                 Swal.fire({
-                    position: "top-end",
                     icon: "success",
                     title: "Produto adicionado ao pedido com sucesso"
                 });

@@ -95,7 +95,6 @@ public class RelatorioController : Controller
         return File(pdf, "application/pdf", "Relatorio_ProdutosEmEstoque.pdf");
     }
 
-
     public IActionResult MovimentacaoEstoque()
     {
         var movimentacoes = _produtoService.GetMovimentacaoEstoque();
@@ -112,6 +111,14 @@ public class RelatorioController : Controller
 
         var pdf = _relatorioService.GerarRelatorioProdutosComEstoqueBaixo(produtos, tituloRelatorio);
         return File(pdf, "application/pdf", "Relatorio_ProdutosComEstoqueBaixo.pdf");
+    }
+
+    public async Task<IActionResult> Pedidos()
+    {
+        RelatorioViewModel relatorioViewModel = new();
+        relatorioViewModel.Pedidos = _pedidoService.GetListaPedidosAtivos();
+
+        return View(relatorioViewModel);
     }
 
 }

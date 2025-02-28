@@ -2,10 +2,10 @@ $(document).ready(function () {
 
     $('#telefoneInput').mask('00 00 00000-0000');
 
-    $('#telefoneInput').val('55 11 '); // Definindo o valor inicial
+    $('#telefoneInput').val('55 11 '); 
 
     $('#telefoneInput').blur(function () {
-        var telefone = $(this).val().replace(/\D/g, ''); // Remover todos os caracteres não numéricos
+        var telefone = $(this).val().replace(/\D/g, ''); 
 
         var regex = /^\d{10}$/;
         if (!regex.test(telefone)) {
@@ -21,18 +21,43 @@ $(document).ready(function () {
         $(this).val(telefone);
 
         $.ajax({
-            url: '/Store/ClienteGetByTelefone', // Ajuste a URL conforme necessário
+            url: '/Store/ClienteGetByTelefone', 
             type: 'GET',
             data: { telefone: telefone },
             success: function (data) {
+                
                 $('#nomeInput').val(data.nome);
                 $('#emailInput').val(data.email);
                 $('#cep').val(data.cep);
 
-                console.log(data);
+                // Exibe a mensagem do SweetAlert com os dados do cliente
+                Swal.fire({
+                    title: 'Cliente encontrado!',
+                    html: `
+                <p><strong>Nome:</strong> ${data.nome}</p>
+                <p><strong>Email:</strong> ${data.email}</p>
+                <p><strong>CEP:</strong> ${data.cep}</p>
+                <p><strong>Telefone:</strong> ${data.telefone}</p>
+            `,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+
+                console.log(data); // Exibe os dados no console para depuração
             },
             error: function (error) {
                 console.error('Erro ao buscar cliente:', error);
+
+                debugger;
+
+                Swal.fire({
+                    title: 'Cliente não encontrado!',
+                    text: 'Não foi possível encontrar o cliente. Será necessário cadastrar o cliente para prosseguir com o pedido.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+
+                limparFormulario();
             }
         });
     });
@@ -69,6 +94,7 @@ $(document).ready(function () {
         }
     });
 });
+
 function atualizarEstadoPedido(idPedido, novoEstado) {
     // Exibir mensagem de confirmação usando SweetAlert
     Swal.fire({
@@ -119,6 +145,7 @@ function atualizarEstadoPedido(idPedido, novoEstado) {
         }
     });
 }
+
 function cancelarPedido(idPedido) {
     debugger;
     var novoEstado = $('#PedidoAtivo').val() === 'True' ? false : true; // Inverte o estado atual
@@ -174,6 +201,18 @@ function cancelarPedido(idPedido) {
             });
         }
     });
+}
+
+function limparFormulario() {
+    $('#nomeInput').val('');
+    $('#emailInput').val('');
+    $('#cep').val('');
+    $('#enderecoId').val('');
+    $('#logradouro').val('');
+    $('#complemento').val('');
+    $('#bairro').val('');
+    $('#cidade').val('');
+    $('#uf').val('');
 }
 
 
