@@ -121,4 +121,10 @@ public class RelatorioController : Controller
         return View(relatorioViewModel);
     }
 
+    [Route("Relatorio/PedidosAtivos/{ordenarPor?}/{ordem?}/{filtro?}")]
+    public async Task<IActionResult> PedidosAtivos(string ordenarPor, string ordem, string filtro)
+    {
+
+    }
+
 }

@@ -1,0 +1,49 @@
+﻿<div class="modal fade" id="pedidosAtivosModal" tabindex="-1" aria-labelledby="pedidosAtivosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="produtosEmEstoqueLabel">Pedidos Ativos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <label for="ordenarPor" class="form-label">Ordenar por:</label>
+                    <select class="form-select" id="ordenarPor">
+                        <option value="codigo">N° do Pedido</option>
+                        <option value="data">Data do Pedido</option>
+                        <option value="nomeCliente">Nome</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="ordem" class="form-label">Ordem:</label>
+                    <select class="form-select" id="ordem">
+                        <option value="asc">Crescente</option>
+                        <option value="desc">Decrescente</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="filtro" class="form-label">Filtro:</label>
+                    <select class="form-select" id="filtro">
+                        <option value="T">Todos</option>
+                        <option value="P">Pagos</option>
+                        <option value="A">Não Pagos</option>
+                    </select>
+                </div>
+
+                <div id="tabelaProdutosEmEstoque">
+                    <p>Clique em imprimir o relatório para gerar o PDF com os produtos registrados no estoque...</p>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="imprimirRelatorio">Imprimir Relatório</button>
+            </div>
+
+        </div>
+    </div>
+</div>

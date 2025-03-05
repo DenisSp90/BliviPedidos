@@ -8,4 +8,7 @@ public interface IRelatorioService
     byte[] GerarRelatorioProdutosComEstoqueBaixo(IEnumerable<Produto> produtos, string tituloRelatorio);
     byte[] GerarRelatorioMovimentacaoEstoque(IEnumerable<ProdutoMovimentacao> movimentacoes, string tituloRelatorio);
     byte[] GerarRelatorioProdutosParados(IEnumerable<Produto> produtos, string tituloRelatorio);
+
+    // Relatório de Pedidos
+    byte[] GerarRelatorioPedidosAtivos(IEnumerable<Pedido> pedidos, string tituloRelatorio, string[] configuracoesRelatorio);
 }
