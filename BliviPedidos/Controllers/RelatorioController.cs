@@ -124,7 +124,14 @@ public class RelatorioController : Controller
     [Route("Relatorio/PedidosAtivos/{ordenarPor?}/{ordem?}/{filtro?}")]
     public async Task<IActionResult> PedidosAtivos(string ordenarPor, string ordem, string filtro)
     {
+        // Obter os produtos da base de dados
+        var pedidos = _pedidoService.GetListaPedidosAtivos();
 
+        var tituloRelatorio = "Relatório de Produtos em Estoque";
+        var configuracoesRelatorio = new string[] { ordenarPor, ordem, filtro };
+
+        var pdf = _relatorioService.GerarRelatorioPedidosAtivos(pedidos, tituloRelatorio, configuracoesRelatorio);
+        return File(pdf, "application/pdf", "Relatorio_ProdutosEmEstoque.pdf");
     }
 
 }

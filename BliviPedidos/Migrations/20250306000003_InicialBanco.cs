@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BliviPedidos.Migrations
 {
     /// <inheritdoc />
-    public partial class InicialbancoDados : Migration
+    public partial class InicialBanco : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -317,7 +317,7 @@ namespace BliviPedidos.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     PedidoId = table.Column<int>(type: "int", nullable: false),
-                    ClienteId = table.Column<int>(type: "int", nullable: false),
+                    ClienteId = table.Column<int>(type: "int", nullable: true),
                     Nome = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Email = table.Column<string>(type: "longtext", nullable: true)
@@ -348,8 +348,7 @@ namespace BliviPedidos.Migrations
                         name: "FK_Cadastro_Cliente_ClienteId",
                         column: x => x.ClienteId,
                         principalTable: "Cliente",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Cadastro_Pedido_PedidoId",
                         column: x => x.PedidoId,
@@ -365,10 +364,10 @@ namespace BliviPedidos.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    PedidoId = table.Column<int>(type: "int", nullable: false),
-                    ProdutoId = table.Column<int>(type: "int", nullable: false),
                     Quantidade = table.Column<int>(type: "int", nullable: false),
-                    PrecoUnitario = table.Column<decimal>(type: "decimal(65,30)", nullable: false)
+                    PrecoUnitario = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    PedidoId = table.Column<int>(type: "int", nullable: false),
+                    ProdutoId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

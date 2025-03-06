@@ -71,6 +71,11 @@ public class RelatorioService : IRelatorioService
 
     }
 
+    public byte[] GerarRelatorioPedidosAtivos(IEnumerable<Pedido> pedidos, string tituloRelatorio, string[] configuracoesRelatorio)
+    {
+        throw new NotImplementedException();
+    }
+
     public byte[] GerarRelatorioProdutosComEstoqueBaixo(IEnumerable<Produto> produtos, string tituloRelatorio)
     {
         using (var stream = new MemoryStream())

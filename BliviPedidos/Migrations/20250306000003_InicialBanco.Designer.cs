@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BliviPedidos.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250221223125_AjusteCamposCadastro")]
-    partial class AjusteCamposCadastro
+    [Migration("20250306000003_InicialBanco")]
+    partial class InicialBanco
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

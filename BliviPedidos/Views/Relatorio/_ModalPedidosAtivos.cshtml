@@ -47,3 +47,22 @@
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function () {
+        // Ação do botão Imprimir
+        $('#imprimirRelatorio').click(function () {
+            debugger;
+
+            var ordenarPor = $('#ordenarPor').val();
+            var ordem = $('#ordem').val();
+            var filtro = $('#filtro').val();
+
+            var url = '@Url.Action("PedidosAtivos", "Relatorio")';
+
+            // Redireciona para a ação de geração de relatório com parâmetros de ordenação
+            window.location.href = `${url}/${ordenarPor}/${ordem}/${filtro}`;
+
+        });
+    });
+</script>
