@@ -36,3 +36,24 @@ public class CarrinhoViewModel
 
     public decimal Total => Itens.Sum(i => i.Quantidade * i.PrecoUnitario);
 }
+
+public class PedidoViewModel
+{
+    public int Id { get; set; }
+    public string NomeCliente { get; set; }
+    public string CelularCliente { get; set; }
+    public string EmailCliente { get; set; }
+    public List<ItemPedidoViewModel> Itens { get; set; }
+    public decimal ValorTotalPedido { get; set; }
+    public bool Pago { get; set; }
+    public DateTime? DataPedido { get; set; }
+    public DateTime? DataPagamento { get; set; }
+    public string? EmailResponsavel { get; set; } = string.Empty;
+}
+
+public class ItemPedidoViewModel
+{
+    public string NomeProduto { get; set; }
+    public decimal PrecoUnitario { get; set; }
+    public int Quantidade { get; set; }
+}

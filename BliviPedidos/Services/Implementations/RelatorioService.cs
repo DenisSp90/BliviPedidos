@@ -7,6 +7,7 @@ using BliviPedidos.Data;
 using BliviPedidos.Models;
 using BliviPedidos.Services.Interfaces;
 using iText.Kernel.Geom;
+using Microsoft.EntityFrameworkCore;
 
 namespace BliviPedidos.Services.Implementations;
 
@@ -73,8 +74,80 @@ public class RelatorioService : IRelatorioService
 
     public byte[] GerarRelatorioPedidosAtivos(IEnumerable<Pedido> pedidos, string tituloRelatorio, string[] configuracoesRelatorio)
     {
-        throw new NotImplementedException();
+        using (var stream = new MemoryStream())
+        {
+            var campoOrdenacao = configuracoesRelatorio[0];  // Campo para ordenação (ex: "ID", "DataPedido")
+            var tipoOrdenacao = configuracoesRelatorio[1];   // Crescente ou Decrescente
+
+            // Ordenar a lista de pedidos conforme os parâmetros de configuração
+            if (tipoOrdenacao == "Crescente")
+            {
+                pedidos = pedidos.OrderBy(p => EF.Property<object>(p, campoOrdenacao));
+            }
+            else if (tipoOrdenacao == "Decrescente")
+            {
+                pedidos = pedidos.OrderByDescending(p => EF.Property<object>(p, campoOrdenacao));
+            }
+
+            PdfWriter writer = new PdfWriter(stream);
+            PdfDocument pdf = new PdfDocument(writer);
+
+            // Configurar a página como horizontal (landscape)
+            pdf.SetDefaultPageSize(PageSize.A4.Rotate());
+
+            Document document = new Document(pdf);
+
+            // Cabeçalho centralizado
+            Paragraph header = new Paragraph(tituloRelatorio)
+                .SetTextAlignment(TextAlignment.CENTER)
+                .SetFontSize(20)
+                .SetBold();
+            document.Add(header);
+
+            string subtitulo = $"Ordenado por {campoOrdenacao} ({tipoOrdenacao})";
+            Paragraph subHeader = new Paragraph(subtitulo)
+                .SetTextAlignment(TextAlignment.CENTER)
+                .SetFontSize(12)
+                .SetItalic();
+            document.Add(subHeader);
+
+            // Espaçamento
+            document.Add(new Paragraph("\n"));
+
+            // Criação da tabela para os pedidos (largura ajustada)
+            Table table = new Table(new float[] { 1, 3, 2, 2, 2, 3 });
+            table.SetWidth(UnitValue.CreatePercentValue(100));
+
+            // Cabeçalhos da Tabela
+            table.AddHeaderCell(new Cell().Add(new Paragraph("Número do Pedido (ID)")).SetBorder(Border.NO_BORDER).SetBold());
+            table.AddHeaderCell(new Cell().Add(new Paragraph("Data do Pedido")).SetBorder(Border.NO_BORDER).SetBold());
+            table.AddHeaderCell(new Cell().Add(new Paragraph("Valor do Pedido (R$)")).SetBorder(Border.NO_BORDER).SetBold());
+            table.AddHeaderCell(new Cell().Add(new Paragraph("Está Pago")).SetBorder(Border.NO_BORDER).SetBold());
+            table.AddHeaderCell(new Cell().Add(new Paragraph("E-mail do Cliente")).SetBorder(Border.NO_BORDER).SetBold());
+            table.AddHeaderCell(new Cell().Add(new Paragraph("E-mail do Vendedor")).SetBorder(Border.NO_BORDER).SetBold());
+
+            // Adicionar linhas de pedidos
+            foreach (var pedido in pedidos)
+            {
+                table.AddCell(new Cell().Add(new Paragraph(pedido.Id.ToString())).SetBorder(new SolidBorder(1)));
+                table.AddCell(new Cell().Add(new Paragraph(pedido.DataPedido.HasValue
+                    ? pedido.DataPedido.Value.ToString("dd/MM/yyyy HH:mm")
+                    : "N/A")).SetBorder(new SolidBorder(1)));
+                table.AddCell(new Cell().Add(new Paragraph(pedido.ValorTotalPedido.ToString("F2"))).SetBorder(new SolidBorder(1)));
+                table.AddCell(new Cell().Add(new Paragraph(pedido.Pago ? "Sim" : "Não")).SetBorder(new SolidBorder(1)));
+                table.AddCell(new Cell().Add(new Paragraph(pedido.Cadastro.Cliente.Email)).SetBorder(new SolidBorder(1)));
+                table.AddCell(new Cell().Add(new Paragraph(pedido.EmailResponsavel)).SetBorder(new SolidBorder(1)));
+            }
+
+            // Adicionar tabela ao documento
+            document.Add(table);
+
+            // Fechar o documento
+            document.Close();
+            return stream.ToArray();
+        }
     }
+
 
     public byte[] GerarRelatorioProdutosComEstoqueBaixo(IEnumerable<Produto> produtos, string tituloRelatorio)
     {

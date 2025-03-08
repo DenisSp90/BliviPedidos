@@ -15,6 +15,7 @@ namespace BliviPedidos.Services.Interfaces
         Pedido UpdateCadastro(Cadastro cadastro);
         IList<Pedido> GetListaPedidos();
         IList<Pedido> GetListaPedidosAtivos();
+        Task<List<Pedido>> GetListaPedidosAtivosAsync();
         IList<Pedido> GetListaPedidosAtivosByEmail(string email);
     }
 }

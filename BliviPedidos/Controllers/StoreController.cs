@@ -326,14 +326,6 @@ public class StoreController : Controller
                "_boleto.NumeroTitulo",
                String.Format("{0:C}", pedido.ValorTotalPedido));
 
-            //Pix pixObj = new Pix(
-            //    "COLEGIO CERIMAR",
-            //    pixType,
-            //    "01904650000124",
-            //    "SAOPAULO",
-            //    "_boleto.NumeroTitulo",
-            //    String.Format("{0:C}", pedido.ValorTotalPedido));
-
             string qrCodeValue = pixObj.GetPayLoad();
             string qrCodeImageBase64 = GenerateQrCode(qrCodeValue);
 
@@ -341,7 +333,7 @@ public class StoreController : Controller
             {
                 Pedido = pedido,
                 PixKey = qrCodeValue,
-                PixQRCodeUrl = qrCodeImageBase64 // Substitua pela URL real do QR code
+                PixQRCodeUrl = qrCodeImageBase64 
             };
 
             return View(viewModel);

@@ -127,7 +127,21 @@ public class RelatorioController : Controller
         // Obter os produtos da base de dados
         var pedidos = _pedidoService.GetListaPedidosAtivos();
 
-        var tituloRelatorio = "Relatório de Produtos em Estoque";
+        // Aplicar filtro de status dos produtos
+        switch (filtro)
+        {
+            case "P":
+                pedidos = pedidos.Where(p => p.Pago).ToList();
+                break;
+            case "A":
+                pedidos = pedidos.Where(p => !p.Pago).ToList();
+                break;
+            default:
+                // Não aplica filtro, retorna todos os produtos
+                break;
+        }
+
+        var tituloRelatorio = "Relatório de Pedidos Ativos";
         var configuracoesRelatorio = new string[] { ordenarPor, ordem, filtro };
 
         var pdf = _relatorioService.GerarRelatorioPedidosAtivos(pedidos, tituloRelatorio, configuracoesRelatorio);

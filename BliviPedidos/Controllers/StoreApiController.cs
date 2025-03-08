@@ -1,4 +1,5 @@
 ﻿using BliviPedidos.Data;
+using BliviPedidos.Models.ViewModels;
 using BliviPedidos.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Syncfusion.DocIO.DLS;
@@ -18,14 +19,20 @@ public class StoreApiController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly IProdutoService _produtoService;
+    private readonly IPedidoService _pedidoService;
+
 
     public StoreApiController(
         ApplicationDbContext context, 
-        IProdutoService produtoService)
+        IProdutoService produtoService,
+        IPedidoService pedidoService)
     {
         _context = context;
         _produtoService = produtoService;
+        _pedidoService = pedidoService;
     }
+
+
 
     [HttpGet("produtoList")]
     public async Task<IActionResult> GetProdutoList()
@@ -125,6 +132,58 @@ public class StoreApiController : Controller
             ModelState.AddModelError("", ex.Message + "Ocorreu um erro ao processar o pedido. Por favor, tente novamente mais tarde.");
             return RedirectToAction("Error", "Home", new { errorMessage = ex.Message });
         }
+    }
+
+    [HttpGet("pedidoListAtivos")]
+    public async Task<IActionResult> GetPedidoListAtivos()
+    { 
+        var pedidos = await _pedidoService.GetListaPedidosAtivosAsync();
+
+        var viewModel = pedidos.Select(p => new PedidoViewModel
+        {
+            Id = p.Id,
+            NomeCliente = p.Cadastro.Nome,
+            EmailCliente = p.Cadastro.Email,
+            Itens = p.Itens.Select(i => new ItemPedidoViewModel
+            {
+                NomeProduto = i.Produto.Nome,
+                PrecoUnitario = i.PrecoUnitario,
+                Quantidade = i.Quantidade
+            }).ToList(),
+            ValorTotalPedido = p.ValorTotalPedido
+        }).ToList();
+
+        return Ok(viewModel);
+    }
+
+    [HttpGet("pedido-detalhe/{id}")]
+    public async Task<IActionResult> GetPedidoById(int id)
+    {
+        var pedido = await _pedidoService.GetPedidoByIdAsync(id);  
+
+        if (pedido == null)
+            return NotFound(); 
+
+        var viewModel = new PedidoViewModel
+        {
+            Id = pedido.Id,
+            NomeCliente = pedido.Cadastro.Nome,
+            CelularCliente = pedido.Cadastro.Telefone,
+            EmailCliente = pedido.Cadastro.Email,
+            Itens = pedido.Itens.Select(i => new ItemPedidoViewModel
+            {
+                NomeProduto = i.Produto.Nome,
+                PrecoUnitario = i.PrecoUnitario,
+                Quantidade = i.Quantidade
+            }).ToList(),
+            ValorTotalPedido = pedido.ValorTotalPedido, 
+            Pago = pedido.Pago,
+            DataPedido = pedido.DataPedido, 
+            DataPagamento = pedido.DataPagamento, 
+            EmailResponsavel = pedido.EmailResponsavel
+        };
+
+        return Ok(viewModel);
     }
 }
 

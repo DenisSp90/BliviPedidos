@@ -94,8 +94,19 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
         return dbSet.Include(p => p.Itens)
                 .ThenInclude(i => i.Produto)
                 .Include(p => p.Cadastro)
+                .Include(c => c.Cadastro.Cliente)
                 .Where(p => p.Ativo == true)
                 .ToList();
+    }
+
+    public async Task<List<Pedido>> GetListaPedidosAtivosAsync()
+    {
+        return await dbSet.Include(p => p.Itens)
+                          .ThenInclude(i => i.Produto)
+                          .Include(p => p.Cadastro)
+                          .ThenInclude(c => c.Cliente)
+                          .Where(p => p.Ativo == true)
+                          .ToListAsync();
     }
 
     public IList<Pedido> GetListaPedidosAtivosByEmail(string email)
@@ -138,7 +149,7 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
             .SingleOrDefault();
 
         pedido.ValorTotalPedido = pedido.Itens.Sum(i => i.Quantidade * i.PrecoUnitario);
-       dbSet.Update(pedido);
+        dbSet.Update(pedido);
 
         _context.SaveChangesAsync();
 
@@ -152,7 +163,9 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
             .Include(p => p.Itens)
                 .ThenInclude(i => i.Produto)
             .Include(p => p.Cadastro)
+                .ThenInclude(c => c.Cliente)  // Inclui o cliente vinculado ao cadastro
             .FirstOrDefaultAsync(p => p.Id == id);
+
 
         if (pedido == null)
             return null;
@@ -160,7 +173,7 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
         pedido.ValorTotalPedido = pedido.Itens.Sum(i => i.Quantidade * i.PrecoUnitario);
         dbSet.Update(pedido);
         await _context.SaveChangesAsync();
-        
+
         return pedido;
     }
 
@@ -259,7 +272,7 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
 
         throw new ArgumentException("ItemPedido não encontrado");
     }
-    
+
     private int? GetPedidoId()
     {
         return contextAccessor.HttpContext.Session.GetInt32("pedidoId");

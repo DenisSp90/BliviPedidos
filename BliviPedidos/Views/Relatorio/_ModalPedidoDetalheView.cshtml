@@ -1,0 +1,84 @@
+﻿<div class="modal fade" id="pedidoDetalheModal" tabindex="-1" role="dialog" aria-labelledby="pedidoDetalheModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pedidoDetalheModalLabel">Detalhes do Pedido #<span id="pedidoId"></span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="customer-info mb-4">
+                    <h5><strong>Informações do Cliente</strong></h5>
+                    <p><strong>Nome:</strong> <span id="pedidoNome"></span></p>
+                    <p><strong>Celular:</strong> <span id="pedidoCelularCliente"></span></p>
+                    <p><strong>Email:</strong> <span id="pedidoEmailCliente"></span></p>
+                </div>
+
+                <div class="order-total mb-4">
+                    <ul class="list-group">
+                        <li class="list-group-item list-group-item-success text-center">
+                            <h5><strong>Valor Total do Pedido:</strong> R$ <span id="valorTotalPedido"></span></h5>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="order-items mb-4">
+                    <h5><strong>Itens do Pedido</strong></h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped text-center" id="pedidoItens">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Produto</th>
+                                    <th>Quantidade</th>
+                                    <th>Preço Unitário</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="order-details card mt-4">
+                    <div class="card-header text-center bg-info text-white">
+                        <h5><strong>Informações do Pedido</strong></h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Pagamento:</strong> <span id="pedidoPagamento"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Data do Pedido:</strong> <span id="pedidoData"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Data de Pagamento:</strong> <span id="pedidoDataPagamento"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Responsável pela Venda:</strong> <span id="pedidoResponsavel"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="verPedidoDetalhe">Ver Detalhes Completo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#verPedidoDetalhe').on('click', function() {
+            var pedidoId = $('#pedidoId').text();
+            window.location.href = '/Store/PedidoDetalhe/' + pedidoId;
+        });
+    });
+</script>
