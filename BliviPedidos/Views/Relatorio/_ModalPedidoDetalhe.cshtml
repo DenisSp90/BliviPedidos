@@ -1,5 +1,66 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿<div class="modal fade" id="filtrarPedidoModal" tabindex="-1" aria-labelledby="filtrarPedidoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filtrarPedidoLabel">Opções de Filtro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Checkbox para ativar/desativar o filtro -->
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="ativarFiltroPedido" />
+                    <label class="form-check-label" for="ativarFiltroPedido">
+                        Filtrar por Número do Pedido
+                    </label>
+                </div>
+
+                <!-- Campo de entrada para o número do pedido (desabilitado por padrão) -->
+                <div class="form-group mt-3">
+                    <label for="numeroPedido">Número do Pedido</label>
+                    <input type="text" class="form-control" id="numeroPedido" placeholder="Informe o número do pedido" disabled />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" id="filtrarPedidoBtn" class="btn btn-primary">Aplicar Filtro</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+        $(document).ready(function() {
+        // Habilitar/desabilitar o campo de número do pedido com base no checkbox
+        $('#ativarFiltroPedido').on('change', function() {
+            if ($(this).is(':checked')) {
+                $('#numeroPedido').prop('disabled', false);  // Habilitar campo
+            } else {
+                $('#numeroPedido').prop('disabled', true);   // Desabilitar campo
+                $('#numeroPedido').val('');  // Limpar valor quando desabilitado
+            }
+        });
+
+        // Quando o botão de filtrar for clicado
+        $('#filtrarPedidoBtn').on('click', function() {
+            // Verificar se o checkbox está marcado (filtro ativo)
+            var filtrarPorNumero = $('#ativarFiltroPedido').is(':checked');
+            var numeroPedido = $('#numeroPedido').val().trim();
+
+            // Se o filtro está ativo mas o número do pedido não foi informado
+            if (filtrarPorNumero && numeroPedido === '') {
+                alert('Por favor, informe um número de pedido.');
+                return;
+            }
+
+            // Construir a URL da requisição com base na ativação do filtro
+            var url = '@Url.Action("PedidoDetalhe", "Relatorio")';
+
+            // Montar a URL com os parâmetros de filtro
+            if (filtrarPorNumero) {
+                window.location.href = `${url}/true/${numeroPedido}`;
+            } else {
+                window.location.href = `${url}/false`;
+            }
+        });
+    });
+
+</script>

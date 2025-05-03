@@ -53,6 +53,43 @@ public class RelatorioController : Controller
         return View(relatorioViewModel);
     }
 
+    [Route("Relatorio/PedidoDetalhe/{usarFiltro?}/{pedidoId?}")]
+    public IActionResult PedidoDetalhe(bool? usarFiltro = null, int? pedidoId = null)
+    {
+        try
+        {
+            // Obter a lista de pedidos ativos
+            var pedidos = _pedidoService.GetListaPedidosAtivos();
+
+            // Aplicar o filtro se necessário
+            if (usarFiltro.HasValue && usarFiltro.Value && pedidoId.HasValue)
+            {
+                // Filtrar o pedido pelo ID
+                pedidos = pedidos.Where(p => p.Id == pedidoId.Value).ToList();
+            }
+
+            // Gerar o título e as configurações do relatório
+            var tituloRelatorio = "Detalhes do Pedido";
+            var configuracoesRelatorio = new string[] { usarFiltro.HasValue ? usarFiltro.ToString() : "false", pedidoId?.ToString() ?? "N/A" };
+
+            // Gerar o PDF com o serviço GerarRelatorioPedidosDetalhe
+            var pdf = _relatorioService.GerarRelatorioPedidosDetalhe(pedidos, tituloRelatorio, configuracoesRelatorio);
+
+            // Retornar o PDF gerado
+            return File(pdf, "application/pdf", "Relatorio_PedidoDetalhe.pdf");
+        }
+        catch (Exception ex)
+        {
+            // Logar o erro
+            Console.WriteLine($"Erro ao carregar o relatório de detalhes do pedido: {ex.Message}");
+
+            // Retornar uma view de erro com uma mensagem apropriada
+            return View("Erro", new ErrorViewModel { ErrorMessage = "Ocorreu um erro ao carregar os detalhes do pedido. Tente novamente mais tarde." });
+        }
+    }
+
+
+
     [Route("Relatorio/ProdutosEmEstoque/{ordenarPor?}/{ordem?}/{filtro?}")]
     public IActionResult ProdutosEmEstoque(string ordenarPor, string ordem, string filtro)
     {

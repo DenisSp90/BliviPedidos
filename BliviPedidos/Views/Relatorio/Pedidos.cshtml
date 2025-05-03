@@ -10,7 +10,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Página de Inicial</a></li>
             <li class="breadcrumb-item">Relatórios</li>
-            <li class="breadcrumb-item active">Produtos</li>
+            <li class="breadcrumb-item active">Pedidos</li>
         </ol>
     </nav>
 </div>
@@ -23,7 +23,7 @@
                     <a href="javascript:void(0)" class="box has-text-centered" data-bs-toggle="modal" data-bs-target="#pedidosAtivosModal">
                         <div class="card info-card sales-card">
                             <div class="card-body">
-                                <h5 class="card-title">Tabela<span> | Tabela de produtos no estoque</span></h5>
+                                <h5 class="card-title">Tabela<span> | Tabela de pedidos realizados</span></h5>
                                 <div class="d-flex align-items-center">
                                     <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                                         <i class="bi bi-table"></i>
@@ -40,13 +40,13 @@
                     @Html.Partial("_ModalPedidosAtivos")
                 </div>
                 <div class="col-lg-6 col-md-6">
-                    <a href="javascript:void(0)" class="box has-text-centered" data-bs-toggle="modal" data-bs-target="#pedidosAtivosModal">
+                    <a href="javascript:void(0)" class="box has-text-centered" data-bs-toggle="modal" data-bs-target="#filtrarPedidoModal">
                         <div class="card info-card sales-card">
                             <div class="card-body">
-                                <h5 class="card-title">Tabela<span> | Tabela de produtos no estoque</span></h5>
+                                <h5 class="card-title">Pedido Detalhes<span> | Detalhes do pedido, itens, etc.</span></h5>
                                 <div class="d-flex align-items-center">
                                     <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-table"></i>
+                                        <i class="bi bi-ui-checks-grid"></i>
                                     </div>
                                     <div class="ps-3">
                                         <h6></h6>
@@ -57,7 +57,7 @@
                         </div>
                     </a>
 
-                    @Html.Partial("_ModalPedidosAtivos")
+                    @Html.Partial("_ModalPedidoDetalhe")
                 </div>
             </div>
         </div>

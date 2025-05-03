@@ -8,6 +8,7 @@ using BliviPedidos.Models;
 using BliviPedidos.Services.Interfaces;
 using iText.Kernel.Geom;
 using Microsoft.EntityFrameworkCore;
+using iText.Kernel.Colors;
 
 namespace BliviPedidos.Services.Implementations;
 
@@ -147,6 +148,90 @@ public class RelatorioService : IRelatorioService
             return stream.ToArray();
         }
     }
+
+    public byte[] GerarRelatorioPedidosDetalhe(IEnumerable<Pedido> pedidos, string tituloRelatorio, string[] configuracoesRelatorio)
+    {
+        using (var stream = new MemoryStream())
+        {
+            PdfWriter writer = new PdfWriter(stream);
+            PdfDocument pdf = new PdfDocument(writer);
+
+            // Configurar a página como retrato (portrait) por pedido
+            pdf.SetDefaultPageSize(PageSize.A4);
+
+            Document document = new Document(pdf);
+
+            foreach (var pedido in pedidos)
+            {
+                // Cabeçalho com o título do relatório
+                Paragraph header = new Paragraph(tituloRelatorio)
+                    .SetTextAlignment(TextAlignment.CENTER)
+                    .SetFontSize(20)
+                    .SetBold()
+                    .SetFontColor(ColorConstants.BLUE);  // Define cor do cabeçalho
+                document.Add(header);
+
+                // Subtítulo com o ID do pedido
+                Paragraph subHeader = new Paragraph($"Detalhes do Pedido #{pedido.Id}")
+                    .SetTextAlignment(TextAlignment.CENTER)
+                    .SetFontSize(14)
+                    .SetBold()
+                    .SetFontColor(ColorConstants.DARK_GRAY);  // Cor para o subtítulo
+                document.Add(subHeader);
+
+                // Informações do cliente
+                document.Add(new Paragraph("\nInformações do Cliente:")
+                    .SetBold()
+                    .SetFontColor(ColorConstants.BLACK));  // Texto do cliente em negrito
+                document.Add(new Paragraph($"Nome: {pedido.Cadastro.Cliente.Nome}"));
+                document.Add(new Paragraph($"Celular: {pedido.Cadastro.Cliente.Telefone}"));
+                document.Add(new Paragraph($"Email: {pedido.Cadastro.Cliente.Email}"));
+
+                // Valor total do pedido
+                document.Add(new Paragraph("\nValor Total do Pedido:")
+                    .SetBold()
+                    .SetFontColor(ColorConstants.BLACK));
+                document.Add(new Paragraph($"R$ {pedido.ValorTotalPedido:F2}"));
+
+                // Itens do pedido
+                document.Add(new Paragraph("\nItens do Pedido:")
+                    .SetBold()
+                    .SetFontColor(ColorConstants.BLACK));
+                Table itemTable = new Table(new float[] { 3, 1, 2 });
+                itemTable.SetWidth(UnitValue.CreatePercentValue(100));
+
+                // Estilizando o cabeçalho da tabela
+                itemTable.AddHeaderCell(new Cell().Add(new Paragraph("Produto")).SetBold().SetBackgroundColor(ColorConstants.LIGHT_GRAY));
+                itemTable.AddHeaderCell(new Cell().Add(new Paragraph("Quantidade")).SetBold().SetBackgroundColor(ColorConstants.LIGHT_GRAY));
+                itemTable.AddHeaderCell(new Cell().Add(new Paragraph("Preço Unitário")).SetBold().SetBackgroundColor(ColorConstants.LIGHT_GRAY));
+
+                foreach (var item in pedido.Itens)
+                {
+                    itemTable.AddCell(new Paragraph(item.Produto.Nome));
+                    itemTable.AddCell(new Paragraph(item.Quantidade.ToString()));
+                    itemTable.AddCell(new Paragraph($"R$ {item.PrecoUnitario:F2}"));
+                }
+
+                document.Add(itemTable);
+
+                // Informações adicionais do pedido
+                document.Add(new Paragraph("\nInformações do Pedido:")
+                    .SetBold()
+                    .SetFontColor(ColorConstants.BLACK));
+                document.Add(new Paragraph($"Pagamento: {(pedido.Pago ? "Sim" : "Não")}"));
+                document.Add(new Paragraph($"Data do Pedido: {pedido.DataPedido?.ToString("dd/MM/yyyy HH:mm") ?? "N/A"}"));
+                document.Add(new Paragraph($"Data de Pagamento: {pedido.DataPagamento?.ToString("dd/MM/yyyy HH:mm") ?? "N/A"}"));
+                document.Add(new Paragraph($"Responsável pela Venda: {pedido.EmailResponsavel}"));
+
+                // Quebra de página para o próximo pedido
+                document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+            }
+
+            document.Close();
+            return stream.ToArray();
+        }
+    }
+
 
 
     public byte[] GerarRelatorioProdutosComEstoqueBaixo(IEnumerable<Produto> produtos, string tituloRelatorio)

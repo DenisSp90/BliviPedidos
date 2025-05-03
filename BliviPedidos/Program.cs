@@ -49,6 +49,7 @@ builder.Services.AddTransient<IEmailEnviarService, EmailEnviarService>();
 builder.Services.AddTransient<IClienteService, ClienteService>();
 
 builder.Services.AddTransient<IRelatorioService, RelatorioService>();
+builder.Services.AddTransient<ICategoriaService, CategoriaService>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();

@@ -77,6 +77,24 @@ namespace BliviPedidos.Migrations
                     b.ToTable("Cadastro");
                 });
 
+            modelBuilder.Entity("BliviPedidos.Models.Categoria", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsAtivo")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categoria");
+                });
+
             modelBuilder.Entity("BliviPedidos.Models.Cliente", b =>
                 {
                     b.Property<int>("Id")
@@ -190,6 +208,9 @@ namespace BliviPedidos.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int?>("CategoriaId")
+                        .HasColumnType("int");
+
                     b.Property<string>("CodeBar")
                         .HasColumnType("longtext");
 
@@ -219,6 +240,8 @@ namespace BliviPedidos.Migrations
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CategoriaId");
 
                     b.ToTable("Produto");
                 });
@@ -492,6 +515,16 @@ namespace BliviPedidos.Migrations
                         .HasForeignKey("ClienteId");
                 });
 
+            modelBuilder.Entity("BliviPedidos.Models.Produto", b =>
+                {
+                    b.HasOne("BliviPedidos.Models.Categoria", "Categoria")
+                        .WithMany("Produtos")
+                        .HasForeignKey("CategoriaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Categoria");
+                });
+
             modelBuilder.Entity("BliviPedidos.Models.ProdutoMovimentacao", b =>
                 {
                     b.HasOne("BliviPedidos.Models.Produto", "Produto")
@@ -552,6 +585,11 @@ namespace BliviPedidos.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("BliviPedidos.Models.Categoria", b =>
+                {
+                    b.Navigation("Produtos");
                 });
 
             modelBuilder.Entity("BliviPedidos.Models.Cliente", b =>

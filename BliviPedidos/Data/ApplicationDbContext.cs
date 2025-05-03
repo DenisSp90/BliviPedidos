@@ -18,6 +18,16 @@ namespace BliviPedidos.Data
             // Definir a chave primária para Produto
             modelBuilder.Entity<Produto>().HasKey(t => t.Id);
 
+            // Definir a chave primária para Categoria
+            modelBuilder.Entity<Categoria>().HasKey(c => c.Id);
+
+            // Relacionamento 1:N entre Categoria e Produto
+            modelBuilder.Entity<Produto>()
+                .HasOne(p => p.Categoria)              // Um Produto tem uma Categoria
+                .WithMany(c => c.Produtos)             // Uma Categoria tem muitos Produtos
+                .HasForeignKey(p => p.CategoriaId)     // Chave estrangeira em Produto
+                .OnDelete(DeleteBehavior.SetNull);     // Se a Categoria for deletada, manter o Produto sem categoria
+
             // Definir a chave primária para Pedido
             modelBuilder.Entity<Pedido>().HasKey(t => t.Id);
             modelBuilder.Entity<Pedido>()
@@ -66,9 +76,7 @@ namespace BliviPedidos.Data
             
         }
 
-
-
-
+        public DbSet<Categoria> Categoria { get; set; } = default!;
         public DbSet<Pedido> Pedido { get; set; }
         public DbSet<BliviPedidos.Models.Produto> Produto { get; set; } = default!;
         public DbSet<BliviPedidos.Models.ProdutoMovimentacao> ProdutoMovimentacao { get; set; } = default!;

@@ -11,4 +11,6 @@ public interface IRelatorioService
 
     // Relatório de Pedidos
     byte[] GerarRelatorioPedidosAtivos(IEnumerable<Pedido> pedidos, string tituloRelatorio, string[] configuracoesRelatorio);
+    byte[] GerarRelatorioPedidosDetalhe(IEnumerable<Pedido> pedidos, string tituloRelatorio, string[] configuracoesRelatorio);
+
 }

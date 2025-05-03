@@ -53,16 +53,16 @@ namespace BliviPedidos.Services.Implementations
         public async Task<ProdutoViewModel> ProcurarProdutoAsync(int id)
         {
             var produto = await _context.Produto
-                        .Include(p => p.ProdutoMovimentacao)
-                        .FirstOrDefaultAsync(p => p.Id == id);
+                .Include(p => p.ProdutoMovimentacao)
+                .Include(p => p.Categoria) // Inclui a categoria relacionada
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (produto == null)
-            {
                 return null;
-            }
 
             return _mapper.Map<ProdutoViewModel>(produto);
         }
+
 
         public async Task RegistrarCancelamentoProdutos(ItemPedido itemPedido)
         {
@@ -133,6 +133,7 @@ namespace BliviPedidos.Services.Implementations
 
                         // Atualiza o estado de atividade do produto
                         produtoAtual.IsAtivo = produto.IsAtivo;
+                        produtoAtual.CategoriaId = produto.CategoriaId;
 
                         // Salva as mudanças no banco de dados
                         _context.Produto.Update(produtoAtual);

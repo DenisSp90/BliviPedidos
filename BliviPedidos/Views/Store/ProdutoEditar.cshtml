@@ -19,8 +19,8 @@
                 <div class="card-body">
                     <h5 class="card-title">Editar o Produto</h5>
                     <form id="formulario" class="row g-3" method="post" enctype="multipart/form-data" asp-action="ProdutoEditar">
-                        <input id="hiddenProdutoId" type="hidden" asp-for="Id" />                        
-                        
+                        <input id="hiddenProdutoId" type="hidden" asp-for="Id" />
+
                         <div class="col-12">
                             <label asp-for="Nome" class="col-sm-2 col-form-label"></label>
                             <input asp-for="Nome" type="hidden" placeholder="Nome do Produto" class="form-control" id="NomeHidden">
@@ -47,12 +47,15 @@
                             <input asp-for="Quantidade" type="text" placeholder="Quantidade de Produto" class="form-control">
                             <span asp-validation-for="Quantidade" class="text-danger"></span>
                         </div>
+
                         <div class="col-12">
-                            <input asp-for="CodeBar" type="hidden" placeholder="Codigo de barras" class="form-control">
-                            <input asp-for="Tamanho" type="hidden" placeholder="Tamanho do Produto" class="form-control">
-                            <input asp-for="Foto" type="hidden" placeholder="Tamanho do Produto" class="form-control">
-                        </div>    
-                        
+                            <label asp-for="CategoriaId" class="col-sm-2 col-form-label"></label>
+                            <select asp-for="CategoriaId" asp-items="@(new SelectList(Model.Categorias, "Id", "Nome"))" class="form-control">
+                                <option value="">Selecione uma Categoria</option>
+                            </select>
+                            <span asp-validation-for="CategoriaId" class="text-danger"></span>
+                        </div>
+
                         <div class="col-12">
                             <div class="form-check">
                                 <input asp-for="IsAtivo" class="form-check-input" type="checkbox">
@@ -61,7 +64,7 @@
                                 </label>
                             </div>
                         </div>
-                        
+
                         <div class="card-footer d-flex justify-content-between">
                             <div>
                                 <a asp-action="ProdutoLista" class="btn btn-secondary btn-sm">
@@ -70,9 +73,9 @@
                             </div>
 
                             <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i>&nbsp;Salvar</button>
-
                         </div>
                     </form>
+
                 </div>
 
             </div>

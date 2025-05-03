@@ -2,14 +2,13 @@
 using BliviPedidos.Models.ViewModels;
 using BliviPedidos.Models;
 
-namespace BliviPedidos.Profiles
+namespace BliviPedidos.Profiles;
+
+public class ProdutoProfile : Profile
 {
-    public class ProdutoProfile : Profile
+    public ProdutoProfile()
     {
-        public ProdutoProfile()
-        {
-            CreateMap<Produto, ProdutoViewModel>();
-            CreateMap<ProdutoViewModel, Produto>();
-        }
+        CreateMap<Produto, ProdutoViewModel>();
+        CreateMap<ProdutoViewModel, Produto>();
     }
 }

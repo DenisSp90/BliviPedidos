@@ -25,6 +25,7 @@ public class StoreController : Controller
     private readonly IClienteService _clienteService;
     private readonly string _imagemPasta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "imagens/produtos");
     private readonly IConfiguration _configuration;
+    private readonly ICategoriaService _categoriaService;
 
     public StoreController(
         ApplicationDbContext context,
@@ -34,7 +35,8 @@ public class StoreController : Controller
         IEmailEnviarService emailSender,
         IClienteService clienteService,
         IItemPedidoService itemPedidoService,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        ICategoriaService categoriaService)
     {
         _context = context;
         _mapper = mapper;
@@ -50,6 +52,7 @@ public class StoreController : Controller
 
         _itemPedidoService = itemPedidoService;
         _configuration = configuration;
+        _categoriaService = categoriaService;
     }
 
     [HttpPost]
@@ -97,8 +100,45 @@ public class StoreController : Controller
         return Ok(new { Ativo = pedido.Ativo, Pago = pedido.Pago });
     }
 
+    public IActionResult CategoriaCadastro()
+    {
+        return View(new CategoriaViewModel());
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CategoriaCadastro([FromForm] CategoriaViewModel model)
+    {
+        if (ModelState.IsValid)
+        {
+            Categoria c = _mapper.Map<Categoria>(model);
+            if (await _categoriaService.RegistrarCategoriaAsync(c))
+                return RedirectToAction("CategoriaLista");
+            else
+                return View(model);
+        }
+        return View(model);
+    }
+
+    public async Task<IActionResult> CategoriaLista(int filtro)
+    {
+        try
+        {
+            // Valida o filtro, se não for 1, 2 ou 3, redireciona para Home
+            if (filtro != 1 && filtro != 2 && filtro != 3)
+                return RedirectToAction("Index", "Home");
+
+            IEnumerable<Categoria> categorias = await _categoriaService.GetCategoriaListAsync();
+
+            return View(categorias);
+        }
+        catch (Exception ex)
+        {
+            return View("Erro");
+        }
+    }
+
     public async Task<IActionResult> ClienteGetByTelefone(string telefone)
-    {        
+    {
         var cliente = await _clienteService.ProcurarClienteByTelefoneAsync(telefone);
 
         if (cliente != null && cliente.Id != 0)
@@ -188,7 +228,7 @@ public class StoreController : Controller
                pixChave,
                pixCity,
                "_boleto.NumeroTitulo",
-               String.Format("{0:C}", pedido.ValorTotalPedido));           
+               String.Format("{0:C}", pedido.ValorTotalPedido));
 
             string qrCodeValue = pixObj.GetPayLoad();
             string qrCodeImageBase64 = GenerateQrCode(qrCodeValue);
@@ -294,7 +334,7 @@ public class StoreController : Controller
             var pixCity = _configuration["PixAppSettings:PixCity"];
 
             PixModel.PixType pixType = PixModel.PixType.cnpj;
-            
+
             switch (pixTipo)
             {
                 case "CPF":
@@ -333,7 +373,7 @@ public class StoreController : Controller
             {
                 Pedido = pedido,
                 PixKey = qrCodeValue,
-                PixQRCodeUrl = qrCodeImageBase64 
+                PixQRCodeUrl = qrCodeImageBase64
             };
 
             return View(viewModel);
@@ -445,21 +485,40 @@ public class StoreController : Controller
 
     public IActionResult ProdutoCadastro()
     {
-        return View(new ProdutoViewModel());
+        var viewModel = new ProdutoViewModel
+        {
+            Categorias = _context.Categoria
+                .Where(c => c.IsAtivo) // Opcional: Filtrar apenas categorias ativas
+                .OrderBy(c => c.Nome)  // Opcional: Ordenar por nome
+                .ToList()
+        };
+
+        return View(viewModel);
     }
+
 
     [HttpPost]
     public async Task<IActionResult> ProdutoCadastro([FromForm] ProdutoViewModel model)
     {
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            Produto p = _mapper.Map<Produto>(model);
+            model.Categorias = _context.Categoria
+                .Where(c => c.IsAtivo)
+                .OrderBy(c => c.Nome)
+                .ToList();
 
-            if (await _produtoService.RegistrarProdutoAsync(p))
-                return RedirectToAction("ProdutoLista");
-            else
-                return View(model);
+            return View(model);
         }
+
+        var produto = _mapper.Map<Produto>(model);
+
+        if (await _produtoService.RegistrarProdutoAsync(produto))
+            return RedirectToAction("ProdutoLista");
+
+        model.Categorias = _context.Categoria
+            .Where(c => c.IsAtivo)
+            .OrderBy(c => c.Nome)
+            .ToList();
 
         return View(model);
     }
@@ -501,15 +560,18 @@ public class StoreController : Controller
 
     public async Task<IActionResult> ProdutoEditar(int id)
     {
-        var produto = await _produtoService.ProcurarProdutoAsync(id);
+        var produtoViewModel = await _produtoService.ProcurarProdutoAsync(id);
 
-        if (produto == null)
+        if (produtoViewModel == null)
             return NotFound();
 
-        if (string.IsNullOrEmpty(produto.Foto))
-            produto.Foto = "/img/default.png";
+        // Carregar as categorias disponíveis
+        produtoViewModel.Categorias = _context.Categoria
+            .Where(c => c.IsAtivo) // Opcional: Filtrar apenas categorias ativas
+            .OrderBy(c => c.Nome)  // Opcional: Ordenar por nome
+            .ToList();
 
-        return View(produto);
+        return View(produtoViewModel);
     }
 
     [HttpPost]
@@ -517,21 +579,39 @@ public class StoreController : Controller
     {
         try
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                Produto p = _mapper.Map<Produto>(model);
-                await _produtoService.RegistrarProdutoAsync(p);
+                model.Categorias = _context.Categoria
+                    .Where(c => c.IsAtivo)
+                    .OrderBy(c => c.Nome)
+                    .ToList();
 
-                return RedirectToAction("ProdutoDetalhe", new { id = p.Id });
+                return View(model);
             }
+
+            var produto = _mapper.Map<Produto>(model);
+
+            // Salvar as alterações no banco de dados
+            if (await _produtoService.RegistrarProdutoAsync(produto))
+                return RedirectToAction("ProdutoDetalhe", new { id = produto.Id });
+
+            model.Categorias = _context.Categoria
+                .Where(c => c.IsAtivo)
+                .OrderBy(c => c.Nome)
+                .ToList();
 
             return View(model);
         }
         catch (Exception ex)
         {
+            ModelState.AddModelError("", $"Ocorreu um erro ao processar o pedido: {ex.Message}");
 
-            ModelState.AddModelError("", ex.Message + "Ocorreu um erro ao processar o pedido. Por favor, tente novamente mais tarde.");
-            return RedirectToAction("Error", "Home");
+            model.Categorias = _context.Categoria
+                .Where(c => c.IsAtivo)
+                .OrderBy(c => c.Nome)
+                .ToList();
+
+            return View(model);
         }
     }
 

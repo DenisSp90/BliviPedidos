@@ -32,8 +32,6 @@ public class StoreApiController : Controller
         _pedidoService = pedidoService;
     }
 
-
-
     [HttpGet("produtoList")]
     public async Task<IActionResult> GetProdutoList()
     {

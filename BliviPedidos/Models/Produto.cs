@@ -6,10 +6,10 @@ namespace BliviPedidos.Models;
 public class Produto
 {
     public Produto()
-    {        
+    {
     }
 
-    public Produto(int id, string codigo, string nome, decimal precoVenda, decimal precoPago, int quantidade, string? tamanho, string? codeBar)
+    public Produto(int id, string codigo, string nome, decimal precoVenda, decimal precoPago, int quantidade, string? tamanho, string? codeBar, int? categoriaId)
     {
         Id = id;
         Codigo = codigo;
@@ -18,7 +18,8 @@ public class Produto
         PrecoPago = precoPago;
         Quantidade = quantidade;
         Tamanho = tamanho;
-        CodeBar = codeBar;           
+        CodeBar = codeBar;
+        CategoriaId = categoriaId;
     }
 
     public int Id { get; protected set; }
@@ -52,6 +53,13 @@ public class Produto
     public string? Foto { get; set; }
 
     public bool IsAtivo { get; set; }
+
+    // Propriedade de chave estrangeira para Categoria (agora opcional)
+    [Display(Name = "Categoria")]
+    public int? CategoriaId { get; set; }
+
+    // Propriedade de navegação para Categoria
+    public Categoria? Categoria { get; set; }
 
     // Relacionamento 1:N com MovimentacaoEstoque
     public ICollection<ProdutoMovimentacao>? ProdutoMovimentacao { get; set; }

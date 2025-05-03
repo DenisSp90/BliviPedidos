@@ -12,7 +12,7 @@ public class ProdutoViewModel
     [Required(ErrorMessage = "O campo 'Nome' é obrigatório.")]
     [Display(Name = "Nome")]
     public string Nome { get; set; } = string.Empty;
-           
+
     [Required(ErrorMessage = "O campo 'Preco de venda' é obrigatório.")]
     [Range(0, double.MaxValue, ErrorMessage = "O campo Preço do produto deve ser um número.")]
     [Display(Name = "Preço venda")]
@@ -38,4 +38,15 @@ public class ProdutoViewModel
     public List<Produto>? Produtos { get; set; }
 
     public int FiltroRegistros { get; set; }
+
+    // Propriedade para vincular à categoria
+    [Required(ErrorMessage = "O campo 'Categoria' é obrigatório.")]
+    [Display(Name = "Categoria")]
+    public int CategoriaId { get; set; }
+
+    // Propriedade para exibir os dados da categoria
+    public Categoria? Categoria { get; set; }
+
+    public List<Categoria>? Categorias { get; set; }
+
 }
