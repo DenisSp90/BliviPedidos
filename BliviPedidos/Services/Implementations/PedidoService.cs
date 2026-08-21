@@ -15,6 +15,7 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
     private readonly ICadastroService _cadastroService;
     private readonly IProdutoService _produtoService;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ILogger<PedidoService> _logger;
 
 
     public PedidoService(IHttpContextAccessor contextAccessor,
@@ -22,7 +23,8 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
         IItemPedidoService itemPedidoService,
         ICadastroService cadastroService,
         IProdutoService produtoService,
-        IHttpContextAccessor httpContextAccessor) : base(context)
+        IHttpContextAccessor httpContextAccessor,
+        ILogger<PedidoService> logger) : base(context)
     {
         this.contextAccessor = contextAccessor;
         _context = context;
@@ -30,6 +32,7 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
         _cadastroService = cadastroService;
         _produtoService = produtoService;
         _httpContextAccessor = httpContextAccessor;
+        _logger = logger;
     }
 
     public void AddItem(int id)
@@ -70,6 +73,9 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
         }
         else
         {
+            _logger.LogWarning(
+                "Tentativa de atualizar pagamento de pedido inexistente. PedidoId: {PedidoId}",
+                pedidoId);
             throw new Exception("Pedido não encontrado.");
         }
     }
@@ -231,8 +237,12 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
                 // Confirmar a transação
                 await transaction.CommitAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(
+                    ex,
+                    "Falha ao cancelar pedido e restaurar estoque. PedidoId: {PedidoId}",
+                    pedidoId);
                 // Reverter a transação em caso de erro
                 await transaction.RollbackAsync();
                 throw;

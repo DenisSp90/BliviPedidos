@@ -12,7 +12,21 @@ using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NCaF1cWWhBYVJwWmFZfVpgdV9CaVZTTWY/P1ZhSXxXdk1jUH5ddH1XT2RUUkU=");
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets(typeof(Program).Assembly, optional: true);
+}
+
+builder.Configuration.AddEnvironmentVariables();
+builder.Configuration.AddCommandLine(args);
+
+var syncfusionLicenseKey = builder.Configuration["Syncfusion:LicenseKey"];
+if (!string.IsNullOrWhiteSpace(syncfusionLicenseKey))
+{
+    SyncfusionLicenseProvider.RegisterLicense(syncfusionLicenseKey);
+}
 
 // Add services to the container.
 
@@ -104,6 +118,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 app.UseSession();
 
@@ -125,7 +140,7 @@ using (var scope = app.Services.CreateScope())
     {
         // Log ou tratamento de erro
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ocorreu um erro ao aplicar as migrações.");
+        logger.LogError(ex, "Ocorreu um erro ao aplicar as migraÃ§Ãµes.");
     }
 }
 

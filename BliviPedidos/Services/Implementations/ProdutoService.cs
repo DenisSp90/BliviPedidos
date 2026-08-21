@@ -12,12 +12,18 @@ namespace BliviPedidos.Services.Implementations
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger<ProdutoService> _logger;
 
-        public ProdutoService(ApplicationDbContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor) : base(context)
+        public ProdutoService(
+            ApplicationDbContext context,
+            IMapper mapper,
+            IHttpContextAccessor httpContextAccessor,
+            ILogger<ProdutoService> logger) : base(context)
         {
             _context = context;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
         }
 
         public async Task AtualizarImagemProdutoAsync(int produtoId, string nomeArquivoNovo)
@@ -166,9 +172,12 @@ namespace BliviPedidos.Services.Implementations
                 await _context.SaveChangesAsync();
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                _logger.LogError(
+                    ex,
+                    "Falha ao registrar produto. ProdutoId: {ProdutoId}",
+                    produto.Id);
                 return false;
             }
         }
@@ -176,6 +185,7 @@ namespace BliviPedidos.Services.Implementations
         public bool UpdateQuantidade(List<ItemPedido> itens)
         {
             var usuario = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var pedidoId = itens.FirstOrDefault()?.PedidoId;
 
             try
             {
@@ -218,17 +228,34 @@ namespace BliviPedidos.Services.Implementations
             }
             catch (Exception ex)
             {
-                // Log do erro, se necessário
+                _logger.LogError(
+                    ex,
+                    "Falha ao baixar estoque do pedido. PedidoId: {PedidoId}, TotalItens: {TotalItens}",
+                    pedidoId,
+                    itens.Count);
                 return false;
             }
         }
 
         public async Task<int> RegistrarMovimentacaoAsync(ProdutoMovimentacao movimentacao)
         {
-            _context.ProdutoMovimentacao.Add(movimentacao);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.ProdutoMovimentacao.Add(movimentacao);
+                await _context.SaveChangesAsync();
 
-            return movimentacao.Id;
+                return movimentacao.Id;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Falha ao registrar movimentacao de estoque. ProdutoId: {ProdutoId}, Tipo: {TipoMovimentacao}, Quantidade: {Quantidade}",
+                    movimentacao.ProdutoId,
+                    movimentacao.Tipo,
+                    movimentacao.Quantidade);
+                throw;
+            }
         }
 
         public Task<bool> VerificarExistenciaProdutoNoBanco(string nome, decimal precoPago)

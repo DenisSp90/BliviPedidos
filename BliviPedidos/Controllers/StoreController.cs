@@ -26,6 +26,7 @@ public class StoreController : Controller
     private readonly string _imagemPasta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "imagens/produtos");
     private readonly IConfiguration _configuration;
     private readonly ICategoriaService _categoriaService;
+    private readonly ILogger<StoreController> _logger;
 
     public StoreController(
         ApplicationDbContext context,
@@ -36,7 +37,8 @@ public class StoreController : Controller
         IClienteService clienteService,
         IItemPedidoService itemPedidoService,
         IConfiguration configuration,
-        ICategoriaService categoriaService)
+        ICategoriaService categoriaService,
+        ILogger<StoreController> logger)
     {
         _context = context;
         _mapper = mapper;
@@ -53,6 +55,7 @@ public class StoreController : Controller
         _itemPedidoService = itemPedidoService;
         _configuration = configuration;
         _categoriaService = categoriaService;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -79,7 +82,11 @@ public class StoreController : Controller
         }
         catch (Exception ex)
         {
-
+            _logger.LogError(
+                ex,
+                "Falha ao atualizar pagamento do pedido. PedidoId: {PedidoId}, Pago: {Pago}",
+                idPedido,
+                pago);
             return BadRequest(ex.Message);
         }
     }
@@ -474,6 +481,11 @@ public class StoreController : Controller
             }
             catch (Exception ex)
             {
+                _logger.LogError(
+                    ex,
+                    "Falha ao concluir pedido. PedidoId: {PedidoId}, TotalItens: {TotalItens}",
+                    pedido.Id,
+                    pedido.Itens.Count);
                 ModelState.AddModelError("", "Ocorreu um erro ao processar o pedido. Por favor, tente novamente mais tarde.");
                 return RedirectToAction("Error", "Home", new { message = ex.Message });
             }

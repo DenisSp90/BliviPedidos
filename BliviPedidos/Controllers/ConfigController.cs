@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace BliviPedidos.Controllers;
 
@@ -35,20 +37,23 @@ public class ConfigController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult Save(PixAppSettingsModel model)
     {
-        var jsonPath = Path.Combine(_env.ContentRootPath, "appsettings.json");
-        var json = System.IO.File.ReadAllText(jsonPath);
+        var jsonPath = Path.Combine(_env.ContentRootPath, "appsettings.Local.json");
+        var jsonObj = System.IO.File.Exists(jsonPath)
+            ? JObject.Parse(System.IO.File.ReadAllText(jsonPath))
+            : new JObject();
 
-        dynamic jsonObj = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
-        jsonObj["PixAppSettings"]["Responsavel"] = model.Responsavel;
-        jsonObj["PixAppSettings"]["PixTipo"] = model.PixTipo;
-        jsonObj["PixAppSettings"]["PixChave"] = model.PixChave;
-        jsonObj["PixAppSettings"]["PixCity"] = model.PixCity;
+        jsonObj["PixAppSettings"] = JObject.FromObject(new
+        {
+            model.Responsavel,
+            model.PixTipo,
+            model.PixChave,
+            model.PixCity
+        });
 
-
-        string output = Newtonsoft.Json.JsonConvert.SerializeObject(jsonObj, Newtonsoft.Json.Formatting.Indented);
-        System.IO.File.WriteAllText(jsonPath, output);
+        System.IO.File.WriteAllText(jsonPath, jsonObj.ToString(Formatting.Indented));
 
         return RedirectToAction("Index");
     }

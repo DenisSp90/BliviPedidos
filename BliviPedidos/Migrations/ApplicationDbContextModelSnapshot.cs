@@ -3,6 +3,7 @@ using System;
 using BliviPedidos.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -16,14 +17,18 @@ namespace BliviPedidos.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.18")
+                .HasAnnotation("ProductVersion", "9.0.19")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("BliviPedidos.Models.Cadastro", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Bairro")
                         .HasColumnType("longtext");
@@ -83,6 +88,8 @@ namespace BliviPedidos.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<bool>("IsAtivo")
                         .HasColumnType("tinyint(1)");
 
@@ -106,6 +113,8 @@ namespace BliviPedidos.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("Bairro")
                         .HasColumnType("longtext");
 
@@ -121,11 +130,11 @@ namespace BliviPedidos.Migrations
                     b.Property<string>("Endereco")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Municipio")
-                        .HasColumnType("longtext");
-
                     b.Property<int?>("LojaId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Municipio")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -157,6 +166,8 @@ namespace BliviPedidos.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<int>("PedidoId")
                         .HasColumnType("int");
 
@@ -183,6 +194,8 @@ namespace BliviPedidos.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Ativa")
                         .HasColumnType("tinyint(1)");
@@ -226,6 +239,8 @@ namespace BliviPedidos.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<bool>("Ativo")
                         .HasColumnType("tinyint(1)");
 
@@ -264,6 +279,8 @@ namespace BliviPedidos.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("CategoriaId")
                         .HasColumnType("int");
@@ -314,6 +331,8 @@ namespace BliviPedidos.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<DateTime>("Data")
                         .HasColumnType("datetime(6)");
 
@@ -321,7 +340,6 @@ namespace BliviPedidos.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<int?>("ProdutoId")
-                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<int>("Quantidade")
@@ -369,6 +387,8 @@ namespace BliviPedidos.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("longtext");
@@ -456,6 +476,8 @@ namespace BliviPedidos.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("longtext");
@@ -625,9 +647,7 @@ namespace BliviPedidos.Migrations
                 {
                     b.HasOne("BliviPedidos.Models.Produto", "Produto")
                         .WithMany("ProdutoMovimentacao")
-                        .HasForeignKey("ProdutoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProdutoId");
 
                     b.Navigation("Produto");
                 });

@@ -1,7 +1,9 @@
 ﻿using BliviPedidos.Data;
 using BliviPedidos.Models.ViewModels;
 using BliviPedidos.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Syncfusion.DocIO.DLS;
 using Syncfusion.DocIORenderer;
 using System.Drawing;
@@ -14,6 +16,7 @@ using ZXing.Rendering;
 namespace BliviPedidos.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/StoreApi")]
 public class StoreApiController : Controller
 {
@@ -35,14 +38,48 @@ public class StoreApiController : Controller
     [HttpGet("produtoList")]
     public async Task<IActionResult> GetProdutoList()
     {
-        var p = await _produtoService.GetProdutosAsync();
-        return Ok(p);
+        var produtos = await _context.Produto
+            .AsNoTracking()
+            .OrderBy(p => p.Nome)
+            .Select(p => new ProdutoPublicoViewModel
+            {
+                Id = p.Id,
+                Codigo = p.Codigo,
+                Nome = p.Nome,
+                PrecoVenda = p.PrecoVenda,
+                Tamanho = p.Tamanho,
+                Foto = p.Foto,
+                IsAtivo = p.IsAtivo,
+                Disponivel = p.IsAtivo && p.Quantidade > 0,
+                CategoriaId = p.CategoriaId,
+                CategoriaNome = p.Categoria != null ? p.Categoria.Nome : null
+            })
+            .ToListAsync();
+
+        return Ok(produtos);
     }
 
     [HttpGet("produto/{id}")]
     public async Task<IActionResult> GetProduto(int id)
     {
-        var produto = await _context.Produto.FindAsync(id);
+        var produto = await _context.Produto
+            .AsNoTracking()
+            .Where(p => p.Id == id)
+            .Select(p => new ProdutoPublicoViewModel
+            {
+                Id = p.Id,
+                Codigo = p.Codigo,
+                Nome = p.Nome,
+                PrecoVenda = p.PrecoVenda,
+                Tamanho = p.Tamanho,
+                Foto = p.Foto,
+                IsAtivo = p.IsAtivo,
+                Disponivel = p.IsAtivo && p.Quantidade > 0,
+                CategoriaId = p.CategoriaId,
+                CategoriaNome = p.Categoria != null ? p.Categoria.Nome : null
+            })
+            .SingleOrDefaultAsync();
+
         if (produto == null)
         {
             return NotFound();

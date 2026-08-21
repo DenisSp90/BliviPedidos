@@ -22,12 +22,14 @@ comercial sera representado por uma `Loja`, sem copiar o projeto para cada clien
 
 ## Fase 0 - estabilizacao e seguranca
 
-- [ ] Atualizar o projeto para uma versao suportada do .NET.
-- [ ] Proteger os endpoints administrativos da API.
-- [ ] Remover dados internos dos retornos publicos, especialmente `PrecoPago`.
-- [ ] Adicionar logs para falhas de pedido e movimentacao de estoque.
-- [ ] Separar configuracoes sensiveis do `appsettings.json` versionado.
-- [ ] Criar testes para conclusao e cancelamento de pedido.
+- [x] Atualizar o projeto para uma versao suportada do .NET.
+- Decisao temporaria de hospedagem: usar .NET 9 por compatibilidade com a KingHost.
+  Revisar e migrar para .NET 10 antes do fim do suporte do .NET 9, em novembro de 2026.
+- [x] Proteger os endpoints administrativos da API.
+- [x] Remover dados internos dos retornos publicos, especialmente `PrecoPago`.
+- [x] Adicionar logs para falhas de pedido e movimentacao de estoque.
+- [x] Separar configuracoes sensiveis do `appsettings.json` versionado.
+- [x] Criar testes para conclusao e cancelamento de pedido.
 
 Conclusao: dados administrativos nao podem ser obtidos sem autorizacao adequada.
 
@@ -41,7 +43,7 @@ Conclusao: dados administrativos nao podem ser obtidos sem autorizacao adequada.
 - [ ] Associar usuarios internos a uma loja.
 - [ ] Resolver a loja atual por rota, dominio ou usuario.
 - [ ] Garantir filtro por `LojaId` em todas as consultas.
-
+- [ ] Criar uma tela para criar e gerenciar lojas, com slug, logo e cores.
 Conclusao: uma loja nao consegue consultar nem alterar dados de outra loja.
 
 ## Fase 2 - area administrativa
