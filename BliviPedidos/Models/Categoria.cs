@@ -4,6 +4,9 @@ namespace BliviPedidos.Models;
 
 public class Categoria
 {
+    // Temporariamente opcional para permitir a migracao dos dados existentes.
+    public int? LojaId { get; set; }
+    public Loja? Loja { get; set; }
     public Categoria()
     {
     }

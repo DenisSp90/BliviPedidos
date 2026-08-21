@@ -4,6 +4,10 @@ namespace BliviPedidos.Models;
 
 public class Cliente : BaseModel
 {
+    // Temporariamente opcional para permitir a migracao dos dados existentes.
+    public int? LojaId { get; set; }
+    public Loja? Loja { get; set; }
+
     public Cliente() { }
 
     public Cliente(string nome, string? email, string? responsavelCerimar, string? turma, string telefone, string? endereco, string? complemento, string? bairro, string? municipio, string? uF, string? cEP, IList<Pedido>? pedidos)

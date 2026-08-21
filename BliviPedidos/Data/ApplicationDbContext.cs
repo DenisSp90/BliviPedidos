@@ -18,6 +18,38 @@ namespace BliviPedidos.Data
             // Definir a chave primária para Produto
             modelBuilder.Entity<Produto>().HasKey(t => t.Id);
 
+            modelBuilder.Entity<Loja>()
+                .HasIndex(l => l.Slug)
+                .IsUnique();
+
+            modelBuilder.Entity<Loja>()
+                .HasIndex(l => l.Dominio)
+                .IsUnique();
+
+            modelBuilder.Entity<Produto>()
+                .HasOne(p => p.Loja)
+                .WithMany(l => l.Produtos)
+                .HasForeignKey(p => p.LojaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Categoria>()
+                .HasOne(c => c.Loja)
+                .WithMany(l => l.Categorias)
+                .HasForeignKey(c => c.LojaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Cliente>()
+                .HasOne(c => c.Loja)
+                .WithMany(l => l.Clientes)
+                .HasForeignKey(c => c.LojaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Pedido>()
+                .HasOne(p => p.Loja)
+                .WithMany(l => l.Pedidos)
+                .HasForeignKey(p => p.LojaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Definir a chave primária para Categoria
             modelBuilder.Entity<Categoria>().HasKey(c => c.Id);
 
@@ -77,6 +109,7 @@ namespace BliviPedidos.Data
         }
 
         public DbSet<Categoria> Categoria { get; set; } = default!;
+        public DbSet<Loja> Loja { get; set; } = default!;
         public DbSet<Pedido> Pedido { get; set; }
         public DbSet<BliviPedidos.Models.Produto> Produto { get; set; } = default!;
         public DbSet<BliviPedidos.Models.ProdutoMovimentacao> ProdutoMovimentacao { get; set; } = default!;

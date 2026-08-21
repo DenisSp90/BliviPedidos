@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <None Include="wwwroot\js\site.js" />
+    <!-- Mantem builds isolados de tooling sem recompilar artefatos legados de obj. -->
+    <Compile Remove="obj\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>

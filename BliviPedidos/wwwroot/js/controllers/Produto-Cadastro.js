@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+    debugger;
     var precoPagoInput = document.getElementById('PrecoPago');
     var precoVendaInput = document.getElementById('PrecoVenda');
 

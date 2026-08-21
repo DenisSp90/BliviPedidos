@@ -131,6 +131,8 @@ namespace BliviPedidos.Services.Implementations
                             produtoAtual.Quantidade = produto.Quantidade;
                         }
 
+                        produtoAtual.PrecoVenda = produto.PrecoVenda;
+
                         // Atualiza o estado de atividade do produto
                         produtoAtual.IsAtivo = produto.IsAtivo;
                         produtoAtual.CategoriaId = produto.CategoriaId;

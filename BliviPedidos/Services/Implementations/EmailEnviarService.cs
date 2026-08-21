@@ -37,13 +37,13 @@ namespace BliviPedidos.Services.Implementations
 
                 MailMessage mail = new MailMessage()
                 {
-                    From = new MailAddress(_emailSettings.UsernameEmail, "Blivi Pedidos")
+                    From = new MailAddress(_emailSettings.UsernameEmail, "Gorila Smoke")
                 };
 
                 mail.To.Add(new MailAddress(ToEmail));
                 mail.CC.Add(new MailAddress(_emailSettings.CcEmail));
 
-                mail.Subject = "Blivi Pedidos - " + subject;
+                mail.Subject = "Gorila Smoke - " + subject;
                 mail.Body = message;
                 mail.IsBodyHtml = true;
                 mail.Priority = MailPriority.High;

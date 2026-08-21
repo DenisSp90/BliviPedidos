@@ -466,6 +466,7 @@ public class StoreController : Controller
                 cadastro.Pedido.DataPedido = DateTime.Now;
 
                 _pedidoService.UpdateCadastro(cadastro);
+                EnviarEmailPedido(cadastro).Wait(); 
 
                 _pedidoService.ClearPedido();
 

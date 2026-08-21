@@ -1,4 +1,4 @@
-﻿@model IEnumerable<BliviPedidos.Models.Categoria>
+﻿ @model IEnumerable<BliviPedidos.Models.Categoria>;
 
 @{
     ViewData["Title"] = "Lista de Categorias";
@@ -20,7 +20,14 @@
     <div class="row">
         <div class="col-lg-12">
             <div class="row">
-                <div class="col-lg-6 col-md-6">
+                 @{
+                    var categoriasTotal = Model.Count();
+                    // decimal valorTotalPrecoPago = Model.Sum(produto => produto.PrecoPago * produto.Quantidade);
+                    // decimal valorTotalPrecoVenda = Model.Sum(produto => produto.PrecoVenda * produto.Quantidade);
+                    // decimal lucroTotal = Model.Sum(produto => (produto.PrecoVenda - produto.PrecoPago) * produto.Quantidade);
+                }
+
+                <div class="col-lg-12 col-md-12">
                     <div class="card info-card sales-card">
                         <div class="card-body">
                             <h5 class="card-title">Categorias<span> | Total</span></h5>
@@ -30,25 +37,7 @@
                                     <i class="bi bi-collection"></i>
                                 </div>
                                 <div class="ps-3">
-                                    <h6>99</h6>
-                                    <span class="small pt-1 fw-bold">Registrados no estoque</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 col-md-6">
-                    <div class="card info-card sales-card">
-                        <div class="card-body">
-                            <h5 class="card-title">Categorias<span> | Total</span></h5>
-
-                            <div class="d-flex align-items-center">
-                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-collection"></i>
-                                </div>
-                                <div class="ps-3">
-                                    <h6>99</h6>
+                                    <h6>@categoriasTotal</h6>
                                     <span class="small pt-1 fw-bold">Registrados no estoque</span>
                                 </div>
                             </div>

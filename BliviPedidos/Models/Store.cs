@@ -130,6 +130,10 @@ namespace BliviPedidos.Models
 
         public List<ItemPedido> Itens { get; set; } = new List<ItemPedido>();
 
+        // Temporariamente opcional para permitir a migracao dos dados existentes.
+        public int? LojaId { get; set; }
+        public Loja? Loja { get; set; }
+
         [Required]
         public virtual Cadastro Cadastro { get; set; }
 
