@@ -92,7 +92,7 @@ public class StoreApiController : Controller
     {
         try
         {
-            var produto = await _context.Produto.FindAsync(produtoId);
+            var produto = await _context.Produto.SingleOrDefaultAsync(produto => produto.Id == produtoId);
 
             if (produto == null)
                 return NotFound();

@@ -1,0 +1,92 @@
+@model IReadOnlyCollection<BliviPedidos.Models.Loja>
+
+@{
+    ViewData["Title"] = "Lojas";
+}
+
+<div class="pagetitle">
+    <h1>Gerenciamento de lojas</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Página Inicial</a></li>
+            <li class="breadcrumb-item active">Lojas</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    @if (TempData["Erro"] is string erro)
+    {
+        <div class="alert alert-danger">@erro</div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title">Lojas cadastradas</h5>
+                <a class="btn btn-primary" asp-action="Criar">
+                    <i class="bi bi-plus-lg"></i> Nova loja
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Identidade</th>
+                            <th>Slug</th>
+                            <th>Domínio</th>
+                            <th>Cor</th>
+                            <th>Status</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var loja in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if (!string.IsNullOrWhiteSpace(loja.LogoUrl))
+                                        {
+                                            <img src="@loja.LogoUrl" alt="Logo de @loja.Nome" width="42" height="42" class="rounded border object-fit-contain" />
+                                        }
+                                        <div>
+                                            <strong>@loja.Nome</strong>
+                                            @if (loja.Id == Loja.PadraoId)
+                                            {
+                                                <span class="badge bg-info ms-1">Padrão</span>
+                                            }
+                                            <div class="small text-muted">ID @loja.Id</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><code>@loja.Slug</code></td>
+                                <td>@(loja.Dominio ?? "—")</td>
+                                <td>
+                                    <span class="d-inline-block rounded-circle border align-middle" style="width: 24px; height: 24px; background-color: @(loja.CorPrimaria ?? "#0d6efd")"></span>
+                                    <span class="ms-1">@(loja.CorPrimaria ?? "#0d6efd")</span>
+                                </td>
+                                <td>
+                                    <span class="badge @(loja.Ativa ? "bg-success" : "bg-secondary")">
+                                        @(loja.Ativa ? "Ativa" : "Inativa")
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a class="btn btn-sm btn-outline-primary" asp-action="Editar" asp-route-id="@loja.Id">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
+                                    <form asp-action="AlterarStatus" asp-route-id="@loja.Id" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm @(loja.Ativa ? "btn-outline-danger" : "btn-outline-success")">
+                                            @(loja.Ativa ? "Desativar" : "Ativar")
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

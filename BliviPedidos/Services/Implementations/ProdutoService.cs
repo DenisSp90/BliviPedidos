@@ -28,7 +28,7 @@ namespace BliviPedidos.Services.Implementations
 
         public async Task AtualizarImagemProdutoAsync(int produtoId, string nomeArquivoNovo)
         {
-            var produto = await _context.Produto.FindAsync(produtoId); // Substitua pelo nome da sua DbSet
+            var produto = await _context.Produto.SingleOrDefaultAsync(produto => produto.Id == produtoId);
             if (produto != null)
             {
                 produto.Foto = nomeArquivoNovo;

@@ -1,0 +1,107 @@
+@model BliviPedidos.Models.ViewModels.LojaViewModel
+
+@{
+    var editando = Model.Id > 0;
+    ViewData["Title"] = editando ? "Editar loja" : "Nova loja";
+}
+
+<div class="pagetitle">
+    <h1>@ViewData["Title"]</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Página Inicial</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Loja" asp-action="Index">Lojas</a></li>
+            <li class="breadcrumb-item active">@(editando ? "Editar" : "Cadastrar")</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Identidade da loja</h5>
+
+                    <form class="row g-3" method="post" asp-action="@(editando ? "Editar" : "Criar")" asp-route-id="@Model.Id">
+                        <input asp-for="Id" type="hidden" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="col-md-7">
+                            <label asp-for="Nome" class="form-label"></label>
+                            <input asp-for="Nome" class="form-control" placeholder="Nome exibido da loja" />
+                            <span asp-validation-for="Nome" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-5">
+                            <label asp-for="Slug" class="form-label"></label>
+                            <input asp-for="Slug" class="form-control" placeholder="minha-loja" />
+                            <span asp-validation-for="Slug" class="text-danger"></span>
+                            <div class="form-text">Usado nas URLs públicas da loja.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Dominio" class="form-label"></label>
+                            <input asp-for="Dominio" class="form-control" placeholder="loja.exemplo.com" />
+                            <span asp-validation-for="Dominio" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="LogoUrl" class="form-label"></label>
+                            <input asp-for="LogoUrl" class="form-control" placeholder="https://exemplo.com/logo.png" />
+                            <span asp-validation-for="LogoUrl" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="CorPrimaria" class="form-label"></label>
+                            <div class="input-group">
+                                <input id="seletorCor" type="color" class="form-control form-control-color" value="@Model.CorPrimaria" aria-label="Selecionar cor" />
+                                <input asp-for="CorPrimaria" id="valorCor" class="form-control" />
+                            </div>
+                            <span asp-validation-for="CorPrimaria" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="form-check form-switch mb-2">
+                                <input asp-for="Ativa" class="form-check-input" />
+                                <label asp-for="Ativa" class="form-check-label"></label>
+                            </div>
+                        </div>
+
+                        <div class="col-12 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Salvar</button>
+                            <a class="btn btn-light" asp-action="Index">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Prévia</h5>
+                    @if (!string.IsNullOrWhiteSpace(Model.LogoUrl))
+                    {
+                        <img src="@Model.LogoUrl" alt="Prévia do logo" class="img-fluid mb-3" style="max-height: 120px" />
+                    }
+                    <div class="rounded p-3 text-white" style="background-color: @Model.CorPrimaria">
+                        @(string.IsNullOrWhiteSpace(Model.Nome) ? "Nome da loja" : Model.Nome)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const seletorCor = document.getElementById('seletorCor');
+        const valorCor = document.getElementById('valorCor');
+        seletorCor.addEventListener('input', () => valorCor.value = seletorCor.value);
+        valorCor.addEventListener('input', () => {
+            if (/^#[0-9a-fA-F]{6}$/.test(valorCor.value)) seletorCor.value = valorCor.value;
+        });
+    </script>
+}

@@ -4,6 +4,8 @@ namespace BliviPedidos.Models;
 
 public class Loja
 {
+    public const int PadraoId = 1;
+
     public int Id { get; set; }
 
     [Required, MaxLength(120)]
@@ -27,4 +29,5 @@ public class Loja
     public ICollection<Categoria> Categorias { get; set; } = new List<Categoria>();
     public ICollection<Cliente> Clientes { get; set; } = new List<Cliente>();
     public ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
+    public ICollection<UsuarioLoja> Usuarios { get; set; } = new List<UsuarioLoja>();
 }

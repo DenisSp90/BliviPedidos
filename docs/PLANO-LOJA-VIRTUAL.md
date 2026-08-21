@@ -37,13 +37,13 @@ Conclusao: dados administrativos nao podem ser obtidos sem autorizacao adequada.
 
 - [x] Criar a entidade `Loja`.
 - [x] Relacionar `Loja` com produto, categoria, cliente e pedido.
-- [ ] Criar uma loja padrao para os dados existentes.
-- [ ] Migrar os registros existentes para a loja padrao.
-- [ ] Tornar `LojaId` obrigatorio depois da migracao dos dados.
-- [ ] Associar usuarios internos a uma loja.
-- [ ] Resolver a loja atual por rota, dominio ou usuario.
-- [ ] Garantir filtro por `LojaId` em todas as consultas.
-- [ ] Criar uma tela para criar e gerenciar lojas, com slug, logo e cores.
+- [x] Criar uma loja padrao para os dados existentes.
+- [x] Migrar os registros existentes para a loja padrao.
+- [x] Tornar `LojaId` obrigatorio depois da migracao dos dados.
+- [x] Associar usuarios internos a uma loja.
+- [x] Resolver a loja atual por rota, dominio ou usuario.
+- [x] Garantir filtro por `LojaId` em todas as consultas.
+- [x] Criar uma tela para criar e gerenciar lojas, com slug, logo e cores.
 Conclusao: uma loja nao consegue consultar nem alterar dados de outra loja.
 
 ## Fase 2 - area administrativa

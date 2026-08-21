@@ -548,7 +548,7 @@ public class StoreController : Controller
 
         try
         {
-            var produto = _context.Produto.Find(id);
+            var produto = _context.Produto.SingleOrDefault(produto => produto.Id == id);
             _context.Produto.Remove(produto);
             _context.SaveChanges();
 

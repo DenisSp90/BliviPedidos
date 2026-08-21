@@ -1,5 +1,6 @@
 using BliviPedidos.Data;
 using BliviPedidos.Models;
+using BliviPedidos.Middleware;
 using BliviPedidos.Services.Implementations;
 using BliviPedidos.Services.Interfaces;
 using DinkToPdf.Contracts;
@@ -64,6 +65,7 @@ builder.Services.AddTransient<IClienteService, ClienteService>();
 
 builder.Services.AddTransient<IRelatorioService, RelatorioService>();
 builder.Services.AddTransient<ICategoriaService, CategoriaService>();
+builder.Services.AddScoped<ILojaAtualService, LojaAtualService>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
@@ -119,6 +121,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
+app.UseMiddleware<LojaAtualMiddleware>();
 app.UseAuthorization();
 app.UseSession();
 

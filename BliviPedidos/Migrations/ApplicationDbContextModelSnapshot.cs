@@ -93,7 +93,7 @@ namespace BliviPedidos.Migrations
                     b.Property<bool>("IsAtivo")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int?>("LojaId")
+                    b.Property<int>("LojaId")
                         .HasColumnType("int");
 
                     b.Property<string>("Nome")
@@ -130,7 +130,7 @@ namespace BliviPedidos.Migrations
                     b.Property<string>("Endereco")
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("LojaId")
+                    b.Property<int>("LojaId")
                         .HasColumnType("int");
 
                     b.Property<string>("Municipio")
@@ -231,6 +231,16 @@ namespace BliviPedidos.Migrations
                         .IsUnique();
 
                     b.ToTable("Loja");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Ativa = true,
+                            CorPrimaria = "#0d6efd",
+                            Nome = "Blivi Pedidos",
+                            Slug = "blivi-pedidos"
+                        });
                 });
 
             modelBuilder.Entity("BliviPedidos.Models.Pedido", b =>
@@ -256,7 +266,7 @@ namespace BliviPedidos.Migrations
                     b.Property<string>("EmailResponsavel")
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("LojaId")
+                    b.Property<int>("LojaId")
                         .HasColumnType("int");
 
                     b.Property<bool>("Pago")
@@ -272,6 +282,21 @@ namespace BliviPedidos.Migrations
                     b.HasIndex("LojaId");
 
                     b.ToTable("Pedido");
+                });
+
+            modelBuilder.Entity("BliviPedidos.Models.UsuarioLoja", b =>
+                {
+                    b.Property<string>("UsuarioId")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("LojaId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UsuarioId");
+
+                    b.HasIndex("LojaId");
+
+                    b.ToTable("UsuarioLoja");
                 });
 
             modelBuilder.Entity("BliviPedidos.Models.Produto", b =>
@@ -297,7 +322,7 @@ namespace BliviPedidos.Migrations
                     b.Property<bool>("IsAtivo")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int?>("LojaId")
+                    b.Property<int>("LojaId")
                         .HasColumnType("int");
 
                     b.Property<string>("Nome")
@@ -612,6 +637,25 @@ namespace BliviPedidos.Migrations
                     b.Navigation("Produto");
                 });
 
+            modelBuilder.Entity("BliviPedidos.Models.UsuarioLoja", b =>
+                {
+                    b.HasOne("BliviPedidos.Models.Loja", "Loja")
+                        .WithMany("Usuarios")
+                        .HasForeignKey("LojaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Usuario")
+                        .WithOne()
+                        .HasForeignKey("BliviPedidos.Models.UsuarioLoja", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Loja");
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("BliviPedidos.Models.Pedido", b =>
                 {
                     b.HasOne("BliviPedidos.Models.Cliente", null)
@@ -722,6 +766,8 @@ namespace BliviPedidos.Migrations
                     b.Navigation("Pedidos");
 
                     b.Navigation("Produtos");
+
+                    b.Navigation("Usuarios");
                 });
 
             modelBuilder.Entity("BliviPedidos.Models.Pedido", b =>

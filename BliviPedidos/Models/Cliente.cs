@@ -4,9 +4,8 @@ namespace BliviPedidos.Models;
 
 public class Cliente : BaseModel
 {
-    // Temporariamente opcional para permitir a migracao dos dados existentes.
-    public int? LojaId { get; set; }
-    public Loja? Loja { get; set; }
+    public int LojaId { get; set; } = Loja.PadraoId;
+    public Loja Loja { get; set; } = null!;
 
     public Cliente() { }
 

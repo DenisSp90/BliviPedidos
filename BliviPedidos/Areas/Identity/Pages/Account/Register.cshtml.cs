@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using BliviPedidos.Data;
+using BliviPedidos.Models;
 
 namespace BliviPedidos.Areas.Identity.Pages.Account
 {
@@ -29,13 +31,15 @@ namespace BliviPedidos.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<IdentityUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly ApplicationDbContext _context;
 
         public RegisterModel(
             UserManager<IdentityUser> userManager,
             IUserStore<IdentityUser> userStore,
             SignInManager<IdentityUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            ApplicationDbContext context)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -43,6 +47,7 @@ namespace BliviPedidos.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _context = context;
         }
 
         /// <summary>
@@ -131,6 +136,26 @@ namespace BliviPedidos.Areas.Identity.Pages.Account
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
+                    var usuarioLoja = new UsuarioLoja
+                    {
+                        UsuarioId = userId,
+                        LojaId = Loja.PadraoId
+                    };
+                    _context.UsuarioLoja.Add(usuarioLoja);
+
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Falha ao associar novo usuario a loja padrao. UsuarioId: {UsuarioId}", userId);
+                        _context.Entry(usuarioLoja).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+                        await _userManager.DeleteAsync(user);
+                        ModelState.AddModelError(string.Empty, "Não foi possível associar o usuário à loja.");
+                        return Page();
+                    }
+
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(
