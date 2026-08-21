@@ -52,11 +52,11 @@ Conclusao: uma loja nao consegue consultar nem alterar dados de outra loja.
 
 ## Fase 2 - area administrativa
 
-- [ ] Criar `Areas/Admin` e `_LayoutAdmin.cshtml`.
-- [ ] Mover gradualmente controllers e views administrativas.
-- [ ] Criar papeis `Administrador`, `Vendedor` e `Estoquista`.
-- [ ] Aplicar politicas de autorizacao por operacao.
-- [ ] Preservar redirecionamentos temporarios para URLs antigas.
+- [x] Criar `Areas/Admin` e `_LayoutAdmin.cshtml`.
+- [x] Mover gradualmente controllers e views administrativas (primeiro lote: gerenciamento de lojas).
+- [x] Criar papeis `Administrador`, `Vendedor` e `Estoquista`.
+- [x] Aplicar politicas de autorizacao por operacao.
+- [x] Preservar redirecionamentos temporarios para URLs antigas.
 
 Conclusao: funcoes internas ficam sob `/admin` e exigem o papel correto.
 

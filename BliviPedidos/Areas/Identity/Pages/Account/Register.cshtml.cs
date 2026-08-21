@@ -21,12 +21,13 @@ using Microsoft.Extensions.Logging;
 using BliviPedidos.Data;
 using BliviPedidos.Models;
 using BliviPedidos.Services.Implementations;
+using BliviPedidos.Seguranca;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace BliviPedidos.Areas.Identity.Pages.Account
 {
-    [Authorize(Roles = InicializadorSistema.PerfilAdministrador)]
+    [Authorize(Policy = PoliticasAutorizacao.Administracao)]
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<IdentityUser> _signInManager;
@@ -74,6 +75,7 @@ namespace BliviPedidos.Areas.Identity.Pages.Account
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
         public IReadOnlyCollection<SelectListItem> Lojas { get; private set; } = Array.Empty<SelectListItem>();
+        public IReadOnlyCollection<SelectListItem> Perfis { get; private set; } = Array.Empty<SelectListItem>();
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -112,6 +114,10 @@ namespace BliviPedidos.Areas.Identity.Pages.Account
             [Range(1, int.MaxValue, ErrorMessage = "Selecione uma loja.")]
             [Display(Name = "Loja")]
             public int LojaId { get; set; }
+
+            [Required(ErrorMessage = "Selecione um perfil.")]
+            [Display(Name = "Perfil")]
+            public string Perfil { get; set; }
         }
 
         public async Task<IActionResult> OnGetAsync(string returnUrl = null)
@@ -125,6 +131,7 @@ namespace BliviPedidos.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             await CarregarLojasAsync();
+            CarregarPerfis();
 
             // Se você não precisa redirecionar, retorne a página atual
             return Page();
@@ -135,10 +142,16 @@ namespace BliviPedidos.Areas.Identity.Pages.Account
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             await CarregarLojasAsync();
+            CarregarPerfis();
 
             if (!await _context.Loja.AnyAsync(loja => loja.Id == Input.LojaId && loja.Ativa))
             {
                 ModelState.AddModelError("Input.LojaId", "Selecione uma loja ativa.");
+            }
+
+            if (!InicializadorSistema.Perfis.Contains(Input.Perfil, StringComparer.Ordinal))
+            {
+                ModelState.AddModelError("Input.Perfil", "Selecione um perfil válido.");
             }
 
             if (ModelState.IsValid)
@@ -153,6 +166,22 @@ namespace BliviPedidos.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    var resultadoPerfil = await _userManager.AddToRoleAsync(user, Input.Perfil);
+                    if (!resultadoPerfil.Succeeded)
+                    {
+                        await _userManager.DeleteAsync(user);
+                        foreach (var error in resultadoPerfil.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+
+                        _logger.LogError(
+                            "Falha ao atribuir perfil ao novo usuario. Email: {Email}, Perfil: {Perfil}",
+                            Input.Email,
+                            Input.Perfil);
+                        return Page();
+                    }
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var usuarioLoja = new UsuarioLoja
@@ -179,7 +208,7 @@ namespace BliviPedidos.Areas.Identity.Pages.Account
                         return Page();
                     }
 
-                    TempData["UsuarioCriado"] = $"Usuário {Input.Email} criado com sucesso.";
+                    TempData["UsuarioCriado"] = $"Usuário {Input.Email} criado como {Input.Perfil} com sucesso.";
                     return RedirectToPage();
                 }
                 foreach (var error in result.Errors)
@@ -214,6 +243,13 @@ namespace BliviPedidos.Areas.Identity.Pages.Account
                 .OrderBy(loja => loja.Nome)
                 .Select(loja => new SelectListItem(loja.Nome, loja.Id.ToString()))
                 .ToListAsync();
+        }
+
+        private void CarregarPerfis()
+        {
+            Perfis = InicializadorSistema.Perfis
+                .Select(perfil => new SelectListItem(perfil, perfil))
+                .ToArray();
         }
 
         private IUserEmailStore<IdentityUser> GetEmailStore()

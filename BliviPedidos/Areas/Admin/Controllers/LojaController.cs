@@ -2,13 +2,15 @@ using BliviPedidos.Data;
 using BliviPedidos.Models;
 using BliviPedidos.Models.ViewModels;
 using BliviPedidos.Services.Implementations;
+using BliviPedidos.Seguranca;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace BliviPedidos.Controllers;
+namespace BliviPedidos.Areas.Admin.Controllers;
 
-[Authorize(Roles = InicializadorSistema.PerfilAdministrador)]
+[Area("Admin")]
+[Authorize(Policy = PoliticasAutorizacao.Administracao)]
 public class LojaController : Controller
 {
     private readonly ApplicationDbContext _context;

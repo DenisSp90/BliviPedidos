@@ -4,12 +4,13 @@ using BliviPedidos.Models;
 using BliviPedidos.Models.ViewModels;
 using BliviPedidos.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using BliviPedidos.Seguranca;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace BliviPedidos.Controllers;
 
-[Authorize]
+[Authorize(Policy = PoliticasAutorizacao.AcessoInterno)]
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;

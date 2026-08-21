@@ -30,8 +30,36 @@ public class InicializadorSistemaTests
         Assert.NotNull(usuario);
         Assert.True(usuario.EmailConfirmed);
         Assert.True(await userManager.IsInRoleAsync(usuario, InicializadorSistema.PerfilAdministrador));
+        var roleManager = cenario.Scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        foreach (var perfil in InicializadorSistema.Perfis)
+        {
+            Assert.True(await roleManager.RoleExistsAsync(perfil));
+        }
+
         var vinculo = await context.UsuarioLoja.SingleAsync(item => item.UsuarioId == usuario.Id);
         Assert.Equal(Loja.PadraoId, vinculo.LojaId);
+    }
+
+    [Fact]
+    public async Task BancoComUsuario_DeveCriarPerfisAusentesSemExigirBootstrapAdmin()
+    {
+        await using var cenario = await CriarCenarioAsync(new Dictionary<string, string?>());
+        var userManager = cenario.Scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+        var usuario = new IdentityUser
+        {
+            UserName = "existente@teste.com",
+            Email = "existente@teste.com"
+        };
+        var resultado = await userManager.CreateAsync(usuario, "SenhaForte!123");
+        Assert.True(resultado.Succeeded);
+
+        await InicializadorSistema.InicializarAsync(cenario.Scope.ServiceProvider, cenario.Configuration);
+
+        var roleManager = cenario.Scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        foreach (var perfil in InicializadorSistema.Perfis)
+        {
+            Assert.True(await roleManager.RoleExistsAsync(perfil));
+        }
     }
 
     [Fact]

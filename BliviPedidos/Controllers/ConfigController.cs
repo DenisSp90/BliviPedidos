@@ -1,5 +1,6 @@
 ﻿using BliviPedidos.Models;
 using Microsoft.AspNetCore.Authorization;
+using BliviPedidos.Seguranca;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
@@ -7,7 +8,7 @@ using Newtonsoft.Json.Linq;
 
 namespace BliviPedidos.Controllers;
 
-[Authorize]
+[Authorize(Policy = PoliticasAutorizacao.Administracao)]
 public class ConfigController : Controller
 {
     private readonly IConfiguration _configuration;

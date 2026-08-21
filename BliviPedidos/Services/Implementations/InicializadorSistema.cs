@@ -8,6 +8,15 @@ namespace BliviPedidos.Services.Implementations;
 public static class InicializadorSistema
 {
     public const string PerfilAdministrador = "Administrador";
+    public const string PerfilVendedor = "Vendedor";
+    public const string PerfilEstoquista = "Estoquista";
+
+    public static readonly IReadOnlyCollection<string> Perfis =
+    [
+        PerfilAdministrador,
+        PerfilVendedor,
+        PerfilEstoquista
+    ];
 
     public static async Task InicializarAsync(
         IServiceProvider services,
@@ -18,6 +27,8 @@ public static class InicializadorSistema
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger("BootstrapAdmin");
+
+        await CriarPerfisAsync(roleManager);
 
         if (await userManager.Users.AnyAsync(cancellationToken))
         {
@@ -35,13 +46,6 @@ public static class InicializadorSistema
         }
 
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-
-        if (!await roleManager.RoleExistsAsync(PerfilAdministrador))
-        {
-            ValidarResultado(
-                await roleManager.CreateAsync(new IdentityRole(PerfilAdministrador)),
-                "criar o papel Administrador");
-        }
 
         var email = settings.Email.Trim().ToLowerInvariant();
         var usuario = new IdentityUser
@@ -64,6 +68,21 @@ public static class InicializadorSistema
         await transaction.CommitAsync(cancellationToken);
 
         logger.LogInformation("Administrador inicial criado e associado à loja padrão. Email: {Email}", email);
+    }
+
+    private static async Task CriarPerfisAsync(RoleManager<IdentityRole> roleManager)
+    {
+        foreach (var perfil in Perfis)
+        {
+            if (await roleManager.RoleExistsAsync(perfil))
+            {
+                continue;
+            }
+
+            ValidarResultado(
+                await roleManager.CreateAsync(new IdentityRole(perfil)),
+                $"criar o papel {perfil}");
+        }
     }
 
     private static void ValidarResultado(IdentityResult resultado, string operacao)

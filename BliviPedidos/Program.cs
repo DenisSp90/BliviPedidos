@@ -3,6 +3,7 @@ using BliviPedidos.Models;
 using BliviPedidos.Middleware;
 using BliviPedidos.Services.Implementations;
 using BliviPedidos.Services.Interfaces;
+using BliviPedidos.Seguranca;
 using DinkToPdf.Contracts;
 using DinkToPdf;
 using Microsoft.AspNetCore.Identity;
@@ -45,6 +46,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AdicionarPoliticasAutorizacao();
 
 builder.Services.AddControllersWithViews();
 
@@ -126,6 +128,9 @@ app.UseMiddleware<LojaAtualMiddleware>();
 app.UseAuthorization();
 app.UseSession();
 
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

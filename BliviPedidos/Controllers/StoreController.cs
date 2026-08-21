@@ -5,6 +5,7 @@ using BliviPedidos.Models.ViewModels;
 using BliviPedidos.Services.Interfaces;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
+using BliviPedidos.Seguranca;
 using Microsoft.AspNetCore.Mvc;
 using QRCoder;
 using System.Drawing;
@@ -59,6 +60,7 @@ public class StoreController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public async Task<IActionResult> AtualizarEstadoPagamento(int idPedido, bool pago)
     {
         try
@@ -92,6 +94,7 @@ public class StoreController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public async Task<IActionResult> CancelarPedido(int idPedido, bool ativo)
     {
         var pedido = await _pedidoService.GetPedidoByIdAsync(idPedido);
@@ -107,12 +110,14 @@ public class StoreController : Controller
         return Ok(new { Ativo = pedido.Ativo, Pago = pedido.Pago });
     }
 
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
     public IActionResult CategoriaCadastro()
     {
         return View(new CategoriaViewModel());
     }
 
     [HttpPost]
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
     public async Task<IActionResult> CategoriaCadastro([FromForm] CategoriaViewModel model)
     {
         if (ModelState.IsValid)
@@ -126,6 +131,7 @@ public class StoreController : Controller
         return View(model);
     }
 
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
     public async Task<IActionResult> CategoriaLista(int filtro)
     {
         try
@@ -144,6 +150,7 @@ public class StoreController : Controller
         }
     }
 
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public async Task<IActionResult> ClienteGetByTelefone(string telefone)
     {
         var cliente = await _clienteService.ProcurarClienteByTelefoneAsync(telefone);
@@ -154,6 +161,7 @@ public class StoreController : Controller
             return NotFound();
     }
 
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public async Task<IActionResult> ClienteDetalhe(int id)
     {
         try
@@ -174,6 +182,7 @@ public class StoreController : Controller
         }
     }
 
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public async Task<IActionResult> ClienteLista()
     {
         StoreViewModel storeViewModel = new StoreViewModel();
@@ -183,6 +192,7 @@ public class StoreController : Controller
         return View(storeViewModel);
     }
 
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public async Task<IActionResult> CuponFiscal(int id)
     {
         try
@@ -257,6 +267,7 @@ public class StoreController : Controller
 
     [HttpPost]
     [Route("Store/Carrinho/{produtoId?}")]
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public IActionResult Carrinho(int produtoId)
     {
         if (produtoId > 0)
@@ -276,6 +287,7 @@ public class StoreController : Controller
     }
 
     [HttpGet]
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public async Task<IActionResult> GetInfoPedidos()
     {
         var listaPedidosAtivos = _pedidoService.GetListaPedidosAtivosByEmail(HttpContext.User.Identity.Name);
@@ -285,12 +297,14 @@ public class StoreController : Controller
         return Json(new { NumeroTotalPedidos = numeroTotalPedidos, NumeroPedidosNaoPagos = numeroPedidosNaoPagos });
     }
 
+    [Authorize(Policy = PoliticasAutorizacao.AcessoInterno)]
     public IActionResult Index()
     {
         return View();
     }
 
     [Route("Store/ItemsSearch/{query?}")]
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public IActionResult ItemsSearch(string query)
     {
         var items = _context.Produto
@@ -301,6 +315,7 @@ public class StoreController : Controller
         return Json(items);
     }
 
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public IActionResult PedidoCadastro()
     {
         StoreViewModel storeViewModel = new StoreViewModel();
@@ -320,6 +335,7 @@ public class StoreController : Controller
         return View(pedido.Cadastro);
     }
 
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public async Task<IActionResult> PedidoDetalhe(int id)
     {
         try
@@ -391,6 +407,7 @@ public class StoreController : Controller
         }
     }
 
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public IActionResult PedidoLista(int filtro)
     {
         try
@@ -417,6 +434,7 @@ public class StoreController : Controller
         }
     }
 
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public async Task<IActionResult> PedidoPreparacao()
     {
         StoreViewModel storeViewModel = new StoreViewModel();
@@ -429,6 +447,7 @@ public class StoreController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public async Task<IActionResult> PedidoResumo(Cadastro cadastro)
     {
         var pedido = _pedidoService.GetPedido();
@@ -496,6 +515,7 @@ public class StoreController : Controller
         }
     }
 
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
     public IActionResult ProdutoCadastro()
     {
         var viewModel = new ProdutoViewModel
@@ -511,6 +531,7 @@ public class StoreController : Controller
 
 
     [HttpPost]
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
     public async Task<IActionResult> ProdutoCadastro([FromForm] ProdutoViewModel model)
     {
         if (!ModelState.IsValid)
@@ -560,6 +581,7 @@ public class StoreController : Controller
         }
     }
 
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
     public async Task<IActionResult> ProdutoDetalhe(int id)
     {
         var produto = await _produtoService.ProcurarProdutoAsync(id);
@@ -571,6 +593,7 @@ public class StoreController : Controller
         return View(produto);
     }
 
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
     public async Task<IActionResult> ProdutoEditar(int id)
     {
         var produtoViewModel = await _produtoService.ProcurarProdutoAsync(id);
@@ -588,6 +611,7 @@ public class StoreController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
     public async Task<IActionResult> ProdutoEditar([FromForm] ProdutoViewModel model)
     {
         try
@@ -628,6 +652,7 @@ public class StoreController : Controller
         }
     }
 
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
     public async Task<IActionResult> ProdutoImportar()
     {
         StoreViewModel storeViewModel = new StoreViewModel();
@@ -637,6 +662,7 @@ public class StoreController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
     public async Task<IActionResult> ProdutoImportarUpload(IFormFile file)
     {
         if (file != null && file.Length > 0)
@@ -709,6 +735,7 @@ public class StoreController : Controller
     }
 
     [HttpGet]
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
     public IActionResult ProdutoDownloadListaImportacao()
     {
         var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/files/ProdutoListaImportacao.xlsx");
@@ -717,6 +744,7 @@ public class StoreController : Controller
         return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
     }
 
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
     public async Task<IActionResult> ProdutoLista(int filtro)
     {
         try
@@ -753,6 +781,7 @@ public class StoreController : Controller
 
     [HttpPost]
     [Route("Store/UploadImagem/{produtoId}")]
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
     public async Task<IActionResult> UploadImagem(string produtoId)
     {
         if (Request.Form.Files.Count > 0 && !string.IsNullOrEmpty(produtoId))
@@ -781,12 +810,14 @@ public class StoreController : Controller
     }
 
     [HttpPost]
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public UpdateQuantidadeResponse UpdateQuantidade([FromBody] ItemPedido itemPedido)
     {
         return _pedidoService.UpdateQuantidade(itemPedido);
     }
 
     [HttpPost]
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public async Task<IActionResult> UpdateQuantidade2(int itemPedidoId, int produtoId, int quantidade, decimal preco)
     {
         try

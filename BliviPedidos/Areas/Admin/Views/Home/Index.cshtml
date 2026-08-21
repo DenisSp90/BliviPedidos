@@ -1,0 +1,50 @@
+@{
+    ViewData["Title"] = "Administração";
+}
+
+<div class="pagetitle">
+    <h1>Console administrativo</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active">Visão geral</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section dashboard">
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card info-card sales-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Lojas</h5>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-buildings"></i>
+                        </div>
+                        <div class="ps-3">
+                            <p class="mb-0">Crie lojas e configure slug, domínio, logo e cores.</p>
+                        </div>
+                    </div>
+                    <a class="btn btn-primary" asp-area="Admin" asp-controller="Loja" asp-action="Index">Gerenciar lojas</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card info-card customers-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Usuários</h5>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-person-plus"></i>
+                        </div>
+                        <div class="ps-3">
+                            <p class="mb-0">Crie usuários internos e associe cada conta à sua loja.</p>
+                        </div>
+                    </div>
+                    <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Register">Criar usuário</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -4,6 +4,7 @@ using BliviPedidos.Models;
 using BliviPedidos.Models.ViewModels;
 using BliviPedidos.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using BliviPedidos.Seguranca;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
@@ -12,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BliviPedidos.Controllers;
 
-[Authorize]
+[Authorize(Policy = PoliticasAutorizacao.Relatorios)]
 public class RelatorioController : Controller
 {
     private readonly ApplicationDbContext _context;

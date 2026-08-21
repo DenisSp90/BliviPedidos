@@ -45,6 +45,13 @@
                                     <span asp-validation-for="Input.LojaId" class="text-danger"></span>
                                 </div>
                                 <div class="form-floating mb-3">
+                                    <select asp-for="Input.Perfil" asp-items="Model.Perfis" class="form-select" aria-required="true">
+                                        <option value="">Selecione o perfil</option>
+                                    </select>
+                                    <label asp-for="Input.Perfil"></label>
+                                    <span asp-validation-for="Input.Perfil" class="text-danger"></span>
+                                </div>
+                                <div class="form-floating mb-3">
                                     <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
                                     <label asp-for="Input.Password">Password</label>
                                     <span asp-validation-for="Input.Password" class="text-danger"></span>
@@ -61,7 +68,8 @@
                             <section>
                                 <h3>Console administrativo</h3>
                                 <hr />
-                                <p>O usuário será criado na loja selecionada e poderá acessar somente os dados dessa loja.</p>
+                                <p>O usuário será criado na loja e no perfil selecionados, acessando somente os dados e operações permitidos.</p>
+                                <p><strong>Vendedor</strong> opera pedidos e clientes. <strong>Estoquista</strong> gerencia produtos e categorias. <strong>Administrador</strong> possui acesso completo.</p>
                                 <p>A conta será criada com o e-mail já confirmado. Oriente o usuário a trocar a senha no primeiro acesso.</p>
                             </section>
                         </div>

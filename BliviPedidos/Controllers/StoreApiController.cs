@@ -2,6 +2,7 @@
 using BliviPedidos.Models.ViewModels;
 using BliviPedidos.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using BliviPedidos.Seguranca;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Syncfusion.DocIO.DLS;
@@ -36,6 +37,7 @@ public class StoreApiController : Controller
     }
 
     [HttpGet("produtoList")]
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
     public async Task<IActionResult> GetProdutoList()
     {
         var produtos = await _context.Produto
@@ -60,6 +62,7 @@ public class StoreApiController : Controller
     }
 
     [HttpGet("produto/{id}")]
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
     public async Task<IActionResult> GetProduto(int id)
     {
         var produto = await _context.Produto
@@ -88,6 +91,7 @@ public class StoreApiController : Controller
     }
 
     [HttpGet("etiqueta/pdf/{produtoId}")]
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
     public async Task<IActionResult> GerarEtiquetaPdf(int produtoId)
     {
         try
@@ -170,6 +174,7 @@ public class StoreApiController : Controller
     }
 
     [HttpGet("pedidoListAtivos")]
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public async Task<IActionResult> GetPedidoListAtivos()
     { 
         var pedidos = await _pedidoService.GetListaPedidosAtivosAsync();
@@ -192,6 +197,7 @@ public class StoreApiController : Controller
     }
 
     [HttpGet("pedido-detalhe/{id}")]
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public async Task<IActionResult> GetPedidoById(int id)
     {
         var pedido = await _pedidoService.GetPedidoByIdAsync(id);  

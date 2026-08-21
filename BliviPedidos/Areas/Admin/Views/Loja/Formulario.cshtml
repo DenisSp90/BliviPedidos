@@ -9,8 +9,8 @@
     <h1>@ViewData["Title"]</h1>
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Página Inicial</a></li>
-            <li class="breadcrumb-item"><a asp-controller="Loja" asp-action="Index">Lojas</a></li>
+            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index">Administração</a></li>
+            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Loja" asp-action="Index">Lojas</a></li>
             <li class="breadcrumb-item active">@(editando ? "Editar" : "Cadastrar")</li>
         </ol>
     </nav>

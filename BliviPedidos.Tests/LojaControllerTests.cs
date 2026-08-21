@@ -1,7 +1,10 @@
-using BliviPedidos.Controllers;
+using BliviPedidos.Areas.Admin.Controllers;
 using BliviPedidos.Data;
 using BliviPedidos.Models;
 using BliviPedidos.Models.ViewModels;
+using BliviPedidos.Services.Implementations;
+using BliviPedidos.Seguranca;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +15,22 @@ namespace BliviPedidos.Tests;
 
 public class LojaControllerTests
 {
+    [Fact]
+    public void Controller_DevePertencerAAreaAdminEExigirAdministrador()
+    {
+        var controllerType = typeof(LojaController);
+
+        var area = Assert.Single(controllerType
+            .GetCustomAttributes(typeof(AreaAttribute), true)
+            .Cast<AreaAttribute>());
+        var authorize = Assert.Single(controllerType
+            .GetCustomAttributes(typeof(AuthorizeAttribute), true)
+            .Cast<AuthorizeAttribute>());
+
+        Assert.Equal("Admin", area.RouteValue);
+        Assert.Equal(PoliticasAutorizacao.Administracao, authorize.Policy);
+    }
+
     [Fact]
     public async Task Criar_DeveNormalizarESalvarLoja()
     {
