@@ -43,6 +43,7 @@ builder.Services.Configure<PixAppSettingsModel>(builder.Configuration.GetSection
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddControllersWithViews();
@@ -137,13 +138,15 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var dbContext = services.GetRequiredService<ApplicationDbContext>();
-        dbContext.Database.Migrate();
+        await dbContext.Database.EnsureCreatedAsync();
+        await InicializadorSistema.InicializarAsync(services, app.Configuration);
     }
     catch (Exception ex)
     {
         // Log ou tratamento de erro
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ocorreu um erro ao aplicar as migrações.");
+        logger.LogCritical(ex, "Não foi possível inicializar o banco e o administrador do sistema.");
+        throw;
     }
 }
 

@@ -20,6 +20,8 @@ dotnet user-secrets set "PixAppSettings:PixTipo" "<TIPO>" --project .\BliviPedid
 dotnet user-secrets set "PixAppSettings:PixChave" "<CHAVE_PIX>" --project .\BliviPedidos\BliviPedidos.csproj
 dotnet user-secrets set "PixAppSettings:PixCity" "<CIDADE>" --project .\BliviPedidos\BliviPedidos.csproj
 dotnet user-secrets set "Syncfusion:LicenseKey" "<LICENCA>" --project .\BliviPedidos\BliviPedidos.csproj
+dotnet user-secrets set "BootstrapAdmin:Email" "<EMAIL_ADMIN>" --project .\BliviPedidos\BliviPedidos.csproj
+dotnet user-secrets set "BootstrapAdmin:Password" "<SENHA_FORTE>" --project .\BliviPedidos\BliviPedidos.csproj
 ```
 
 Como alternativa local, copie `appsettings.Local.example.json` para `appsettings.Local.json` e preencha os valores. O arquivo local esta no `.gitignore` e nunca deve ser commitado.
@@ -42,7 +44,11 @@ PixAppSettings__PixTipo
 PixAppSettings__PixChave
 PixAppSettings__PixCity
 Syncfusion__LicenseKey
+BootstrapAdmin__Email
+BootstrapAdmin__Password
 ```
+
+As chaves `BootstrapAdmin` são usadas somente quando o banco ainda não possui usuários. Depois que o primeiro administrador for criado, elas podem ser removidas do ambiente de produção.
 
 Variaveis de ambiente possuem prioridade sobre `appsettings.Local.json`, User Secrets e `appsettings.json`.
 

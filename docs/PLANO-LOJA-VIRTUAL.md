@@ -35,6 +35,10 @@ Conclusao: dados administrativos nao podem ser obtidos sem autorizacao adequada.
 
 ## Fase 1 - fundacao multi-loja
 
+Durante o desenvolvimento, o banco e descartavel e o esquema atual e criado com
+`EnsureCreated`. Antes da publicacao definitiva, gerar uma nova migration inicial
+consolidada e substituir `EnsureCreated` por `Migrate`.
+
 - [x] Criar a entidade `Loja`.
 - [x] Relacionar `Loja` com produto, categoria, cliente e pedido.
 - [x] Criar uma loja padrao para os dados existentes.

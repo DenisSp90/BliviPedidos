@@ -1,16 +1,16 @@
 ﻿@page
 @model RegisterModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Novo usuário";
 }
 
 <div class="pagetitle">
-    <h1>Profile</h1>
+    <h1>Novo usuário</h1>
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-            <li class="breadcrumb-item">Users</li>
-            <li class="breadcrumb-item active">Profile</li>
+            <li class="breadcrumb-item">Usuários</li>
+            <li class="breadcrumb-item active">Cadastro</li>
         </ol>
     </nav>
 </div>
@@ -21,17 +21,28 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">
-                        Registro Crie uma nova conta.
+                        Criar usuário interno
                     </h5>
 
                     <div class="row">
                         <div class="col-md-4">
                             <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                                @if (TempData["UsuarioCriado"] is string mensagem)
+                                {
+                                    <div class="alert alert-success">@mensagem</div>
+                                }
                                 <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
                                 <div class="form-floating mb-3">
                                     <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
                                     <label asp-for="Input.Email">Email</label>
                                     <span asp-validation-for="Input.Email" class="text-danger"></span>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <select asp-for="Input.LojaId" asp-items="Model.Lojas" class="form-select" aria-required="true">
+                                        <option value="">Selecione a loja</option>
+                                    </select>
+                                    <label asp-for="Input.LojaId"></label>
+                                    <span asp-validation-for="Input.LojaId" class="text-danger"></span>
                                 </div>
                                 <div class="form-floating mb-3">
                                     <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
@@ -43,39 +54,15 @@
                                     <label asp-for="Input.ConfirmPassword">Confirm Password</label>
                                     <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
                                 </div>
-                                <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+                                <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Criar usuário</button>
                             </form>
                         </div>
                         <div class="col-md-6 col-md-offset-2">
                             <section>
-                                <h3>Você deverá estar logado para registrar novos usuários.</h3>
+                                <h3>Console administrativo</h3>
                                 <hr />
-                                @{
-                                    if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                                    {
-                                        <div>
-                                            <p>
-                                                There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">
-                                                    article
-                                                    about setting up this ASP.NET application to support logging in via external services
-                                                </a>.
-                                            </p>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                                            <div>
-                                                <p>
-                                                    @foreach (var provider in Model.ExternalLogins!)
-                                                    {
-                                                        <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                                    }
-                                                </p>
-                                            </div>
-                                        </form>
-                                    }
-                                }
+                                <p>O usuário será criado na loja selecionada e poderá acessar somente os dados dessa loja.</p>
+                                <p>A conta será criada com o e-mail já confirmado. Oriente o usuário a trocar a senha no primeiro acesso.</p>
                             </section>
                         </div>
                     </div>
