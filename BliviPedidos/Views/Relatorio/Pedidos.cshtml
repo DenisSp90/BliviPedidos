@@ -83,7 +83,7 @@
                                 @foreach (var p in Model.Pedidos)
                                 {
                                     var hoje = DateTime.Now;
-                                    var classeLinha = (!p.Pago && p.DataPedido < hoje) ? "table-danger" : "";
+                                    var classeLinha = (p.StatusPagamento != StatusPagamento.Pago && p.DataPedido < hoje) ? "table-danger" : "";
 
                                     string numeroTelefone = new String(p.Cadastro.Telefone.Where(Char.IsDigit).ToArray());
                                     string linkWhatsApp = "https://api.whatsapp.com/send?phone=" + numeroTelefone +
@@ -98,7 +98,7 @@
                                         </td>
                                         <td>@Html.DisplayFor(modelItem => p.Id)</td>
                                         <td>
-                                            @if (p.Pago)
+                                            @if (p.StatusPagamento == StatusPagamento.Pago)
                                             {
                                                 <span class="badge rounded-pill bg-success">Pago</span>
                                             }

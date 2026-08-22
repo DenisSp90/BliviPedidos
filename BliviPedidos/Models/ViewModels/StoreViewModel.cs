@@ -45,7 +45,7 @@ public class PedidoViewModel
     public string EmailCliente { get; set; }
     public List<ItemPedidoViewModel> Itens { get; set; }
     public decimal ValorTotalPedido { get; set; }
-    public bool Pago { get; set; }
+    public StatusPagamento StatusPagamento { get; set; }
     public DateTime? DataPedido { get; set; }
     public DateTime? DataPagamento { get; set; }
     public string? EmailResponsavel { get; set; } = string.Empty;

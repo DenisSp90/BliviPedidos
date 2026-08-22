@@ -25,13 +25,13 @@
                     decimal totalLucroTodosPedidos = Model.Pedidos.Sum(p => p.Itens.Sum(item => (item.PrecoUnitario - item.Produto.PrecoPago) * item.Quantidade));
 
                     var totalLucroPedidosPagos = Model.Pedidos
-                    .Where(p => p.Pago) // Filtra apenas os pedidos pagos
+                    .Where(p => p.StatusPagamento == StatusPagamento.Pago)
                     .Sum(p => p.Itens.Sum(item => (item.PrecoUnitario - item.Produto.PrecoPago) * item.Quantidade));
 
                     if (Model.Pedidos.Count != 0)
                     {
                         valorPrevisto = Model.Pedidos.Sum(x => Convert.ToDecimal(x.ValorTotalPedido));
-                        valorPago = Model.Pedidos.Where(p => p.Pago).Sum(x => Convert.ToDecimal(x.ValorTotalPedido));
+                        valorPago = Model.Pedidos.Where(p => p.StatusPagamento == StatusPagamento.Pago).Sum(x => Convert.ToDecimal(x.ValorTotalPedido));
 
                         if (valorPago != 0)
                             pa = Convert.ToInt32(Math.Abs((valorPago / valorPrevisto) * 100));
@@ -42,15 +42,15 @@
                 <div class="col-xxl-6 col-md-6">
                     <div class="card info-card sales-card">
                         <div class="card-body">
-                            <h5 class="card-title">Pedidos<span> | Ativos</span></h5>
+                            <h5 class="card-title">Pedidos<span> | Em andamento</span></h5>
 
                             <div class="d-flex align-items-center">
                                 <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                                     <i class="bi bi-cart"></i>
                                 </div>
                                 <div class="ps-3">
-                                    <h6>@Model.Pedidos.Where(p => p.Ativo).Count()</h6>
-                                    <span class="text-success small pt-1 fw-bold">Ativos</span>
+                                    <h6>@Model.Pedidos.Count(p => p.Status != StatusPedido.Carrinho && p.Status != StatusPedido.Concluido && p.Status != StatusPedido.Cancelado)</h6>
+                                    <span class="text-success small pt-1 fw-bold">Em andamento</span>
                                 </div>
                             </div>
                         </div>
@@ -161,7 +161,7 @@
                                 @foreach (var p in Model.Pedidos)
                                 {
                                     var hoje = DateTime.Now;
-                                    var classeLinha = (!p.Pago && p.DataPedido < hoje) ? "table-danger" : "";
+                                    var classeLinha = (p.StatusPagamento != StatusPagamento.Pago && p.DataPedido < hoje) ? "table-danger" : "";
 
                                     string numeroTelefone = new String(p.Cadastro.Telefone.Where(Char.IsDigit).ToArray());
                                     string linkWhatsApp = "https://api.whatsapp.com/send?phone=" + numeroTelefone +
@@ -175,7 +175,7 @@
                                         </td>
                                         <td>@Html.DisplayFor(modelItem => p.Id)</td>
                                         <td>
-                                            @if (p.Pago)
+                                            @if (p.StatusPagamento == StatusPagamento.Pago)
                                             {
                                                 <span class="badge rounded-pill bg-success">Pago</span>
                                             }

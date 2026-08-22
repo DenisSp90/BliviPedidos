@@ -42,6 +42,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.Configure<PixAppSettingsModel>(builder.Configuration.GetSection("PixAppSettings"));
+builder.Services.Configure<ReservaEstoqueOptions>(builder.Configuration.GetSection(ReservaEstoqueOptions.Secao));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -75,6 +76,7 @@ builder.Services.AddScoped<ICarrinhoPublicoService, CarrinhoPublicoService>();
 builder.Services.AddScoped<ICalculadorCarrinhoPublicoService, CalculadorCarrinhoPublicoService>();
 builder.Services.AddScoped<IDadosConsumidorCheckoutService, DadosConsumidorCheckoutService>();
 builder.Services.AddScoped<IConfirmacaoCheckoutService, ConfirmacaoCheckoutService>();
+builder.Services.AddHostedService<ExpiracaoReservaService>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();

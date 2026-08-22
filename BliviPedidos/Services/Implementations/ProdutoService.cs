@@ -72,7 +72,7 @@ namespace BliviPedidos.Services.Implementations
 
         public async Task RegistrarCancelamentoProdutos(ItemPedido itemPedido)
         {
-            var usuario = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var usuario = _httpContextAccessor.HttpContext?.User.Identity?.Name ?? "SISTEMA";
 
             var produto = await _context.Produto
                 .Include(p => p.ProdutoMovimentacao)
@@ -87,6 +87,10 @@ namespace BliviPedidos.Services.Implementations
                     ProdutoId = produto.Id,
                     Quantidade = itemPedido.Quantidade,
                     Tipo = "Entrada",
+                    LojaId = produto.LojaId,
+                    PedidoId = itemPedido.PedidoId,
+                    Ator = usuario,
+                    Origem = OrigemMovimentacaoEstoque.CancelamentoPedido,
                     Observacao = $"[ENTRADA] | [PEDIDO-CANCELAMENTO ] | [{usuario.ToUpper()}]",
                     Data = DateTime.Now
                 };
@@ -100,7 +104,7 @@ namespace BliviPedidos.Services.Implementations
 
         public async Task<bool> RegistrarProdutoAsync(Produto produto)
         {
-            var usuario = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var usuario = _httpContextAccessor.HttpContext?.User.Identity?.Name ?? "SISTEMA";
 
             try
             {
@@ -124,6 +128,9 @@ namespace BliviPedidos.Services.Implementations
                                 ProdutoId = produto.Id,
                                 Quantidade = quantidadeMovimentada,
                                 Tipo = tipoMovimentacao,
+                                LojaId = produtoAtual.LojaId,
+                                Ator = usuario,
+                                Origem = OrigemMovimentacaoEstoque.EdicaoEstoque,
                                 Observacao = $"[{tipoMovimentacao.ToUpper()}] | [CADASTRO-EDITAR] | [{usuario.ToUpper()}]",
                                 Data = DateTime.Now
                             };
@@ -161,6 +168,9 @@ namespace BliviPedidos.Services.Implementations
                         ProdutoId = produto.Id,
                         Quantidade = produto.Quantidade,
                         Tipo = "Entrada",
+                        LojaId = produto.LojaId,
+                        Ator = usuario,
+                        Origem = OrigemMovimentacaoEstoque.CadastroProduto,
                         Observacao = $"[ENTRADA] | [CADASTRO-NOVO] [{usuario.ToUpper()}]",
                         Data = DateTime.Now
                     };
@@ -184,7 +194,7 @@ namespace BliviPedidos.Services.Implementations
 
         public bool UpdateQuantidade(List<ItemPedido> itens)
         {
-            var usuario = _httpContextAccessor.HttpContext.User.Identity.Name;
+            var usuario = _httpContextAccessor.HttpContext?.User.Identity?.Name ?? "SISTEMA";
             var pedidoId = itens.FirstOrDefault()?.PedidoId;
 
             try
@@ -209,6 +219,10 @@ namespace BliviPedidos.Services.Implementations
                             ProdutoId = produto.Id,
                             Quantidade = item.Quantidade,
                             Tipo = "Saída",
+                            LojaId = produto.LojaId,
+                            PedidoId = item.PedidoId,
+                            Ator = usuario,
+                            Origem = OrigemMovimentacaoEstoque.PedidoInterno,
                             Observacao = $"[SAIDA] | [PEDIDO-REALIZADO] | {usuario.ToUpper()} | PEDIDO: [{item.Pedido.Id.ToString()}]",
                             Data = DateTime.Now
                         };

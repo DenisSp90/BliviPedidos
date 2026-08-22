@@ -61,14 +61,18 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
         }
     }
 
-    public async Task AtualizarStatusPagamentoAsync(int pedidoId, bool novoStatusPagamento)
+    public async Task AtualizarStatusPagamentoAsync(int pedidoId, StatusPagamento novoStatusPagamento)
     {
         var pedido = await GetPedidoByIdAsync(pedidoId);
 
         if (pedido != null)
         {
-            pedido.DataPagamento = DateTime.Now;
-            pedido.Pago = novoStatusPagamento;
+            pedido.StatusPagamento = novoStatusPagamento;
+            pedido.DataPagamento = novoStatusPagamento == StatusPagamento.Pago
+                ? DateTime.Now
+                : null;
+            if (novoStatusPagamento == StatusPagamento.Pago)
+                pedido.ReservaExpiraEm = null;
             await _context.SaveChangesAsync();
         }
         else
@@ -90,7 +94,8 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
         return dbSet.Include(p => p.Itens)
                 .ThenInclude(i => i.Produto)
                 .Include(p => p.Cadastro)
-                .OrderByDescending(p => p.Ativo)
+                .OrderBy(p => p.Status == StatusPedido.Cancelado || p.Status == StatusPedido.Concluido)
+                .ThenBy(p => p.Status)
                 .ThenBy(p => p.Id)
                 .ToList();
     }
@@ -101,7 +106,9 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
                 .ThenInclude(i => i.Produto)
                 .Include(p => p.Cadastro)
                 .Include(c => c.Cadastro.Cliente)
-                .Where(p => p.Ativo == true)
+                .Where(p => p.Status != StatusPedido.Carrinho &&
+                            p.Status != StatusPedido.Concluido &&
+                            p.Status != StatusPedido.Cancelado)
                 .ToList();
     }
 
@@ -111,7 +118,9 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
                           .ThenInclude(i => i.Produto)
                           .Include(p => p.Cadastro)
                           .ThenInclude(c => c.Cliente)
-                          .Where(p => p.Ativo == true)
+                          .Where(p => p.Status != StatusPedido.Carrinho &&
+                                      p.Status != StatusPedido.Concluido &&
+                                      p.Status != StatusPedido.Cancelado)
                           .ToListAsync();
     }
 
@@ -120,7 +129,10 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
         return dbSet.Include(p => p.Itens)
             .ThenInclude(i => i.Produto)
             .Include(p => p.Cadastro)
-            .Where(p => p.Ativo && p.EmailResponsavel == contextAccessor.HttpContext.User.Identity.Name)
+            .Where(p => p.Status != StatusPedido.Carrinho &&
+                        p.Status != StatusPedido.Concluido &&
+                        p.Status != StatusPedido.Cancelado &&
+                        p.EmailResponsavel == contextAccessor.HttpContext.User.Identity.Name)
             .ToList();
     }
 
@@ -183,70 +195,84 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
         return pedido;
     }
 
-    public async Task RegistrarCancelamentoPedido(int pedidoId)
+    public async Task RegistrarCancelamentoPedido(int pedidoId, string? origem = null, string? ator = null)
     {
-        var usuario = _httpContextAccessor.HttpContext.User.Identity.Name;
+        var usuario = ator ?? _httpContextAccessor.HttpContext?.User.Identity?.Name ?? "SISTEMA";
+        origem ??= OrigemMovimentacaoEstoque.CancelamentoPedido;
 
-        // Iniciando a transação
-        using (var transaction = await _context.Database.BeginTransactionAsync())
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        try
         {
-            try
+            var pedido = await _context.Pedido
+                .AsNoTracking()
+                .Include(item => item.Itens)
+                .SingleOrDefaultAsync(item => item.Id == pedidoId);
+
+            if (pedido == null)
+                throw new Exception("Pedido não encontrado");
+
+            if (pedido.Status == StatusPedido.Cancelado)
             {
-                var pedido = await GetPedidoByIdAsync(pedidoId);
-
-                if (pedido == null)
-                    throw new Exception("Pedido não encontrado");
-
-                pedido.ValorTotalPedido = 0;
-                pedido.Pago = false;
-                pedido.Ativo = false;
-
-                foreach (var item in pedido.Itens)
-                {
-                    var produto = item.Produto;
-
-                    if (produto != null)
-                    {
-                        // Atualizar a quantidade do produto no estoque
-                        produto.Quantidade += item.Quantidade;
-
-                        // Criar a movimentação de entrada para o cancelamento
-                        var movimentacao = new ProdutoMovimentacao
-                        {
-                            ProdutoId = produto.Id,
-                            Quantidade = item.Quantidade,
-                            Tipo = "Entrada",
-                            Observacao = $"[ENTRADA] | [PEDIDO-CANCELAMENTO] | [{usuario.ToUpper()}] | PEDIDO: [{pedido.Id}]",
-                            Data = DateTime.Now
-                        };
-
-                        // Registrar a movimentação
-                        await _produtoService.RegistrarMovimentacaoAsync(movimentacao);
-
-                        // Atualizar o estado do produto no contexto
-                        _context.Entry(produto).State = EntityState.Modified;
-                    }
-                }
-
-                // Atualizar o estado do pedido no contexto
-                _context.Entry(pedido).State = EntityState.Modified;
-
-                // Salvar as alterações no banco de dados
-                await _context.SaveChangesAsync();
-
-                // Confirmar a transação
-                await transaction.CommitAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(
-                    ex,
-                    "Falha ao cancelar pedido e restaurar estoque. PedidoId: {PedidoId}",
-                    pedidoId);
-                // Reverter a transação em caso de erro
                 await transaction.RollbackAsync();
-                throw;
+                return;
             }
+
+            if (pedido.Status == StatusPedido.Concluido)
+                throw new InvalidOperationException("Um pedido concluído não pode ser cancelado.");
+
+            var cancelamentoAdquirido = await _context.Pedido
+                .Where(item => item.Id == pedidoId
+                    && item.Status != StatusPedido.Cancelado
+                    && item.Status != StatusPedido.Concluido)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(item => item.ValorTotalPedido, 0m)
+                    .SetProperty(item => item.StatusPagamento, StatusPagamento.Cancelado)
+                    .SetProperty(item => item.Status, StatusPedido.Cancelado)
+                    .SetProperty(item => item.ReservaExpiraEm, (DateTime?)null));
+
+            if (cancelamentoAdquirido != 1)
+            {
+                await transaction.RollbackAsync();
+                return;
+            }
+
+            foreach (var item in pedido.Itens)
+            {
+                var produtoRestaurado = await _context.Produto
+                    .Where(produto => produto.Id == item.ProdutoId)
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(
+                        produto => produto.Quantidade,
+                        produto => produto.Quantidade + item.Quantidade));
+
+                if (produtoRestaurado != 1)
+                    throw new InvalidOperationException(
+                        $"O produto {item.ProdutoId} do pedido não foi encontrado para restaurar o estoque.");
+
+                _context.ProdutoMovimentacao.Add(new ProdutoMovimentacao
+                {
+                    ProdutoId = item.ProdutoId,
+                    LojaId = pedido.LojaId,
+                    PedidoId = pedido.Id,
+                    Quantidade = item.Quantidade,
+                    Tipo = "Entrada",
+                    Ator = usuario,
+                    Origem = origem,
+                    Observacao = $"[ENTRADA] | [PEDIDO-CANCELAMENTO] | [{usuario.ToUpperInvariant()}] | PEDIDO: [{pedido.Id}]",
+                    Data = DateTime.UtcNow
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Falha ao cancelar pedido e restaurar estoque. PedidoId: {PedidoId}",
+                pedidoId);
+            await transaction.RollbackAsync();
+            throw;
         }
     }
 

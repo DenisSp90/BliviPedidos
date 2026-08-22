@@ -80,7 +80,8 @@ public class StoreControllerTests
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal("PedidoDetalhe", redirect.ActionName);
-        Assert.True(pedido.Ativo);
+        Assert.Equal(StatusPedido.Confirmado, pedido.Status);
+        Assert.Equal(StatusPagamento.AguardandoPagamento, pedido.StatusPagamento);
         Assert.Equal("operador@teste.com", pedido.EmailResponsavel);
         Assert.NotNull(pedido.DataPedido);
         Assert.Equal(30m, pedido.ValorTotalPedido);
@@ -138,7 +139,7 @@ public class StoreControllerTests
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal("PedidoCadastro", redirect.ActionName);
-        Assert.False(pedido.Ativo);
+        Assert.Equal(StatusPedido.Carrinho, pedido.Status);
         pedidoService.Verify(service => service.UpdateCadastro(It.IsAny<Cadastro>()), Times.Never);
         pedidoService.Verify(service => service.ClearPedido(), Times.Never);
     }

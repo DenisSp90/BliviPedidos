@@ -54,7 +54,7 @@ public class Cliente : BaseModel
     {
         get
         {
-            return Pedidos.Count(p => !p.Pago);
+            return Pedidos.Count(p => p.StatusPagamento != StatusPagamento.Pago);
         }
     }
 

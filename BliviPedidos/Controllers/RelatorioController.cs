@@ -169,10 +169,10 @@ public class RelatorioController : Controller
         switch (filtro)
         {
             case "P":
-                pedidos = pedidos.Where(p => p.Pago).ToList();
+                pedidos = pedidos.Where(p => p.StatusPagamento == StatusPagamento.Pago).ToList();
                 break;
             case "A":
-                pedidos = pedidos.Where(p => !p.Pago).ToList();
+                pedidos = pedidos.Where(p => p.StatusPagamento != StatusPagamento.Pago).ToList();
                 break;
             default:
                 // Não aplica filtro, retorna todos os produtos

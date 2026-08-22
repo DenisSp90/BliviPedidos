@@ -9,6 +9,23 @@ namespace BliviPedidos.Tests;
 public class ApplicationDbContextTests
 {
     [Fact]
+    public void Pedido_DeveMapearStatusENaoMaisAtivo()
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlite("Data Source=:memory:")
+            .Options;
+        using var context = new ApplicationDbContext(options);
+        var pedido = context.Model.FindEntityType(typeof(Pedido));
+
+        Assert.NotNull(pedido?.FindProperty(nameof(Pedido.Status)));
+        Assert.Null(pedido?.FindProperty("Ativo"));
+        Assert.NotNull(pedido?.FindProperty(nameof(Pedido.StatusPagamento)));
+        Assert.Null(pedido?.FindProperty("Pago"));
+        Assert.Equal(StatusPedido.Carrinho, new Pedido().Status);
+        Assert.Equal(StatusPagamento.AguardandoPagamento, new Pedido().StatusPagamento);
+    }
+
+    [Fact]
     public async Task CriacaoDoBanco_DeveIncluirLojaPadrao()
     {
         await using var connection = new SqliteConnection("Data Source=:memory:");

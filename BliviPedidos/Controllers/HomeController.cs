@@ -41,7 +41,9 @@ public class HomeController : Controller
         var movimentacoes = _produtoService.GetMovimentacaoEstoque();
 
         decimal totalValorPedidos = pedidos.Sum(pedido => pedido.ValorTotalPedido);
-        decimal totalValorPedidosPagos = pedidos.Where(pedido => pedido.Pago).Sum(pedido => pedido.ValorTotalPedido);
+        decimal totalValorPedidosPagos = pedidos
+            .Where(pedido => pedido.StatusPagamento == StatusPagamento.Pago)
+            .Sum(pedido => pedido.ValorTotalPedido);
         decimal valorPedidosNaoPagos = totalValorPedidos - totalValorPedidosPagos;
 
         StoreViewModel storeViewModel = new StoreViewModel

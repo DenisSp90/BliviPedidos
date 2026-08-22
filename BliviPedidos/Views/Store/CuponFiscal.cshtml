@@ -170,10 +170,12 @@
 
                                         <div class="col-md-6">
                                             <div class="d-flex justify-content-right ps-3">
-                                                <input disabled asp-for="Pedido.Pago" type="checkbox" value="" onchange="atualizarEstadoPedido(@Model.Pedido.Id, this.checked)" /> Pago
+                                                <label>Pagamento</label>
+                                                <input disabled class="form-control" value="@Model.Pedido.StatusPagamento" />
                                             </div>
                                             <div class="d-flex justify-content-right ps-3">
-                                                <input disabled asp-for="Pedido.Ativo" type="checkbox" value="" onchange="cancelarPedido(@Model.Pedido.Id, this.checked)" /> Ativo
+                                                <label>Status</label>
+                                                <input disabled class="form-control" value="@Model.Pedido.Status" />
                                             </div>
                                         </div>
                                     </div>
@@ -181,21 +183,10 @@
                                 <div class="card-footer d-flex justify-content-between">
                                     <div>
 
-                                        @if (Model.Pedido.Ativo)
-                                        {
-
-                                            <button type="button" class="btn btn-primary mb-2">
-                                                <i class="bi bi-check-circle"></i> Ativo
-                                            </button>
-                                        }
+                                        <span class="badge bg-primary fs-6">@Model.Pedido.Status</span>
                                     </div>
                                     <div>
-                                        @if (Model.Pedido.Pago)
-                                        {
-                                            <button type="button" class="btn btn-success mb-2">
-                                                <i class="bi bi-check-circle me-1"></i> Pago
-                                            </button>
-                                        }
+                                        <span class="badge bg-success fs-6">@Model.Pedido.StatusPagamento</span>
                                     </div>
                                 </div>
                             </div>

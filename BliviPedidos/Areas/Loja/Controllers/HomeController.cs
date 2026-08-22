@@ -133,7 +133,7 @@ public class HomeController : Controller
     [ValidateAntiForgeryToken]
     [EnableRateLimiting(PoliticasRateLimit.CarrinhoPublico)]
     [RequestSizeLimit(4 * 1024)]
-    [RequestFormLimits(ValueCountLimit = 4, ValueLengthLimit = 128)]
+    [RequestFormLimits(ValueCountLimit = 4, ValueLengthLimit = 2 * 1024)]
     public async Task<IActionResult> AdicionarCarrinho(string lojaSlug, int produtoId)
     {
         var loja = await _lojaAtualService.ObterLojaAsync();
@@ -164,7 +164,7 @@ public class HomeController : Controller
     [ValidateAntiForgeryToken]
     [EnableRateLimiting(PoliticasRateLimit.CarrinhoPublico)]
     [RequestSizeLimit(4 * 1024)]
-    [RequestFormLimits(ValueCountLimit = 4, ValueLengthLimit = 128)]
+    [RequestFormLimits(ValueCountLimit = 4, ValueLengthLimit = 2 * 1024)]
     public async Task<IActionResult> RemoverCarrinho(string lojaSlug, int produtoId)
     {
         var loja = await _lojaAtualService.ObterLojaAsync();
@@ -202,7 +202,7 @@ public class HomeController : Controller
     [ValidateAntiForgeryToken]
     [EnableRateLimiting(PoliticasRateLimit.CheckoutPublico)]
     [RequestSizeLimit(16 * 1024)]
-    [RequestFormLimits(ValueCountLimit = 16, ValueLengthLimit = 256)]
+    [RequestFormLimits(ValueCountLimit = 16, ValueLengthLimit = 2 * 1024)]
     public async Task<IActionResult> Checkout(
         string lojaSlug,
         [Bind(Prefix = "Dados")] DadosConsumidorCheckout dados)
@@ -254,7 +254,7 @@ public class HomeController : Controller
     [ValidateAntiForgeryToken]
     [EnableRateLimiting(PoliticasRateLimit.ConfirmacaoCheckoutPublico)]
     [RequestSizeLimit(4 * 1024)]
-    [RequestFormLimits(ValueCountLimit = 2, ValueLengthLimit = 128)]
+    [RequestFormLimits(ValueCountLimit = 2, ValueLengthLimit = 2 * 1024)]
     public async Task<IActionResult> ConfirmarCheckout(string lojaSlug)
     {
         var loja = await _lojaAtualService.ObterLojaAsync();

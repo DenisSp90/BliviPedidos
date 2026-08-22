@@ -41,7 +41,7 @@ public class ItemPedidoService : BaseService<ItemPedido>, IItemPedidoService
     public async Task UpdateItemPedidoAsync(int itemPedidoId, int novoProdutoId, int quantidade, decimal preco)
     {
 
-        var usuario = _httpContextAccessor.HttpContext.User.Identity.Name;
+        var usuario = _httpContextAccessor.HttpContext?.User.Identity?.Name ?? "SISTEMA";
 
         var itemPedido = await dbSet
             .Include(ip => ip.Produto) 
@@ -68,8 +68,12 @@ public class ItemPedidoService : BaseService<ItemPedido>, IItemPedidoService
         var movimentacaoEntrada = new ProdutoMovimentacao
         {
             ProdutoId = produtoAtual.Id,
+            LojaId = itemPedido.Pedido.LojaId,
+            PedidoId = itemPedido.Pedido.Id,
             Quantidade = itemPedido.Quantidade,
             Tipo = "Entrada",
+            Ator = usuario,
+            Origem = OrigemMovimentacaoEstoque.AlteracaoPedido,
             Observacao = $"[ENTRADA] | [PEDIDO-ALTERAÇÃO] | {usuario.ToUpper()} | PEDIDO: [{itemPedido.Pedido.Id.ToString()}]",
             Data = DateTime.Now
         };
@@ -78,8 +82,12 @@ public class ItemPedidoService : BaseService<ItemPedido>, IItemPedidoService
         var movimentacaoSaida = new ProdutoMovimentacao
         {
             ProdutoId = novoProduto.Id,
+            LojaId = itemPedido.Pedido.LojaId,
+            PedidoId = itemPedido.Pedido.Id,
             Quantidade = quantidade,
             Tipo = "Saída",
+            Ator = usuario,
+            Origem = OrigemMovimentacaoEstoque.AlteracaoPedido,
             Observacao = $"[SAIDA] | [PEDIDO-ALTERAÇÃO] | {usuario.ToUpper()} | PEDIDO: [{itemPedido.Pedido.Id.ToString()}]",
             Data = DateTime.Now
         };

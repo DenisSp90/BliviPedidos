@@ -25,7 +25,7 @@
                     if (Model.Pedidos.Count != 0)
                     {
                         valorPrevisto = Model.Pedidos.Sum(x => Convert.ToDecimal(x.ValorTotalPedido));
-                        valorPago = Model.Pedidos.Where(p => p.Pago).Sum(x => Convert.ToDecimal(x.ValorTotalPedido));
+                        valorPago = Model.Pedidos.Where(p => p.StatusPagamento == StatusPagamento.Pago).Sum(x => Convert.ToDecimal(x.ValorTotalPedido));
 
                         if (valorPago != 0)
                             pa = Convert.ToInt32(Math.Abs((valorPago / valorPrevisto) * 100));
@@ -124,7 +124,7 @@
                             <div class="activity-item d-flex">
                                 <div class="activite-label">R$@pedido.ValorTotalPedido.ToString("N2")</div>
 
-                                @if (pedido.Pago)
+                                @if (pedido.StatusPagamento == StatusPagamento.Pago)
                                 {
                                     <i class='bi bi-circle-fill activity-badge text-success align-self-start'></i>
                                 }

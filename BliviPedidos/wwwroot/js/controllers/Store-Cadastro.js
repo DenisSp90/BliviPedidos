@@ -95,7 +95,7 @@ $(document).ready(function () {
     });
 });
 
-function atualizarEstadoPedido(idPedido, novoEstado) {
+function atualizarEstadoPedido(idPedido, novoStatusPagamento) {
     // Exibir mensagem de confirmação usando SweetAlert
     Swal.fire({
         title: 'Confirmar pagamento do pedido?',
@@ -114,7 +114,7 @@ function atualizarEstadoPedido(idPedido, novoEstado) {
             $.ajax({
                 type: "POST",
                 url: "/Store/AtualizarEstadoPagamento",
-                data: { idPedido: idPedido, pago: novoEstado },
+                data: { idPedido: idPedido, statusPagamento: novoStatusPagamento },
                 success: function (data) {
                     debugger;
 
@@ -148,8 +148,7 @@ function atualizarEstadoPedido(idPedido, novoEstado) {
 
 function cancelarPedido(idPedido) {
     debugger;
-    var novoEstado = $('#PedidoAtivo').val() === 'True' ? false : true; // Inverte o estado atual
-    var acao = novoEstado ? "cancelar" : "reativar";
+    var acao = "cancelar";
 
     Swal.fire({
         title: "Deseja " + acao + " o pedido #" + idPedido + "?",

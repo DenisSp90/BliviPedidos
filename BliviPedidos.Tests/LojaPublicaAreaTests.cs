@@ -48,7 +48,10 @@ public class LojaPublicaAreaTests
             Assert.Single(metodo.GetCustomAttributes(typeof(ValidateAntiForgeryTokenAttribute), true));
             Assert.Single(metodo.GetCustomAttributes(typeof(EnableRateLimitingAttribute), true));
             Assert.Single(metodo.GetCustomAttributes(typeof(RequestSizeLimitAttribute), true));
-            Assert.Single(metodo.GetCustomAttributes(typeof(RequestFormLimitsAttribute), true));
+            var limitesFormulario = Assert.Single(metodo
+                .GetCustomAttributes(typeof(RequestFormLimitsAttribute), true)
+                .Cast<RequestFormLimitsAttribute>());
+            Assert.True(limitesFormulario.ValueLengthLimit >= 1024);
         });
 
         var confirmar = typeof(HomeController).GetMethod(nameof(HomeController.ConfirmarCheckout));

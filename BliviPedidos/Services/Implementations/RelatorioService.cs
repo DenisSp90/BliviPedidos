@@ -135,7 +135,7 @@ public class RelatorioService : IRelatorioService
                     ? pedido.DataPedido.Value.ToString("dd/MM/yyyy HH:mm")
                     : "N/A")).SetBorder(new SolidBorder(1)));
                 table.AddCell(new Cell().Add(new Paragraph(pedido.ValorTotalPedido.ToString("F2"))).SetBorder(new SolidBorder(1)));
-                table.AddCell(new Cell().Add(new Paragraph(pedido.Pago ? "Sim" : "Não")).SetBorder(new SolidBorder(1)));
+                table.AddCell(new Cell().Add(new Paragraph(pedido.StatusPagamento.ToString())).SetBorder(new SolidBorder(1)));
                 table.AddCell(new Cell().Add(new Paragraph(pedido.Cadastro.Cliente.Email)).SetBorder(new SolidBorder(1)));
                 table.AddCell(new Cell().Add(new Paragraph(pedido.EmailResponsavel)).SetBorder(new SolidBorder(1)));
             }
@@ -218,7 +218,7 @@ public class RelatorioService : IRelatorioService
                 document.Add(new Paragraph("\nInformações do Pedido:")
                     .SetBold()
                     .SetFontColor(ColorConstants.BLACK));
-                document.Add(new Paragraph($"Pagamento: {(pedido.Pago ? "Sim" : "Não")}"));
+                document.Add(new Paragraph($"Pagamento: {pedido.StatusPagamento}"));
                 document.Add(new Paragraph($"Data do Pedido: {pedido.DataPedido?.ToString("dd/MM/yyyy HH:mm") ?? "N/A"}"));
                 document.Add(new Paragraph($"Data de Pagamento: {pedido.DataPagamento?.ToString("dd/MM/yyyy HH:mm") ?? "N/A"}"));
                 document.Add(new Paragraph($"Responsável pela Venda: {pedido.EmailResponsavel}"));

@@ -32,7 +32,7 @@ namespace BliviPedidos.Data
             modelBuilder.Entity<Cadastro>()
                 .HasQueryFilter(entidade => entidade.Pedido != null && entidade.Pedido.LojaId == LojaIdAtual);
             modelBuilder.Entity<ProdutoMovimentacao>()
-                .HasQueryFilter(entidade => entidade.Produto != null && entidade.Produto.LojaId == LojaIdAtual);
+                .HasQueryFilter(entidade => entidade.LojaId == LojaIdAtual);
 
             // Definir a chave primária para Produto
             modelBuilder.Entity<Produto>().HasKey(t => t.Id);
@@ -155,6 +155,22 @@ namespace BliviPedidos.Data
                 .HasOne(p => p.Produto)
                 .WithMany(m => m.ProdutoMovimentacao)
                 .HasForeignKey(p => p.ProdutoId);
+
+            modelBuilder.Entity<ProdutoMovimentacao>()
+                .HasOne(m => m.Loja)
+                .WithMany()
+                .HasForeignKey(m => m.LojaId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ProdutoMovimentacao>()
+                .HasOne(m => m.Pedido)
+                .WithMany()
+                .HasForeignKey(m => m.PedidoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ProdutoMovimentacao>().Property(m => m.Ator).HasMaxLength(256).IsRequired();
+            modelBuilder.Entity<ProdutoMovimentacao>().Property(m => m.Origem).HasMaxLength(64).IsRequired();
             
         }
 
@@ -194,6 +210,7 @@ namespace BliviPedidos.Data
                     Cliente entidade => AjustarLoja(entry.State, entidade.LojaId, id => entidade.LojaId = id),
                     Pedido entidade => AjustarLoja(entry.State, entidade.LojaId, id => entidade.LojaId = id),
                     UsuarioLoja entidade => AjustarLoja(entry.State, entidade.LojaId, id => entidade.LojaId = id),
+                    ProdutoMovimentacao entidade => AjustarLoja(entry.State, entidade.LojaId, id => entidade.LojaId = id),
                     _ => LojaIdAtual
                 };
 

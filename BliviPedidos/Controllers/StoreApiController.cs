@@ -215,7 +215,7 @@ public class StoreApiController : Controller
                 Quantidade = i.Quantidade
             }).ToList(),
             ValorTotalPedido = pedido.ValorTotalPedido, 
-            Pago = pedido.Pago,
+            StatusPagamento = pedido.StatusPagamento,
             DataPedido = pedido.DataPedido, 
             DataPagamento = pedido.DataPagamento, 
             EmailResponsavel = pedido.EmailResponsavel

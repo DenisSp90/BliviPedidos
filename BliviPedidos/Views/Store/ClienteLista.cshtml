@@ -42,8 +42,8 @@
                                     <td>@Html.DisplayFor(modelItem => c.Telefone)</td>
                                     <td>@Html.DisplayFor(modelItem => c.Pedidos.Count)</td>
                                     <td>
-                                        @c.Pedidos.Count(p => !p.Pago)
-                                        @if (@c.Pedidos.Count(p => !p.Pago) > 0)
+                                        @c.Pedidos.Count(p => p.StatusPagamento != StatusPagamento.Pago)
+                                        @if (@c.Pedidos.Count(p => p.StatusPagamento != StatusPagamento.Pago) > 0)
                                         {
                                             <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Pendências</span>
                                         }

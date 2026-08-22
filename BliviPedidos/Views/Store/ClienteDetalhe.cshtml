@@ -21,7 +21,7 @@
             <div class="row">
                 @{
                     var valorTotal = Model.Cliente.Pedidos.Sum(x => Convert.ToDecimal(x.ValorTotalPedido));
-                    var valorPago = Model.Cliente.Pedidos.Where(p => p.Pago).Sum(x => Convert.ToDecimal(x.ValorTotalPedido));
+                    var valorPago = Model.Cliente.Pedidos.Where(p => p.StatusPagamento == StatusPagamento.Pago).Sum(x => Convert.ToDecimal(x.ValorTotalPedido));
                     var valorDif = valorTotal - valorPago;
 
                 }
@@ -206,7 +206,7 @@
                                             var hoje = DateTime.Now;
                                             var classeLinha = "";
 
-                                            if (p.Pago)
+                                            if (p.StatusPagamento == StatusPagamento.Pago)
                                             {
                                                 classeLinha = "table-success";
                                             }
@@ -228,17 +228,17 @@
                                                     </a>
                                                 </td>
                                                 <td>
-                                                        @if (!p.Ativo)
+                                                        @if (p.Status == StatusPedido.Cancelado)
                                                         {
                                                         <span class="badge bg-danger"><i class="bi bi-exclamation-octagon me-1"></i> Cancelado</span>
                                                         }
-                                                        else if (p.Pago)
+                                                        else if (p.Status == StatusPedido.Concluido)
                                                         {
-                                                        <span class="badge rounded-pill bg-success">Pago</span>
+                                                        <span class="badge rounded-pill bg-success">Concluído</span>
                                                         }
                                                         else
                                                         {
-                                                        <span class="badge rounded-pill bg-warning text-dark">Pendente</span>
+                                                        <span class="badge rounded-pill bg-warning text-dark">@p.Status</span>
                                                         }
                                                 </td>
                                                 <td>

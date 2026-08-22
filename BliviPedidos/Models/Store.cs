@@ -110,6 +110,14 @@ namespace BliviPedidos.Models
             PrecoUnitario = precoUnitario;
         }
 
+        public ItemPedido(Pedido pedido, int produtoId, int quantidade, decimal precoUnitario)
+        {
+            Pedido = pedido;
+            ProdutoId = produtoId;
+            Quantidade = quantidade;
+            PrecoUnitario = precoUnitario;
+        }
+
         internal void AtualizaQuantidade(int quantidade)
         {
             Quantidade = quantidade;
@@ -139,12 +147,14 @@ namespace BliviPedidos.Models
         [Required]
         public virtual Cadastro Cadastro { get; set; }
 
-        public bool Ativo { get; set; }
+        public StatusPedido Status { get; set; } = StatusPedido.Carrinho;
 
-        public bool Pago { get; set; }
+        public StatusPagamento StatusPagamento { get; set; } = StatusPagamento.AguardandoPagamento;
 
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime? DataPedido { get; set; }
+
+        public DateTime? ReservaExpiraEm { get; set; }
 
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime? DataPagamento { get; set; }

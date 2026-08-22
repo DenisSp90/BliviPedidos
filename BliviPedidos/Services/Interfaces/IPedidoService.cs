@@ -4,9 +4,9 @@ namespace BliviPedidos.Services.Interfaces
 {
     public interface IPedidoService
     {
-        Task AtualizarStatusPagamentoAsync(int pedidoId, bool novoStatusPagamento);
+        Task AtualizarStatusPagamentoAsync(int pedidoId, StatusPagamento novoStatusPagamento);
         void AddItem(int id);
-        Task RegistrarCancelamentoPedido(int pedidoId);
+        Task RegistrarCancelamentoPedido(int pedidoId, string? origem = null, string? ator = null);
         void ClearPedido();
         Pedido GetPedidoById(int id);
         Task<Pedido> GetPedidoByIdAsync(int id);

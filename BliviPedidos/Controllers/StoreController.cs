@@ -61,7 +61,7 @@ public class StoreController : Controller
 
     [HttpPost]
     [Authorize(Policy = PoliticasAutorizacao.Vendas)]
-    public async Task<IActionResult> AtualizarEstadoPagamento(int idPedido, bool pago)
+    public async Task<IActionResult> AtualizarEstadoPagamento(int idPedido, StatusPagamento statusPagamento)
     {
         try
         {
@@ -70,7 +70,7 @@ public class StoreController : Controller
             if (pedido == null)
                 return NotFound();
 
-            await _pedidoService.AtualizarStatusPagamentoAsync(idPedido, pago);
+            await _pedidoService.AtualizarStatusPagamentoAsync(idPedido, statusPagamento);
 
             if (!string.IsNullOrEmpty(pedido.Cadastro.Nome) && pedido.Cadastro.Nome != "AVULSO")
             {
@@ -80,22 +80,26 @@ public class StoreController : Controller
                 //    await EnviarEmailPagamento(pedido.Cadastro);
             }
 
-            return Ok(new { Ativo = pedido.Ativo, Pago = pago });
+            return Ok(new
+            {
+                StatusPedido = pedido.Status.ToString(),
+                StatusPagamento = statusPagamento.ToString()
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(
                 ex,
-                "Falha ao atualizar pagamento do pedido. PedidoId: {PedidoId}, Pago: {Pago}",
+                "Falha ao atualizar pagamento do pedido. PedidoId: {PedidoId}, StatusPagamento: {StatusPagamento}",
                 idPedido,
-                pago);
+                statusPagamento);
             return BadRequest(ex.Message);
         }
     }
 
     [HttpPost]
     [Authorize(Policy = PoliticasAutorizacao.Vendas)]
-    public async Task<IActionResult> CancelarPedido(int idPedido, bool ativo)
+    public async Task<IActionResult> CancelarPedido(int idPedido)
     {
         var pedido = await _pedidoService.GetPedidoByIdAsync(idPedido);
 
@@ -107,7 +111,11 @@ public class StoreController : Controller
         await _pedidoService.RegistrarCancelamentoPedido(pedido.Id);
 
         // Retornar o estado atualizado do pedido
-        return Ok(new { Ativo = pedido.Ativo, Pago = pedido.Pago });
+        return Ok(new
+        {
+            StatusPedido = StatusPedido.Cancelado.ToString(),
+            StatusPagamento = StatusPagamento.Cancelado.ToString()
+        });
     }
 
     [Authorize(Policy = PoliticasAutorizacao.Estoque)]
@@ -291,7 +299,8 @@ public class StoreController : Controller
     public async Task<IActionResult> GetInfoPedidos()
     {
         var listaPedidosAtivos = _pedidoService.GetListaPedidosAtivosByEmail(HttpContext.User.Identity.Name);
-        var numeroPedidosNaoPagos = listaPedidosAtivos.Count(pedido => !pedido.Pago);
+        var numeroPedidosNaoPagos = listaPedidosAtivos.Count(
+            pedido => pedido.StatusPagamento != StatusPagamento.Pago);
         var numeroTotalPedidos = listaPedidosAtivos.Count;
 
         return Json(new { NumeroTotalPedidos = numeroTotalPedidos, NumeroPedidosNaoPagos = numeroPedidosNaoPagos });
@@ -348,7 +357,7 @@ public class StoreController : Controller
             if (pedido == null)
                 return View("PedidoNaoEncontrado");
 
-            if (!pedido.Ativo)
+            if (pedido.Status == StatusPedido.Carrinho)
                 return RedirectToAction("PedidoLista", "Store");
 
             var responsavel = _configuration["PixAppSettings:Responsavel"];
@@ -487,7 +496,8 @@ public class StoreController : Controller
                     cadastro.ClienteId = cliente.Id;
                 }
 
-                cadastro.Pedido.Ativo = true;
+                cadastro.Pedido.Status = StatusPedido.Confirmado;
+                cadastro.Pedido.StatusPagamento = StatusPagamento.AguardandoPagamento;
                 cadastro.Pedido.EmailResponsavel = HttpContext.User.Identity.Name;
                 cadastro.Pedido.DataPedido = DateTime.Now;
 

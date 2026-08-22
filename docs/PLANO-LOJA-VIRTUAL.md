@@ -86,13 +86,13 @@ Conclusao: o visitante confirma um pedido sem poder manipular preco ou estoque.
 
 ## Fase 5 - estoque e ciclo do pedido
 
-- [ ] Substituir `Ativo` por um status de pedido explicito.
-- [ ] Separar status do pedido de status do pagamento.
-- [ ] Confirmar pedido e reservar/baixar estoque na mesma transacao.
-- [ ] Implementar controle de concorrencia para a ultima unidade.
-- [ ] Restaurar estoque de forma idempotente ao cancelar.
-- [ ] Registrar ator, origem, pedido e loja em cada movimentacao.
-- [ ] Definir expiracao de reservas nao pagas, caso sejam usadas.
+- [x] Substituir `Ativo` por um status de pedido explicito.
+- [x] Separar status do pedido de status do pagamento.
+- [x] Confirmar pedido e reservar/baixar estoque na mesma transacao.
+- [x] Implementar controle de concorrencia para a ultima unidade.
+- [x] Restaurar estoque de forma idempotente ao cancelar.
+- [x] Registrar ator, origem, pedido e loja em cada movimentacao.
+- [x] Definir expiracao de reservas nao pagas, caso sejam usadas.
 
 Estados sugeridos: `Carrinho`, `AguardandoPagamento`, `Confirmado`,
 `EmPreparacao`, `Pronto`, `Enviado`, `Concluido` e `Cancelado`.

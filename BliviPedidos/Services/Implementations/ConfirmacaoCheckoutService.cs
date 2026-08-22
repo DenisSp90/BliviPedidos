@@ -3,6 +3,7 @@ using BliviPedidos.Data;
 using BliviPedidos.Models;
 using BliviPedidos.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace BliviPedidos.Services.Implementations;
 
@@ -12,17 +13,20 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
     private readonly ICarrinhoPublicoService _carrinhoService;
     private readonly IDadosConsumidorCheckoutService _dadosService;
     private readonly ILogger<ConfirmacaoCheckoutService> _logger;
+    private readonly ReservaEstoqueOptions _reservaOptions;
 
     public ConfirmacaoCheckoutService(
         ApplicationDbContext context,
         ICarrinhoPublicoService carrinhoService,
         IDadosConsumidorCheckoutService dadosService,
-        ILogger<ConfirmacaoCheckoutService> logger)
+        ILogger<ConfirmacaoCheckoutService> logger,
+        IOptions<ReservaEstoqueOptions> reservaOptions)
     {
         _context = context;
         _carrinhoService = carrinhoService;
         _dadosService = dadosService;
         _logger = logger;
+        _reservaOptions = reservaOptions.Value;
     }
 
     public async Task<ResultadoConfirmacaoCheckout> ConfirmarAsync(
@@ -48,6 +52,7 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
             var quantidades = grupos.ToDictionary(grupo => grupo.Key, grupo => grupo.Single().Quantidade);
             var produtosIds = quantidades.Keys.ToArray();
             var produtos = await _context.Produto
+                .AsNoTracking()
                 .Where(produto => produto.LojaId == lojaId && produtosIds.Contains(produto.Id))
                 .ToListAsync(cancellationToken);
 
@@ -75,9 +80,10 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
             var pedido = new Pedido(cadastro)
             {
                 LojaId = lojaId,
-                Ativo = true,
-                Pago = false,
+                Status = StatusPedido.Confirmado,
+                StatusPagamento = StatusPagamento.AguardandoPagamento,
                 DataPedido = DateTime.UtcNow,
+                ReservaExpiraEm = DateTime.UtcNow.AddMinutes(Math.Max(1, _reservaOptions.ExpiracaoMinutos)),
                 EmailResponsavel = dados.Email,
                 CodigoPublico = CodigoPublicoPedido.Gerar()
             };
@@ -85,8 +91,24 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
             foreach (var produto in produtos)
             {
                 var quantidade = quantidades[produto.Id];
-                pedido.Itens.Add(new ItemPedido(pedido, produto, quantidade, produto.PrecoVenda));
-                produto.Quantidade -= quantidade;
+                var linhasAfetadas = await _context.Produto
+                    .Where(item => item.Id == produto.Id
+                        && item.LojaId == lojaId
+                        && item.IsAtivo
+                        && item.Quantidade >= quantidade)
+                    .ExecuteUpdateAsync(
+                        setters => setters.SetProperty(
+                            item => item.Quantidade,
+                            item => item.Quantidade - quantidade),
+                        cancellationToken);
+
+                if (linhasAfetadas != 1)
+                    return await ReverterAsync(
+                        transaction,
+                        $"Não há estoque suficiente de “{produto.Nome}”.",
+                        cancellationToken);
+
+                pedido.Itens.Add(new ItemPedido(pedido, produto.Id, quantidade, produto.PrecoVenda));
             }
             pedido.ValorTotalPedido = pedido.Itens.Sum(item => item.Subtotal);
             _context.Pedido.Add(pedido);
@@ -97,8 +119,12 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
                 _context.ProdutoMovimentacao.Add(new ProdutoMovimentacao
                 {
                     ProdutoId = item.ProdutoId,
+                    LojaId = lojaId,
+                    PedidoId = pedido.Id,
                     Quantidade = item.Quantidade,
                     Tipo = "Saída",
+                    Ator = dados.Email ?? "CONSUMIDOR",
+                    Origem = OrigemMovimentacaoEstoque.CheckoutPublico,
                     Observacao = $"[SAIDA] | [CHECKOUT-PUBLICO] | PEDIDO: [{pedido.Id}]",
                     Data = DateTime.UtcNow
                 });

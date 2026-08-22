@@ -25,7 +25,7 @@
                         <div class="card-body">
                             <br />
                             <input type="hidden" id="PedidoId" value="@Model.Pedido.Id" />
-                            <input type="hidden" id="PedidoAtivo" value="@Model.Pedido.Ativo" />
+                            <input type="hidden" id="PedidoStatus" value="@Model.Pedido.Status" />
 
                             <div class="card top-selling overflow-auto">
                                 <div class="card-body pb-0">
@@ -278,15 +278,18 @@
 
                                             <!-- Segunda coluna -->
                                             <div class="col-md-8">
-                                                @if (!Model.Pedido.Pago)
+                                                @if (Model.Pedido.StatusPagamento != StatusPagamento.Pago)
                                                 {
-                                                    <button type="button" class="btn btn-outline-success btn-sm mb-2 w-100" onclick="atualizarEstadoPedido(@Model.Pedido.Id, true)">
+                                                    <button type="button" class="btn btn-outline-success btn-sm mb-2 w-100" onclick="atualizarEstadoPedido(@Model.Pedido.Id, 'Pago')">
                                                         <i class="bi bi-check2-square"></i> Marcar como Pago
                                                     </button>
                                                 }
-                                                <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="cancelarPedido(@Model.Pedido.Id)">
-                                                    <i class="bi bi-x-square"></i> Cancelar Pedido
-                                                </button>
+                                                @if (Model.Pedido.Status != StatusPedido.Cancelado && Model.Pedido.Status != StatusPedido.Concluido)
+                                                {
+                                                    <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="cancelarPedido(@Model.Pedido.Id)">
+                                                        <i class="bi bi-x-square"></i> Cancelar Pedido
+                                                    </button>
+                                                }
                                             </div>
 
                                         </div>
@@ -295,21 +298,10 @@
                                     <div class="card-footer d-flex justify-content-between">
                                         <div>
 
-                                            @if (Model.Pedido.Ativo)
-                                            {
-
-                                                <button type="button" class="btn btn-primary mb-2">
-                                                    <i class="bi bi-check-circle"></i> Ativo
-                                                </button>
-                                            }
+                                            <span class="badge bg-primary fs-6">@Model.Pedido.Status</span>
                                         </div>
                                         <div>
-                                            @if (Model.Pedido.Pago)
-                                            {
-                                                <button type="button" class="btn btn-success mb-2">
-                                                    <i class="bi bi-check-circle me-1"></i> Pago
-                                                </button>
-                                            }
+                                            <span class="badge bg-success fs-6">@Model.Pedido.StatusPagamento</span>
                                         </div>
                                     </div>
                                 </div>

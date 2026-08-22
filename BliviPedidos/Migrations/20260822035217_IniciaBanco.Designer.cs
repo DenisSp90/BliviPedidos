@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BliviPedidos.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260822000231_IniciaBanco")]
+    [Migration("20260822035217_IniciaBanco")]
     partial class IniciaBanco
     {
         /// <inheritdoc />
@@ -275,11 +275,12 @@ namespace BliviPedidos.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<int?>("ClienteId")
                         .HasColumnType("int");
+
+                    b.Property<string>("CodigoPublico")
+                        .HasMaxLength(22)
+                        .HasColumnType("varchar(22)");
 
                     b.Property<DateTime?>("DataPagamento")
                         .HasColumnType("datetime(6)");
@@ -296,12 +297,18 @@ namespace BliviPedidos.Migrations
                     b.Property<bool>("Pago")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("ValorTotalPedido")
                         .HasColumnType("decimal(65,30)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ClienteId");
+
+                    b.HasIndex("CodigoPublico")
+                        .IsUnique();
 
                     b.HasIndex("LojaId");
 

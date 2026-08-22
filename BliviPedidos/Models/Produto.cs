@@ -72,10 +72,28 @@ public class ProdutoMovimentacao
 {
     public int Id { get; set; }
     public int? ProdutoId { get; set; }
+    public int LojaId { get; set; } = Loja.PadraoId;
+    public int? PedidoId { get; set; }
     public DateTime Data { get; set; } = DateTime.Now;
     public int Quantidade { get; set; }
     public string Tipo { get; set; } = string.Empty; // "Entrada", "Saída" , "Cancelado", "Troca"
+    public string Ator { get; set; } = "SISTEMA";
+    public string Origem { get; set; } = OrigemMovimentacaoEstoque.Legado;
     public string? Observacao { get; set; }
 
-    public Produto Produto { get; set; }
+    public Produto? Produto { get; set; }
+    public Loja Loja { get; set; } = null!;
+    public Pedido? Pedido { get; set; }
+}
+
+public static class OrigemMovimentacaoEstoque
+{
+    public const string Legado = "Legado";
+    public const string CadastroProduto = "CadastroProduto";
+    public const string EdicaoEstoque = "EdicaoEstoque";
+    public const string PedidoInterno = "PedidoInterno";
+    public const string AlteracaoPedido = "AlteracaoPedido";
+    public const string CheckoutPublico = "CheckoutPublico";
+    public const string CancelamentoPedido = "CancelamentoPedido";
+    public const string ExpiracaoReserva = "ExpiracaoReserva";
 }

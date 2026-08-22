@@ -369,7 +369,9 @@ namespace BliviPedidos.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     LojaId = table.Column<int>(type: "int", nullable: false),
-                    Ativo = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CodigoPublico = table.Column<string>(type: "varchar(22)", maxLength: 22, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Status = table.Column<int>(type: "int", nullable: false),
                     Pago = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     DataPedido = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     DataPagamento = table.Column<DateTime>(type: "datetime(6)", nullable: true),
@@ -586,6 +588,12 @@ namespace BliviPedidos.Migrations
                 name: "IX_Pedido_ClienteId",
                 table: "Pedido",
                 column: "ClienteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Pedido_CodigoPublico",
+                table: "Pedido",
+                column: "CodigoPublico",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Pedido_LojaId",
