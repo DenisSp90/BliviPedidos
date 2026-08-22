@@ -18,7 +18,7 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Editar o Produto</h5>
-                    <form id="formulario" class="row g-3" method="post" enctype="multipart/form-data" asp-action="ProdutoEditar">
+                    <form id="formulario" class="row g-3" method="post" asp-action="ProdutoEditar">
                         <input id="hiddenProdutoId" type="hidden" asp-for="Id" />
 
                         <div class="col-12">
@@ -56,13 +56,21 @@
                                             <span asp-validation-for="CategoriaId" class="text-danger"></span>
                                         </div>
 
-                                        <div class="col-12">
-                                            <div class="form-check">
+                                            <div class="col-12">
+                                                <div class="form-check">
                                                 <input asp-for="IsAtivo" class="form-check-input" type="checkbox">
                                                     <label asp-for="IsAtivo" class="form-check-label">
                                                         Ativo
                                                     </label>
                                                 </div>
+                                            </div>
+
+                                            <div class="col-12">
+                                                <label asp-for="Foto" class="form-label"></label>
+                                                <input asp-for="Foto" type="url" class="form-control"
+                                                       placeholder="https://exemplo.com/imagens/produto.jpg" />
+                                                <div class="form-text">Use um endereço público HTTPS para a imagem do produto.</div>
+                                                <span asp-validation-for="Foto" class="text-danger"></span>
                                             </div>
 
                                             <div class="card-footer d-flex justify-content-between">
@@ -88,7 +96,9 @@
                                             <div class="panel-body" style="text-align: center; height: 200px; display: flex; justify-content: center; align-items: center;">
                                                 @if (Model.Foto != null && Model.Foto.Length > 0)
                                                 {
-                                                    <img id="imagemPreview" src="@Model.Foto" alt="Product Image" style="max-width: 100%; max-height: 100%;" />
+                                                    <img id="imagemPreview" src="@Model.Foto" alt="Imagem do produto"
+                                                         onerror="this.onerror=null;this.src='@Url.Content("~/img/default.png")';"
+                                                         style="max-width: 100%; max-height: 100%;" />
                                                 }
                                                 else
                                                 {
@@ -96,9 +106,9 @@
                                                 }
                                             </div>
                                         </div>
-                                        <div class="d-flex justify-content-center mt-3">
-                                            <button id="openModal" class="btn btn-primary">Substituir Imagem</button>
-                                        </div>
+                                        <p class="text-muted small text-center mt-3 mb-0">
+                                            A imagem é atualizada ao salvar a URL informada no produto.
+                                        </p>
                                     </div>
                                 </div>
 
@@ -149,27 +159,6 @@
                                 </div>
             
 
-                                <!-- Modal HTML -->
-                                <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="imageModalLabel">Substituir Imagem do Produto</h5>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <input id="inputFoto" name="foto" type="file" class="form-control" accept="image/*" />
-                                                <img id="modalPreview" src="" alt="Preview da Imagem" style="display: none; max-width: 100%; max-height: 100%; margin-top: 10px;" />
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                                                <button type="button" id="saveImage" class="btn btn-primary">Salvar Imagem</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 

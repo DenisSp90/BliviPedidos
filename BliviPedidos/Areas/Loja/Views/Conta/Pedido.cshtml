@@ -12,6 +12,7 @@
     <a class="text-decoration-none" href="@Url.RouteUrl("MeusPedidosConsumidorLoja", new { lojaSlug = Model.Loja.Slug })">&larr; Meus pedidos</a>
     <div class="bg-white border rounded-3 shadow-sm p-4 mt-3">
         <div class="d-flex flex-wrap justify-content-between gap-3">
+            <div><span class="text-secondary d-block">Pedido</span><strong>#@Model.PedidoId</strong></div>
             <div><span class="text-secondary d-block">Código</span><strong class="font-monospace">@Model.CodigoPublico</strong></div>
             <div><span class="text-secondary d-block">Status</span><strong>@Model.Status</strong></div>
             <div><span class="text-secondary d-block">Pagamento</span><strong>@Model.StatusPagamento</strong></div>
@@ -19,14 +20,21 @@
         <hr />
         <div class="table-responsive">
             <table class="table align-middle">
-                <thead><tr><th>Produto</th><th>Quantidade</th><th>Preço</th><th>Subtotal</th></tr></thead>
+                <thead><tr><th>Imagem</th><th>Produto</th><th>Quantidade</th><th>Preço</th><th>Subtotal</th></tr></thead>
                 <tbody>
                 @foreach (var item in Model.Itens)
                 {
-                    <tr><td>@item.Produto</td><td>@item.Quantidade</td><td>@item.PrecoUnitario.ToString("C")</td><td>@item.Subtotal.ToString("C")</td></tr>
+                    <tr>
+                        <td>
+                            <img src="@(string.IsNullOrWhiteSpace(item.Foto) ? Url.Content("~/img/default.png") : item.Foto)" referrerpolicy="no-referrer"
+                                 onerror="this.onerror=null;this.src='@Url.Content("~/img/default.png")';"
+                                 alt="@item.Produto" width="56" height="56" class="rounded border object-fit-cover" loading="lazy" />
+                        </td>
+                        <td>@item.Produto</td><td>@item.Quantidade</td><td>@item.PrecoUnitario.ToString("C")</td><td>@item.Subtotal.ToString("C")</td>
+                    </tr>
                 }
                 </tbody>
-                <tfoot><tr><th colspan="3">Total</th><th>@Model.Total.ToString("C")</th></tr></tfoot>
+                <tfoot><tr><th colspan="4">Total</th><th>@Model.Total.ToString("C")</th></tr></tfoot>
             </table>
         </div>
         @if (!string.IsNullOrWhiteSpace(Model.PixQrCodeBase64) && !string.IsNullOrWhiteSpace(Model.PixCopiaECola))

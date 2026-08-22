@@ -245,6 +245,7 @@ public sealed class ContaController : Controller
             .OrderByDescending(pedido => pedido.DataPedido)
             .Select(pedido => new ResumoPedidoConsumidorViewModel
             {
+                PedidoId = pedido.Id,
                 CodigoPublico = pedido.CodigoPublico!,
                 DataPedido = pedido.DataPedido,
                 Status = pedido.Status,
@@ -271,6 +272,7 @@ public sealed class ContaController : Controller
             .Where(item => item.ConsumidorUsuarioId == usuarioId && item.CodigoPublico == codigoPublico)
             .Select(item => new PedidoConsumidorDetalheViewModel
             {
+                PedidoId = item.Id,
                 CodigoPublico = item.CodigoPublico!,
                 DataPedido = item.DataPedido,
                 Status = item.Status,
@@ -279,6 +281,7 @@ public sealed class ContaController : Controller
                 Itens = item.Itens.Select(produto => new ItemPedidoConsumidorViewModel
                 {
                     Produto = produto.Produto.Nome,
+                    Foto = produto.Produto.Foto,
                     Quantidade = produto.Quantidade,
                     PrecoUnitario = produto.PrecoUnitario
                 }).ToList()

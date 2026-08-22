@@ -18,7 +18,7 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Cadastro de Produtos</h5>
-                    <form class="row g-3" id="formulario" method="post" enctype="multipart/form-data" asp-action="ProdutoCadastro">
+                    <form class="row g-3" id="formulario" method="post" asp-action="ProdutoCadastro">
                         <div class="col-12">
                             <label asp-for="Nome" class="col-sm-2 col-form-label"></label>
                             <input asp-for="Nome" type="text" placeholder="Nome do Produto" class="form-control">
@@ -65,6 +65,14 @@
                                 </label>
                                 <div class="form-text">O produto também precisa possuir quantidade maior que zero para aparecer na loja.</div>
                             </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Foto" class="form-label"></label>
+                            <input asp-for="Foto" type="url" class="form-control"
+                                   placeholder="https://exemplo.com/imagens/produto.jpg" />
+                            <div class="form-text">Use um endereço público HTTPS para a imagem do produto.</div>
+                            <span asp-validation-for="Foto" class="text-danger"></span>
                         </div>
 
                         <div class="card-footer d-flex justify-content-between">

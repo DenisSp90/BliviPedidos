@@ -29,6 +29,8 @@ public class ProdutoViewModel
 
     public string? CodeBar { get; set; }
 
+    [Url(ErrorMessage = "Informe uma URL válida para a imagem.")]
+    [Display(Name = "URL da imagem")]
     public string? Foto { get; set; } = string.Empty;
 
     public bool IsAtivo { get; set; } = true;

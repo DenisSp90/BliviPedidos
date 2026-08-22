@@ -54,47 +54,9 @@ $(document).ready(function () {
     var nomeProduto = $('#NomeHidden').val();
     $('#NomeProduto').val(nomeProduto);
 
-    var caminhoImagemServidor = $('#imagemPreview').attr('src');
-    $('#caminhoImagem').val(caminhoImagemServidor);
-
-    $('#openModal').click(function () {
-        $('#imageModal').modal('show');
-    });
-
-    $('#inputFoto').change(function () {
-        if (this.files && this.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                $('#modalPreview').attr('src', e.target.result).show();
-            }
-            reader.readAsDataURL(this.files[0]);
-        }
-    });
-
-    $('#saveImage').click(function () {
-        var formData = new FormData();
-        var file = $('#inputFoto')[0].files[0];
-        var produtoId = $('#hiddenProdutoId').val(); // Pega o ID do produto do campo oculto
-
-        if (file) {
-            formData.append('Foto', file);
-
-            $.ajax({
-                url: '/Store/UploadImagem/' + produtoId, // Envia o ID do produto na URL
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (response) {
-                    $('#imagemPreview').attr('src', response.imagemUrl);
-                    $('#imageModal').modal('hide');
-                    location.reload();
-                },
-                error: function () {
-                    alert('Erro ao salvar a imagem.');
-                }
-            });
-        }
+    $('#Foto').on('input change', function () {
+        var url = $(this).val().trim();
+        $('#imagemPreview').attr('src', url || '/img/default.png');
     });
     
 });

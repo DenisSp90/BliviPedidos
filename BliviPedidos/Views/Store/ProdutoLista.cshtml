@@ -121,6 +121,7 @@
                             <thead>
                                 <tr>
                                     <th>Opções</th>
+                                    <th>Imagem</th>
                                     <th>@Html.DisplayNameFor(model => model.Id)</th>
                                     <th>@Html.DisplayNameFor(model => model.Nome)</th>
                                     <th>@Html.DisplayNameFor(model => model.PrecoPago)</th>
@@ -138,6 +139,11 @@
                                                 <a class="btn btn-info btn-sm" asp-action="ProdutoDetalhe" asp-route-id="@produto.Id"><i class="bi bi-info-circle"></i></a>
                                                 <a class="btn btn btn-danger btn-sm delete-btn" data-id="@produto.Id" href="/Store/ProdutoDelete/@produto.Id"><i class="bi bi-trash"></i></a>
                                             </div>
+                                        </td>
+                                        <td>
+                                            <img src="@(string.IsNullOrWhiteSpace(produto.Foto) ? Url.Content("~/img/default.png") : produto.Foto)"
+                                                 onerror="this.onerror=null;this.src='@Url.Content("~/img/default.png")';"
+                                                 alt="@produto.Nome" width="52" height="52" class="rounded border object-fit-cover" loading="lazy" />
                                         </td>
                                         <td>@produto.Id</td>
                                         <td>

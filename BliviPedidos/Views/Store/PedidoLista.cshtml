@@ -143,6 +143,26 @@
                     </div>
                 </div>
 
+                <div class="card-body pt-0">
+                    <form asp-action="PedidoLista" method="get" class="row g-2 align-items-end">
+                        <input type="hidden" name="filtro" value="@Model.FiltroRegistros" />
+                        <div class="col-md-8 col-lg-6">
+                            <label for="busca" class="form-label">Localizar pedido</label>
+                            <input id="busca" name="busca" value="@Model.BuscaPedido" class="form-control"
+                                   placeholder="Número interno ou código público" />
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i> Buscar</button>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(Model.BuscaPedido))
+                        {
+                            <div class="col-auto">
+                                <a asp-action="PedidoLista" asp-route-filtro="@Model.FiltroRegistros" class="btn btn-light">Limpar</a>
+                            </div>
+                        }
+                    </form>
+                </div>
+
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="datatable table">
@@ -150,6 +170,7 @@
                                 <tr>
                                     <th>Ação</th>
                                     <th>N°</th>
+                                    <th>Código público</th>
                                     <th>Pago</th>
                                     <th>Nome</th>
                                     <th>Total</th>
@@ -165,7 +186,7 @@
 
                                     string numeroTelefone = new String(p.Cadastro.Telefone.Where(Char.IsDigit).ToArray());
                                     string linkWhatsApp = "https://api.whatsapp.com/send?phone=" + numeroTelefone +
-                                    "&text=Recebemos%20seu%20pedido%20número%20" + p.Id.ToString();
+                                    "&text=Recebemos%20seu%20pedido%20" + Uri.EscapeDataString(p.CodigoPublico ?? p.Id.ToString());
 
                                     <tr class="@classeLinha">
                                         <td>
@@ -174,6 +195,7 @@
                                             </a>
                                         </td>
                                         <td>@Html.DisplayFor(modelItem => p.Id)</td>
+                                        <td class="font-monospace">@(p.CodigoPublico ?? "-")</td>
                                         <td>
                                             @if (p.StatusPagamento == StatusPagamento.Pago)
                                             {

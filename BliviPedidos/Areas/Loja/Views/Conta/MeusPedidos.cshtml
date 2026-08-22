@@ -18,11 +18,12 @@
     {
         <div class="table-responsive bg-white border rounded-3 shadow-sm">
             <table class="table align-middle mb-0">
-                <thead><tr><th>Código</th><th>Data</th><th>Pedido</th><th>Pagamento</th><th>Total</th><th></th></tr></thead>
+                <thead><tr><th>Nº</th><th>Código</th><th>Data</th><th>Pedido</th><th>Pagamento</th><th>Total</th><th></th></tr></thead>
                 <tbody>
                 @foreach (var pedido in Model.Pedidos)
                 {
                     <tr>
+                        <td>#@pedido.PedidoId</td>
                         <td class="font-monospace">@pedido.CodigoPublico</td>
                         <td>@pedido.DataPedido?.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
                         <td>@pedido.Status</td>

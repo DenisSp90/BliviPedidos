@@ -15,10 +15,12 @@
         <h1 class="h2 mt-3">Pedido confirmado</h1>
         <p class="text-secondary">Recebemos seu pedido. A loja dará continuidade ao atendimento.</p>
         <div class="alert alert-light border my-4">
+            <span class="d-block small text-secondary">Número do pedido</span>
+            <strong class="fs-5">#@Model.PedidoId</strong>
             <span class="d-block small text-secondary">Código para acompanhamento</span>
             <strong class="fs-4 font-monospace user-select-all">@Model.CodigoPublico</strong>
         </div>
-        <p class="small text-secondary">Guarde este código. Ele não corresponde ao número interno do pedido.</p>
+        <p class="small text-secondary">Informe o número ou o código público ao entrar em contato com a loja.</p>
         @if (!string.IsNullOrWhiteSpace(Model.PixQrCodeBase64) && !string.IsNullOrWhiteSpace(Model.PixCopiaECola))
         {
             <hr class="my-4" />

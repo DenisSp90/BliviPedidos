@@ -17,6 +17,7 @@ public class StoreViewModel
     public decimal ValorPedidosNaoPagos { get; set; }
 
     public int FiltroRegistros { get; set; }
+    public string? BuscaPedido { get; set; }
     public string PixKey { get; set; }
     public string PixQRCodeUrl { get; set; }
 

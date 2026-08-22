@@ -5,7 +5,8 @@
 @model BliviPedidos.Models.ViewModels.StoreViewModel
 
 <div class="pagetitle">
-    <h1>Detalhes do Pedidos - # @Model.Pedido.Id</h1>
+    <h1>Detalhes do Pedido #@Model.Pedido.Id</h1>
+    <p class="text-secondary mb-2">Código público: <strong class="font-monospace">@(Model.Pedido.CodigoPublico ?? "Não gerado")</strong></p>
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Página Inicial</a></li>
@@ -60,7 +61,9 @@
                                                     <th scope="row">
                                                         @if (item.Produto.Foto != null && item.Produto.Foto.Length > 0)
                                                         {
-                                                            <img id="imagemPreview" src="@item.Produto.Foto" alt="Imagem do Produto" style="max-width: 100px; max-height: 100px;" />
+                                                            <img src="@item.Produto.Foto" alt="Imagem do Produto"
+                                                                 onerror="this.onerror=null;this.src='@Url.Content("~/img/default.png")';"
+                                                                 style="max-width: 100px; max-height: 100px;" />
                                                         }
                                                         else
                                                         {

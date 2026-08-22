@@ -21,7 +21,8 @@
             <div class="loja-detalhe-imagem rounded-4 overflow-hidden">
                 @if (!string.IsNullOrWhiteSpace(Model.Produto.Foto))
                 {
-                    <img src="@Model.Produto.Foto" alt="@Model.Produto.Nome" />
+                    <img src="@Model.Produto.Foto" alt="@Model.Produto.Nome" referrerpolicy="no-referrer"
+                         onerror="this.onerror=null;this.src='@Url.Content("~/img/default.png")';" />
                 }
                 else
                 {

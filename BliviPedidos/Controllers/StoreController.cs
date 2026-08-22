@@ -437,7 +437,7 @@ public class StoreController : Controller
     }
 
     [Authorize(Policy = PoliticasAutorizacao.Vendas)]
-    public IActionResult PedidoLista(int filtro)
+    public IActionResult PedidoLista(int filtro, string? busca = null)
     {
         try
         {
@@ -446,14 +446,23 @@ public class StoreController : Controller
 
             StoreViewModel storeViewModel = new StoreViewModel();
 
-            if (filtro == 1)
-                storeViewModel.Pedidos = _pedidoService.GetListaPedidosAtivos()
-                    .OrderByDescending(p => p.Id).ToList();
-            else if (filtro == 2)
-                storeViewModel.Pedidos = _pedidoService.GetListaPedidosAtivosByEmail(HttpContext.User.Identity.Name)
-                    .OrderByDescending(p => p.Id).ToList();
+            IEnumerable<Pedido> pedidos = filtro == 1
+                ? _pedidoService.GetListaPedidosAtivos()
+                : _pedidoService.GetListaPedidosAtivosByEmail(HttpContext.User.Identity!.Name!);
+
+            var buscaNormalizada = busca?.Trim();
+            if (!string.IsNullOrWhiteSpace(buscaNormalizada))
+            {
+                pedidos = pedidos.Where(pedido =>
+                    pedido.Id.ToString() == buscaNormalizada ||
+                    (!string.IsNullOrWhiteSpace(pedido.CodigoPublico) &&
+                     pedido.CodigoPublico.Contains(buscaNormalizada, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            storeViewModel.Pedidos = pedidos.OrderByDescending(p => p.Id).ToList();
 
             storeViewModel.FiltroRegistros = filtro;
+            storeViewModel.BuscaPedido = buscaNormalizada;
 
             return View(storeViewModel);
         }
@@ -807,36 +816,6 @@ public class StoreController : Controller
             // Retorna a view de erro em caso de exceção
             return View("Erro");
         }
-    }
-
-    [HttpPost]
-    [Route("Store/UploadImagem/{produtoId}")]
-    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
-    public async Task<IActionResult> UploadImagem(string produtoId)
-    {
-        if (Request.Form.Files.Count > 0 && !string.IsNullOrEmpty(produtoId))
-        {
-            var arquivo = Request.Form.Files[0];
-
-            var nomeArquivo = Path.GetFileNameWithoutExtension(arquivo.FileName);
-            var extensaoArquivo = Path.GetExtension(arquivo.FileName);
-            var nomeArquivoNovo = $"{nomeArquivo}_{System.Guid.NewGuid()}{extensaoArquivo}";
-
-            var caminhoArquivo = Path.Combine(_imagemPasta, nomeArquivoNovo);
-
-            using (var stream = new FileStream(caminhoArquivo, FileMode.Create))
-            {
-                await arquivo.CopyToAsync(stream);
-            }
-
-            var urlImagem = $"/imagens/produtos/{nomeArquivoNovo}";
-
-            await _produtoService.AtualizarImagemProdutoAsync(int.Parse(produtoId), urlImagem);
-
-            return Json(new { imagemUrl = urlImagem });
-        }
-
-        return BadRequest("Arquivo ou ID do produto não encontrados.");
     }
 
     [HttpPost]

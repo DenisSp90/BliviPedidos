@@ -59,6 +59,17 @@
                 @foreach (var item in Model.Itens)
                 {
                     <div class="d-flex align-items-center gap-3 p-3 border-bottom">
+                        @if (!string.IsNullOrWhiteSpace(item.Produto.Foto))
+                        {
+                            <img src="@item.Produto.Foto" alt="@item.Produto.Nome" width="72" height="72" referrerpolicy="no-referrer"
+                                 onerror="this.onerror=null;this.src='@Url.Content("~/img/default.png")';"
+                                 class="rounded border object-fit-cover flex-shrink-0" loading="lazy" />
+                        }
+                        else
+                        {
+                            <img src="~/img/default.png" alt="Produto sem imagem" width="72" height="72"
+                                 class="rounded border object-fit-cover flex-shrink-0" />
+                        }
                         <div class="flex-grow-1">
                             <strong>@item.Produto.Nome</strong>
                             <div class="small text-secondary">@item.Quantidade × @item.Produto.PrecoVenda.ToString("C")</div>

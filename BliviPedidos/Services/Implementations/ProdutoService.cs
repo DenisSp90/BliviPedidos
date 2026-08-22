@@ -26,17 +26,6 @@ namespace BliviPedidos.Services.Implementations
             _logger = logger;
         }
 
-        public async Task AtualizarImagemProdutoAsync(int produtoId, string nomeArquivoNovo)
-        {
-            var produto = await _context.Produto.SingleOrDefaultAsync(produto => produto.Id == produtoId);
-            if (produto != null)
-            {
-                produto.Foto = nomeArquivoNovo;
-                _context.Produto.Update(produto);
-                await _context.SaveChangesAsync();
-            }
-        }
-
         public async Task<List<Produto>> GetProdutosAsync()
         {
             return await _context.Produto.ToListAsync();
@@ -149,6 +138,9 @@ namespace BliviPedidos.Services.Implementations
                         // Atualiza o estado de atividade do produto
                         produtoAtual.IsAtivo = produto.IsAtivo;
                         produtoAtual.CategoriaId = produto.CategoriaId;
+                        produtoAtual.Foto = string.IsNullOrWhiteSpace(produto.Foto)
+                            ? null
+                            : produto.Foto.Trim();
 
                         // Salva as mudanças no banco de dados
                         _context.Produto.Update(produtoAtual);
@@ -157,7 +149,9 @@ namespace BliviPedidos.Services.Implementations
                 }
                 else
                 {
-                    produto.Foto = "/img/default.png";
+                    produto.Foto = string.IsNullOrWhiteSpace(produto.Foto)
+                        ? null
+                        : produto.Foto.Trim();
 
                     _context.Produto.Add(produto);
                     await _context.SaveChangesAsync();

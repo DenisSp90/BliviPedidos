@@ -295,7 +295,7 @@ public class HomeController : Controller
         var pedido = await _context.Pedido.AsNoTracking()
             .Where(item => item.CodigoPublico == codigoPublico
                 && item.ConsumidorUsuarioId == usuarioId)
-            .Select(item => new { item.ValorTotalPedido })
+            .Select(item => new { item.Id, item.ValorTotalPedido })
             .SingleOrDefaultAsync(HttpContext.RequestAborted);
         if (pedido == null)
             return NotFound();
@@ -316,6 +316,7 @@ public class HomeController : Controller
         return View(new PedidoConfirmadoViewModel
         {
             Loja = ProjetarLojaPublica(loja),
+            PedidoId = pedido.Id,
             CodigoPublico = codigoPublico,
             Total = pedido.ValorTotalPedido,
             PixCopiaECola = pagamento?.CopiaECola,

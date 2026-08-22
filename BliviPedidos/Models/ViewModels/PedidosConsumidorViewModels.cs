@@ -10,6 +10,7 @@ public sealed class MeusPedidosConsumidorViewModel
 
 public sealed class ResumoPedidoConsumidorViewModel
 {
+    public int PedidoId { get; init; }
     public string CodigoPublico { get; init; } = string.Empty;
     public DateTime? DataPedido { get; init; }
     public StatusPedido Status { get; init; }
@@ -20,6 +21,7 @@ public sealed class ResumoPedidoConsumidorViewModel
 public sealed class PedidoConsumidorDetalheViewModel
 {
     public LojaPublicaDto Loja { get; set; } = null!;
+    public int PedidoId { get; init; }
     public string CodigoPublico { get; init; } = string.Empty;
     public DateTime? DataPedido { get; init; }
     public StatusPedido Status { get; init; }
@@ -34,6 +36,7 @@ public sealed class PedidoConsumidorDetalheViewModel
 public sealed class ItemPedidoConsumidorViewModel
 {
     public string Produto { get; init; } = string.Empty;
+    public string? Foto { get; init; }
     public int Quantidade { get; init; }
     public decimal PrecoUnitario { get; init; }
     public decimal Subtotal => Quantidade * PrecoUnitario;

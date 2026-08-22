@@ -85,7 +85,8 @@
                         <div class="loja-produto-imagem">
                             @if (!string.IsNullOrWhiteSpace(produto.Foto))
                             {
-                                <img src="@produto.Foto" alt="@produto.Nome" loading="lazy" />
+                                <img src="@produto.Foto" alt="@produto.Nome" loading="lazy" referrerpolicy="no-referrer"
+                                     onerror="this.onerror=null;this.src='@Url.Content("~/img/default.png")';" />
                             }
                             else
                             {
