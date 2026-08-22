@@ -23,6 +23,21 @@ public class Loja
     [MaxLength(20)]
     public string? CorPrimaria { get; set; }
 
+    [MaxLength(20)]
+    public string? CorSecundaria { get; set; }
+
+    [MaxLength(600)]
+    public string? Descricao { get; set; }
+
+    [MaxLength(20)]
+    public string? Whatsapp { get; set; }
+
+    [MaxLength(255)]
+    public string? EmailContato { get; set; }
+
+    [MaxLength(500)]
+    public string? InstagramUrl { get; set; }
+
     public bool Ativa { get; set; } = true;
 
     public ICollection<Produto> Produtos { get; set; } = new List<Produto>();

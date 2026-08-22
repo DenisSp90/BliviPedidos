@@ -31,6 +31,29 @@ public class LojaViewModel
     [Display(Name = "Cor primária")]
     public string CorPrimaria { get; set; } = "#0d6efd";
 
+    [MaxLength(20)]
+    [RegularExpression("^#[0-9a-fA-F]{6}$", ErrorMessage = "Informe uma cor hexadecimal no formato #RRGGBB.")]
+    [Display(Name = "Cor secundária")]
+    public string CorSecundaria { get; set; } = "#ffffff";
+
+    [MaxLength(600)]
+    [Display(Name = "Descrição pública")]
+    public string? Descricao { get; set; }
+
+    [MaxLength(20)]
+    [Display(Name = "WhatsApp")]
+    public string? Whatsapp { get; set; }
+
+    [MaxLength(255)]
+    [EmailAddress(ErrorMessage = "Informe um e-mail válido.")]
+    [Display(Name = "E-mail de contato")]
+    public string? EmailContato { get; set; }
+
+    [MaxLength(500)]
+    [Url(ErrorMessage = "Informe uma URL válida.")]
+    [Display(Name = "URL do Instagram")]
+    public string? InstagramUrl { get; set; }
+
     [Display(Name = "Loja ativa")]
     public bool Ativa { get; set; } = true;
 }

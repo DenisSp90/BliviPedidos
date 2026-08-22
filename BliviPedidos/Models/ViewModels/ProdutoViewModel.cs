@@ -31,7 +31,7 @@ public class ProdutoViewModel
 
     public string? Foto { get; set; } = string.Empty;
 
-    public bool IsAtivo { get; set; }
+    public bool IsAtivo { get; set; } = true;
 
     public ICollection<ProdutoMovimentacao>? ProdutoMovimentacao { get; set; }
 

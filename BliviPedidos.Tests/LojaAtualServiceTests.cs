@@ -2,6 +2,7 @@ using System.Security.Claims;
 using BliviPedidos.Data;
 using BliviPedidos.Models;
 using BliviPedidos.Services.Implementations;
+using BliviPedidos.Services.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
@@ -36,6 +37,32 @@ public class LojaAtualServiceTests
     }
 
     [Fact]
+    public async Task AreaPublica_DevePriorizarSlugMesmoComUsuarioAutenticado()
+    {
+        await using var cenario = await Cenario.CriarAsync();
+        cenario.HttpContext.User = CriarUsuarioAutenticado(cenario.UsuarioId);
+        cenario.HttpContext.Request.RouteValues["area"] = "Loja";
+        cenario.HttpContext.Request.RouteValues["lojaSlug"] = "blivi-pedidos";
+
+        var loja = await cenario.Service.ObterLojaAsync();
+
+        Assert.Equal(Loja.PadraoId, loja.Id);
+    }
+
+    [Fact]
+    public async Task AreaPublica_ComSlugInexistente_DeveFalharComoNaoEncontrada()
+    {
+        await using var cenario = await Cenario.CriarAsync();
+        cenario.HttpContext.Request.RouteValues["area"] = "Loja";
+        cenario.HttpContext.Request.RouteValues["lojaSlug"] = "nao-existe";
+
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => cenario.Service.ObterLojaAsync());
+
+        Assert.Contains("nao-existe", exception.Message);
+    }
+
+    [Fact]
     public async Task Dominio_DeveResolverLojaPeloHostSemPorta()
     {
         await using var cenario = await Cenario.CriarAsync();
@@ -62,10 +89,10 @@ public class LojaAtualServiceTests
         await using var cenario = await Cenario.CriarAsync();
         cenario.HttpContext.User = CriarUsuarioAutenticado("usuario-sem-loja");
 
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+        var exception = await Assert.ThrowsAsync<UsuarioAutenticadoInexistenteException>(
             () => cenario.Service.ObterLojaAsync());
 
-        Assert.Contains("não está associado", exception.Message);
+        Assert.Contains("não existe mais", exception.Message);
     }
 
     private static ClaimsPrincipal CriarUsuarioAutenticado(string usuarioId)

@@ -1,0 +1,113 @@
+@model BliviPedidos.Models.ViewModels.CatalogoLojaViewModel
+
+@{
+    ViewData["Title"] = "Catálogo";
+    ViewData["LojaNome"] = Model.Loja.Nome;
+    ViewData["LojaSlug"] = Model.Loja.Slug;
+    ViewData["LojaLogo"] = Model.Loja.LogoUrl;
+    ViewData["LojaCorPrimaria"] = Model.Loja.CorPrimaria;
+    ViewData["LojaCorSecundaria"] = Model.Loja.CorSecundaria;
+    ViewData["LojaWhatsapp"] = Model.Loja.Whatsapp;
+    ViewData["LojaEmail"] = Model.Loja.EmailContato;
+    ViewData["LojaInstagram"] = Model.Loja.InstagramUrl;
+}
+
+<section class="loja-hero">
+    <div class="container py-5">
+        <div class="row align-items-center g-4 py-lg-5">
+            <div class="col-lg-7">
+                <span class="badge text-bg-light border mb-3">Catálogo público</span>
+                <h1 class="display-5 fw-bold">Bem-vindo à @Model.Loja.Nome.</h1>
+                <p class="lead text-secondary mb-4">@(Model.Loja.Descricao ?? "Conheça os produtos disponíveis em nosso catálogo.")</p>
+                <a class="btn btn-primary btn-lg" href="#produtos">Ver produtos</a>
+            </div>
+            <div class="col-lg-5">
+                <div class="loja-placeholder rounded-4 p-5 text-center">
+                    <i class="bi bi-bag-heart display-1"></i>
+                    <p class="mb-0 mt-3 fw-semibold">@Model.Produtos.Count produto(s) disponível(is)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="produtos" class="container py-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <span class="text-uppercase small fw-semibold text-primary">Disponíveis agora</span>
+            <h2 class="fw-bold mb-0">Produtos</h2>
+        </div>
+        <span class="text-secondary">@Model.Produtos.Count resultado(s)</span>
+    </div>
+
+    <form method="get" action="@Url.RouteUrl("CatalogoLoja", new { lojaSlug = Model.Loja.Slug })" class="row g-3 bg-white border rounded-4 p-3 mb-4">
+        <div class="col-md-7">
+            <label for="busca" class="form-label">Buscar</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                <input id="busca" name="busca" value="@Model.Busca" class="form-control" placeholder="Nome ou código do produto" />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <label for="categoriaId" class="form-label">Categoria</label>
+            <select id="categoriaId" name="categoriaId" class="form-select">
+                <option value="">Todas</option>
+                @foreach (var categoria in Model.Categorias)
+                {
+                    <option value="@categoria.Id" selected="@(Model.CategoriaId == categoria.Id)">@categoria.Nome</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-primary flex-fill">Filtrar</button>
+            @if (!string.IsNullOrWhiteSpace(Model.Busca) || Model.CategoriaId.HasValue)
+            {
+                <a class="btn btn-outline-secondary" href="@Url.RouteUrl("CatalogoLoja", new { lojaSlug = Model.Loja.Slug })" aria-label="Limpar filtros"><i class="bi bi-x-lg"></i></a>
+            }
+        </div>
+    </form>
+
+    @if (Model.Produtos.Count == 0)
+    {
+        <div class="loja-vazio bg-white border rounded-4 p-5 text-center">
+            <i class="bi bi-box-seam display-4 text-secondary"></i>
+            <h3 class="h5 mt-3">Nenhum produto disponível no momento</h3>
+            <p class="text-secondary mb-0">Volte em breve para conferir as novidades.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var produto in Model.Produtos)
+            {
+                <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                    <article class="card loja-produto h-100 border-0 rounded-4 overflow-hidden">
+                        <div class="loja-produto-imagem">
+                            @if (!string.IsNullOrWhiteSpace(produto.Foto))
+                            {
+                                <img src="@produto.Foto" alt="@produto.Nome" loading="lazy" />
+                            }
+                            else
+                            {
+                                <i class="bi bi-image" aria-hidden="true"></i>
+                            }
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            @if (!string.IsNullOrWhiteSpace(produto.CategoriaNome))
+                            {
+                                <span class="small text-secondary mb-1">@produto.CategoriaNome</span>
+                            }
+                            <h3 class="h6 fw-bold">@produto.Nome</h3>
+                            @if (!string.IsNullOrWhiteSpace(produto.Tamanho))
+                            {
+                                <span class="small text-secondary">Tamanho: @produto.Tamanho</span>
+                            }
+                            <strong class="fs-5 mt-auto pt-3">@produto.PrecoVenda.ToString("C")</strong>
+                            <a class="btn btn-outline-primary mt-3" href="@Url.RouteUrl("DetalheProdutoLoja", new { lojaSlug = Model.Loja.Slug, id = produto.Id })">Ver detalhes</a>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    }
+</section>

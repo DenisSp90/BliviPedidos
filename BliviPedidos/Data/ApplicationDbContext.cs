@@ -51,6 +51,7 @@ namespace BliviPedidos.Data
                 Nome = "Blivi Pedidos",
                 Slug = "blivi-pedidos",
                 CorPrimaria = "#0d6efd",
+                CorSecundaria = "#ffffff",
                 Ativa = true
             });
 

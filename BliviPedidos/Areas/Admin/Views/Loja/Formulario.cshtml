@@ -61,6 +61,39 @@
                             <span asp-validation-for="CorPrimaria" class="text-danger"></span>
                         </div>
 
+                        <div class="col-md-6">
+                            <label asp-for="CorSecundaria" class="form-label"></label>
+                            <div class="input-group">
+                                <input id="seletorCorSecundaria" type="color" class="form-control form-control-color" value="@Model.CorSecundaria" aria-label="Selecionar cor secundária" />
+                                <input asp-for="CorSecundaria" id="valorCorSecundaria" class="form-control" />
+                            </div>
+                            <span asp-validation-for="CorSecundaria" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Descricao" class="form-label"></label>
+                            <textarea asp-for="Descricao" class="form-control" rows="3" placeholder="Apresentação exibida no catálogo público"></textarea>
+                            <span asp-validation-for="Descricao" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Whatsapp" class="form-label"></label>
+                            <input asp-for="Whatsapp" class="form-control" placeholder="5511999999999" />
+                            <span asp-validation-for="Whatsapp" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="EmailContato" class="form-label"></label>
+                            <input asp-for="EmailContato" class="form-control" placeholder="contato@loja.com" />
+                            <span asp-validation-for="EmailContato" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="InstagramUrl" class="form-label"></label>
+                            <input asp-for="InstagramUrl" class="form-control" placeholder="https://instagram.com/minhaloja" />
+                            <span asp-validation-for="InstagramUrl" class="text-danger"></span>
+                        </div>
+
                         <div class="col-md-6 d-flex align-items-end">
                             <div class="form-check form-switch mb-2">
                                 <input asp-for="Ativa" class="form-check-input" />
@@ -85,8 +118,12 @@
                     {
                         <img src="@Model.LogoUrl" alt="Prévia do logo" class="img-fluid mb-3" style="max-height: 120px" />
                     }
-                    <div class="rounded p-3 text-white" style="background-color: @Model.CorPrimaria">
+                    <div class="rounded p-3" style="background-color: @Model.CorPrimaria; color: @Model.CorSecundaria">
                         @(string.IsNullOrWhiteSpace(Model.Nome) ? "Nome da loja" : Model.Nome)
+                        @if (!string.IsNullOrWhiteSpace(Model.Descricao))
+                        {
+                            <div class="small mt-2">@Model.Descricao</div>
+                        }
                     </div>
                 </div>
             </div>
@@ -99,9 +136,15 @@
     <script>
         const seletorCor = document.getElementById('seletorCor');
         const valorCor = document.getElementById('valorCor');
+        const seletorCorSecundaria = document.getElementById('seletorCorSecundaria');
+        const valorCorSecundaria = document.getElementById('valorCorSecundaria');
         seletorCor.addEventListener('input', () => valorCor.value = seletorCor.value);
         valorCor.addEventListener('input', () => {
             if (/^#[0-9a-fA-F]{6}$/.test(valorCor.value)) seletorCor.value = valorCor.value;
+        });
+        seletorCorSecundaria.addEventListener('input', () => valorCorSecundaria.value = seletorCorSecundaria.value);
+        valorCorSecundaria.addEventListener('input', () => {
+            if (/^#[0-9a-fA-F]{6}$/.test(valorCorSecundaria.value)) seletorCorSecundaria.value = valorCorSecundaria.value;
         });
     </script>
 }

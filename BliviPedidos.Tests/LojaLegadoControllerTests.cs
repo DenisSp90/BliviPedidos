@@ -27,7 +27,14 @@ public class LojaLegadoControllerTests
         };
         controller.Request.QueryString = new QueryString(query);
 
-        var result = Assert.IsType<RedirectResult>(controller.Redirecionar(caminho));
+        var resposta = caminho switch
+        {
+            null => controller.Raiz(),
+            "Index" => controller.Index(),
+            "Editar/7" => controller.Editar(7),
+            _ => throw new InvalidOperationException("Cenário de teste não configurado.")
+        };
+        var result = Assert.IsType<RedirectResult>(resposta);
 
         Assert.Equal(destinoEsperado, result.Url);
         Assert.False(result.Permanent);

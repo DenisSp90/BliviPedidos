@@ -1,5 +1,6 @@
 ﻿using BliviPedidos.Data;
 using BliviPedidos.Models.ViewModels;
+using BliviPedidos.Dtos.Publico;
 using BliviPedidos.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using BliviPedidos.Seguranca;
@@ -43,7 +44,7 @@ public class StoreApiController : Controller
         var produtos = await _context.Produto
             .AsNoTracking()
             .OrderBy(p => p.Nome)
-            .Select(p => new ProdutoPublicoViewModel
+            .Select(p => new ProdutoPublicoDto
             {
                 Id = p.Id,
                 Codigo = p.Codigo,
@@ -51,8 +52,6 @@ public class StoreApiController : Controller
                 PrecoVenda = p.PrecoVenda,
                 Tamanho = p.Tamanho,
                 Foto = p.Foto,
-                IsAtivo = p.IsAtivo,
-                Disponivel = p.IsAtivo && p.Quantidade > 0,
                 CategoriaId = p.CategoriaId,
                 CategoriaNome = p.Categoria != null ? p.Categoria.Nome : null
             })
@@ -68,7 +67,7 @@ public class StoreApiController : Controller
         var produto = await _context.Produto
             .AsNoTracking()
             .Where(p => p.Id == id)
-            .Select(p => new ProdutoPublicoViewModel
+            .Select(p => new ProdutoPublicoDto
             {
                 Id = p.Id,
                 Codigo = p.Codigo,
@@ -76,8 +75,6 @@ public class StoreApiController : Controller
                 PrecoVenda = p.PrecoVenda,
                 Tamanho = p.Tamanho,
                 Foto = p.Foto,
-                IsAtivo = p.IsAtivo,
-                Disponivel = p.IsAtivo && p.Quantidade > 0,
                 CategoriaId = p.CategoriaId,
                 CategoriaNome = p.Categoria != null ? p.Categoria.Nome : null
             })

@@ -42,6 +42,11 @@ public class LojaControllerTests
             Dominio = "https://LOJA.EXEMPLO.COM/catalogo",
             LogoUrl = "https://cdn.exemplo.com/logo.png",
             CorPrimaria = "#112233",
+            CorSecundaria = "#fefefe",
+            Descricao = " Uma loja de tecnologia ",
+            Whatsapp = "+55 (11) 99999-9999",
+            EmailContato = "CONTATO@EXEMPLO.COM",
+            InstagramUrl = "https://instagram.com/lojanova",
             Ativa = true
         };
 
@@ -53,6 +58,11 @@ public class LojaControllerTests
         Assert.Equal("Loja Nova", loja.Nome);
         Assert.Equal("loja.exemplo.com", loja.Dominio);
         Assert.Equal("#112233", loja.CorPrimaria);
+        Assert.Equal("#fefefe", loja.CorSecundaria);
+        Assert.Equal("Uma loja de tecnologia", loja.Descricao);
+        Assert.Equal("5511999999999", loja.Whatsapp);
+        Assert.Equal("contato@exemplo.com", loja.EmailContato);
+        Assert.Equal("https://instagram.com/lojanova", loja.InstagramUrl);
     }
 
     [Fact]

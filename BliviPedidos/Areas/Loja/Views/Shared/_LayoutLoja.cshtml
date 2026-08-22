@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Catálogo de produtos" />
+    <title>@ViewData["Title"] - @(ViewData["LojaNome"] ?? "Loja")</title>
+    <link href="~/img/favicon.png" rel="icon" />
+    <link href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700|Nunito:600,700,800" rel="stylesheet" />
+    <link href="~/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet" />
+    <link href="~/css/loja.css" rel="stylesheet" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="loja-publica" style="--loja-cor-primaria: @(ViewData["LojaCorPrimaria"] ?? "#4154f1"); --loja-cor-secundaria: @(ViewData["LojaCorSecundaria"] ?? "#ffffff")">
+    <header class="loja-cabecalho border-bottom bg-white sticky-top">
+        <nav class="navbar navbar-expand-lg container py-3">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="@Url.RouteUrl("CatalogoLoja", new { lojaSlug = ViewData["LojaSlug"] })">
+                @if (ViewData["LojaLogo"] is string logo && !string.IsNullOrWhiteSpace(logo))
+                {
+                    <img src="@logo" alt="Logo de @ViewData["LojaNome"]" class="loja-logo" />
+                }
+                <span>@(ViewData["LojaNome"] ?? "Loja")</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuLoja" aria-controls="menuLoja" aria-expanded="false" aria-label="Abrir menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menuLoja">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-3">
+                    <li class="nav-item"><a class="nav-link" href="@Url.RouteUrl("CatalogoLoja", new { lojaSlug = ViewData["LojaSlug"] })">Produtos</a></li>
+                    <li class="nav-item"><a class="nav-link disabled" aria-disabled="true"><i class="bi bi-cart3 me-1"></i>Carrinho</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <main>@RenderBody()</main>
+    <footer class="border-top bg-white mt-auto">
+        <div class="container py-4 d-flex flex-column flex-md-row justify-content-between gap-2">
+            <span>&copy; @DateTime.Now.Year @(ViewData["LojaNome"] ?? "Loja")</span>
+            <div class="d-flex flex-wrap gap-3">
+                @if (ViewData["LojaWhatsapp"] is string whatsapp && !string.IsNullOrWhiteSpace(whatsapp))
+                {
+                    <a href="https://wa.me/@whatsapp" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>
+                }
+                @if (ViewData["LojaEmail"] is string email && !string.IsNullOrWhiteSpace(email))
+                {
+                    <a href="mailto:@email"><i class="bi bi-envelope me-1"></i>@email</a>
+                }
+                @if (ViewData["LojaInstagram"] is string instagram && !string.IsNullOrWhiteSpace(instagram))
+                {
+                    <a href="@instagram" target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram me-1"></i>Instagram</a>
+                }
+            </div>
+        </div>
+    </footer>
+    <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -62,12 +62,12 @@ Conclusao: funcoes internas ficam sob `/admin` e exigem o papel correto.
 
 ## Fase 3 - catalogo publico
 
-- [ ] Criar `Areas/Loja` e `_LayoutLoja.cshtml`.
-- [ ] Resolver a loja pelo `slug`, por exemplo `/loja/mkstore`.
-- [ ] Exibir somente produtos ativos e disponiveis daquela loja.
-- [ ] Criar busca, categorias e detalhes do produto.
-- [ ] Criar DTOs sem custo, movimentacoes ou dados internos.
-- [ ] Permitir logo, cores e informacoes configuraveis por loja.
+- [x] Criar `Areas/Loja` e `_LayoutLoja.cshtml`.
+- [x] Resolver a loja pelo `slug`, por exemplo `/loja/mkstore`.
+- [x] Exibir somente produtos ativos e disponiveis daquela loja.
+- [x] Criar busca, categorias e detalhes do produto.
+- [x] Criar DTOs sem custo, movimentacoes ou dados internos.
+- [x] Permitir logo, cores e informacoes configuraveis por loja.
 
 Conclusao: o consumidor navega em um catalogo isolado sem acessar o administrativo.
 

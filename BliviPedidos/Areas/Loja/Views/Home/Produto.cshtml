@@ -1,0 +1,50 @@
+@model BliviPedidos.Models.ViewModels.ProdutoDetalheLojaViewModel
+
+@{
+    ViewData["Title"] = Model.Produto.Nome;
+    ViewData["LojaNome"] = Model.Loja.Nome;
+    ViewData["LojaSlug"] = Model.Loja.Slug;
+    ViewData["LojaLogo"] = Model.Loja.LogoUrl;
+    ViewData["LojaCorPrimaria"] = Model.Loja.CorPrimaria;
+    ViewData["LojaCorSecundaria"] = Model.Loja.CorSecundaria;
+    ViewData["LojaWhatsapp"] = Model.Loja.Whatsapp;
+    ViewData["LojaEmail"] = Model.Loja.EmailContato;
+    ViewData["LojaInstagram"] = Model.Loja.InstagramUrl;
+}
+
+<section class="container py-5">
+    <a class="text-decoration-none d-inline-flex align-items-center gap-2 mb-4" href="@Url.RouteUrl("CatalogoLoja", new { lojaSlug = Model.Loja.Slug })">
+        <i class="bi bi-arrow-left"></i> Voltar ao catálogo
+    </a>
+    <div class="row g-5 align-items-start">
+        <div class="col-lg-6">
+            <div class="loja-detalhe-imagem rounded-4 overflow-hidden">
+                @if (!string.IsNullOrWhiteSpace(Model.Produto.Foto))
+                {
+                    <img src="@Model.Produto.Foto" alt="@Model.Produto.Nome" />
+                }
+                else
+                {
+                    <i class="bi bi-image" aria-hidden="true"></i>
+                }
+            </div>
+        </div>
+        <div class="col-lg-6">
+            @if (!string.IsNullOrWhiteSpace(Model.Produto.CategoriaNome))
+            {
+                <span class="badge text-bg-light border mb-3">@Model.Produto.CategoriaNome</span>
+            }
+            <h1 class="display-6 fw-bold">@Model.Produto.Nome</h1>
+            @if (!string.IsNullOrWhiteSpace(Model.Produto.Codigo))
+            {
+                <p class="text-secondary">Código: @Model.Produto.Codigo</p>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Produto.Tamanho))
+            {
+                <p class="mb-2"><strong>Tamanho:</strong> @Model.Produto.Tamanho</p>
+            }
+            <p class="display-6 fw-bold text-primary mt-4">@Model.Produto.PrecoVenda.ToString("C")</p>
+            <span class="badge text-bg-success"><i class="bi bi-check-circle me-1"></i>Disponível</span>
+        </div>
+    </div>
+</section>

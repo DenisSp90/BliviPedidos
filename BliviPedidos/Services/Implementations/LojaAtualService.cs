@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using BliviPedidos.Data;
 using BliviPedidos.Models;
+using BliviPedidos.Services.Exceptions;
 using BliviPedidos.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,6 +39,18 @@ public class LojaAtualService : ILojaAtualService
             ?? throw new InvalidOperationException("Não existe uma requisição HTTP ativa para resolver a loja.");
         var cancellationToken = httpContext.RequestAborted;
 
+        if (string.Equals(
+                httpContext.Request.RouteValues["area"]?.ToString(),
+                "Loja",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            var lojaPublica = await ResolverLojaPelaRotaAsync(httpContext, cancellationToken);
+            if (lojaPublica != null)
+            {
+                return lojaPublica;
+            }
+        }
+
         var usuarioId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!string.IsNullOrWhiteSpace(usuarioId))
         {
@@ -48,27 +61,27 @@ public class LojaAtualService : ILojaAtualService
                 .Select(ul => ul.Loja)
                 .SingleOrDefaultAsync(cancellationToken);
 
-            return lojaUsuario
-                ?? throw new InvalidOperationException("O usuário autenticado não está associado a uma loja ativa.");
-        }
-
-        foreach (var chave in ChavesSlugRota)
-        {
-            var slug = httpContext.Request.RouteValues[chave]?.ToString()?.Trim();
-            if (string.IsNullOrWhiteSpace(slug))
+            if (lojaUsuario != null)
             {
-                continue;
+                return lojaUsuario;
             }
 
-            var slugNormalizado = slug.ToLowerInvariant();
-            var lojaRota = await _context.Loja
+            var usuarioExiste = await _context.Users
                 .AsNoTracking()
-                .SingleOrDefaultAsync(
-                    loja => loja.Ativa && loja.Slug.ToLower() == slugNormalizado,
-                    cancellationToken);
+                .AnyAsync(usuario => usuario.Id == usuarioId, cancellationToken);
 
-            return lojaRota
-                ?? throw new KeyNotFoundException($"Nenhuma loja ativa foi encontrada para o slug '{slug}'.");
+            if (!usuarioExiste)
+            {
+                throw new UsuarioAutenticadoInexistenteException();
+            }
+
+            throw new InvalidOperationException("O usuário autenticado não está associado a uma loja ativa.");
+        }
+
+        var lojaRota = await ResolverLojaPelaRotaAsync(httpContext, cancellationToken);
+        if (lojaRota != null)
+        {
+            return lojaRota;
         }
 
         var dominio = httpContext.Request.Host.Host.Trim().ToLowerInvariant();
@@ -90,5 +103,31 @@ public class LojaAtualService : ILojaAtualService
             .AsNoTracking()
             .SingleOrDefaultAsync(loja => loja.Id == Loja.PadraoId && loja.Ativa, cancellationToken)
             ?? throw new InvalidOperationException("A loja padrão não existe ou está inativa.");
+    }
+
+    private async Task<Loja?> ResolverLojaPelaRotaAsync(
+        HttpContext httpContext,
+        CancellationToken cancellationToken)
+    {
+        foreach (var chave in ChavesSlugRota)
+        {
+            var slug = httpContext.Request.RouteValues[chave]?.ToString()?.Trim();
+            if (string.IsNullOrWhiteSpace(slug))
+            {
+                continue;
+            }
+
+            var slugNormalizado = slug.ToLowerInvariant();
+            var loja = await _context.Loja
+                .AsNoTracking()
+                .SingleOrDefaultAsync(
+                    item => item.Ativa && item.Slug == slugNormalizado,
+                    cancellationToken);
+
+            return loja
+                ?? throw new KeyNotFoundException($"Nenhuma loja ativa foi encontrada para o slug '{slug}'.");
+        }
+
+        return null;
     }
 }

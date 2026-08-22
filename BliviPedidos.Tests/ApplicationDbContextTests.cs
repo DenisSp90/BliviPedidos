@@ -25,6 +25,7 @@ public class ApplicationDbContextTests
         Assert.Equal("Blivi Pedidos", loja.Nome);
         Assert.Equal("blivi-pedidos", loja.Slug);
         Assert.Equal("#0d6efd", loja.CorPrimaria);
+        Assert.Equal("#ffffff", loja.CorSecundaria);
         Assert.True(loja.Ativa);
     }
 

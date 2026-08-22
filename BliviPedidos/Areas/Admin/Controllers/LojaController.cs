@@ -6,6 +6,7 @@ using BliviPedidos.Seguranca;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using LojaModel = BliviPedidos.Models.Loja;
 
 namespace BliviPedidos.Areas.Admin.Controllers;
 
@@ -50,7 +51,7 @@ public class LojaController : Controller
             return View("Formulario", model);
         }
 
-        var loja = new Loja();
+        var loja = new LojaModel();
         Aplicar(model, loja);
         _context.Loja.Add(loja);
 
@@ -89,7 +90,7 @@ public class LojaController : Controller
 
         Normalizar(model);
         await ValidarUnicidadeAsync(model);
-        if (id == Loja.PadraoId && !model.Ativa)
+        if (id == LojaModel.PadraoId && !model.Ativa)
         {
             ModelState.AddModelError(nameof(model.Ativa), "A loja padrão não pode ser desativada.");
         }
@@ -130,7 +131,7 @@ public class LojaController : Controller
             return NotFound();
         }
 
-        if (loja.Id == Loja.PadraoId && loja.Ativa)
+        if (loja.Id == LojaModel.PadraoId && loja.Ativa)
         {
             TempData["Erro"] = "A loja padrão não pode ser desativada.";
             return RedirectToAction(nameof(Index));
@@ -162,6 +163,13 @@ public class LojaController : Controller
         model.Dominio = NormalizarDominio(model.Dominio);
         model.LogoUrl = string.IsNullOrWhiteSpace(model.LogoUrl) ? null : model.LogoUrl.Trim();
         model.CorPrimaria = (model.CorPrimaria ?? string.Empty).Trim();
+        model.CorSecundaria = (model.CorSecundaria ?? string.Empty).Trim();
+        model.Descricao = NormalizarOpcional(model.Descricao);
+        model.EmailContato = NormalizarOpcional(model.EmailContato)?.ToLowerInvariant();
+        model.InstagramUrl = NormalizarOpcional(model.InstagramUrl);
+        model.Whatsapp = string.IsNullOrWhiteSpace(model.Whatsapp)
+            ? null
+            : new string(model.Whatsapp.Where(char.IsDigit).ToArray());
     }
 
     private static string? NormalizarDominio(string? dominio)
@@ -180,17 +188,27 @@ public class LojaController : Controller
         return valor.Split('/')[0].Split(':')[0].ToLowerInvariant();
     }
 
-    private static void Aplicar(LojaViewModel model, Loja loja)
+    private static string? NormalizarOpcional(string? valor)
+    {
+        return string.IsNullOrWhiteSpace(valor) ? null : valor.Trim();
+    }
+
+    private static void Aplicar(LojaViewModel model, LojaModel loja)
     {
         loja.Nome = model.Nome;
         loja.Slug = model.Slug;
         loja.Dominio = model.Dominio;
         loja.LogoUrl = model.LogoUrl;
         loja.CorPrimaria = model.CorPrimaria;
+        loja.CorSecundaria = model.CorSecundaria;
+        loja.Descricao = model.Descricao;
+        loja.Whatsapp = model.Whatsapp;
+        loja.EmailContato = model.EmailContato;
+        loja.InstagramUrl = model.InstagramUrl;
         loja.Ativa = model.Ativa;
     }
 
-    private static LojaViewModel ParaViewModel(Loja loja)
+    private static LojaViewModel ParaViewModel(LojaModel loja)
     {
         return new LojaViewModel
         {
@@ -200,6 +218,11 @@ public class LojaController : Controller
             Dominio = loja.Dominio,
             LogoUrl = loja.LogoUrl,
             CorPrimaria = loja.CorPrimaria ?? "#0d6efd",
+            CorSecundaria = loja.CorSecundaria ?? "#ffffff",
+            Descricao = loja.Descricao,
+            Whatsapp = loja.Whatsapp,
+            EmailContato = loja.EmailContato,
+            InstagramUrl = loja.InstagramUrl,
             Ativa = loja.Ativa
         };
     }
