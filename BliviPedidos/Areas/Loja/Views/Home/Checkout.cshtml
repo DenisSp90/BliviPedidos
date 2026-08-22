@@ -1,0 +1,108 @@
+@model BliviPedidos.Models.ViewModels.CheckoutConsumidorViewModel
+
+@{
+    ViewData["Title"] = "Checkout";
+    ViewData["LojaNome"] = Model.Loja.Nome;
+    ViewData["LojaSlug"] = Model.Loja.Slug;
+    ViewData["LojaLogo"] = Model.Loja.LogoUrl;
+    ViewData["LojaCorPrimaria"] = Model.Loja.CorPrimaria;
+    ViewData["LojaCorSecundaria"] = Model.Loja.CorSecundaria;
+}
+
+<section class="container py-5">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <span class="text-uppercase small fw-semibold text-primary">Checkout</span>
+            <h1 class="h2 fw-bold">Seus dados</h1>
+            <p class="text-secondary">Informe os dados que serão usados no pedido. Você poderá revisá-los antes da confirmação.</p>
+
+            @if (Model.DadosSalvos)
+            {
+                <div class="alert alert-success">Dados salvos nesta sessão. O pedido ainda não foi criado.</div>
+            }
+            @if (TempData["CheckoutErro"] is string checkoutErro)
+            {
+                <div class="alert alert-danger">@checkoutErro</div>
+            }
+
+            <form method="post" action="@Url.RouteUrl("SalvarDadosCheckoutLoja", new { lojaSlug = Model.Loja.Slug })" class="card border-0 rounded-4 shadow-sm">
+                @Html.AntiForgeryToken()
+                <div class="card-body p-4">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="row g-3">
+                        <div class="col-md-7">
+                            <label asp-for="Dados.Nome" class="form-label"></label>
+                            <input asp-for="Dados.Nome" class="form-control" autocomplete="name" />
+                            <span asp-validation-for="Dados.Nome" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-5">
+                            <label asp-for="Dados.Telefone" class="form-label"></label>
+                            <input asp-for="Dados.Telefone" class="form-control" autocomplete="tel" />
+                            <span asp-validation-for="Dados.Telefone" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-8">
+                            <label asp-for="Dados.Email" class="form-label"></label>
+                            <input asp-for="Dados.Email" class="form-control" autocomplete="email" />
+                            <span asp-validation-for="Dados.Email" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Dados.CEP" class="form-label"></label>
+                            <input asp-for="Dados.CEP" class="form-control" autocomplete="postal-code" />
+                            <span asp-validation-for="Dados.CEP" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-8">
+                            <label asp-for="Dados.Endereco" class="form-label"></label>
+                            <input asp-for="Dados.Endereco" class="form-control" autocomplete="street-address" />
+                            <span asp-validation-for="Dados.Endereco" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Dados.Complemento" class="form-label"></label>
+                            <input asp-for="Dados.Complemento" class="form-control" />
+                        </div>
+                        <div class="col-md-5">
+                            <label asp-for="Dados.Bairro" class="form-label"></label>
+                            <input asp-for="Dados.Bairro" class="form-control" />
+                        </div>
+                        <div class="col-md-5">
+                            <label asp-for="Dados.Municipio" class="form-label"></label>
+                            <input asp-for="Dados.Municipio" class="form-control" autocomplete="address-level2" />
+                        </div>
+                        <div class="col-md-2">
+                            <label asp-for="Dados.UF" class="form-label"></label>
+                            <input asp-for="Dados.UF" class="form-control text-uppercase" autocomplete="address-level1" maxlength="2" />
+                            <span asp-validation-for="Dados.UF" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0 p-4 pt-0 d-flex justify-content-between">
+                    <a class="btn btn-outline-secondary" href="@Url.RouteUrl("CarrinhoLoja", new { lojaSlug = Model.Loja.Slug })">Voltar ao carrinho</a>
+                    <button class="btn btn-primary" type="submit">Salvar e revisar</button>
+                </div>
+            </form>
+
+            @if (Model.DadosSalvos)
+            {
+                <form method="post" action="@Url.RouteUrl("ConfirmarCheckoutLoja", new { lojaSlug = Model.Loja.Slug })" class="mt-4 text-end">
+                    @Html.AntiForgeryToken()
+                    <p class="small text-secondary">Ao confirmar, o pedido será criado e o estoque será atualizado.</p>
+                    <button class="btn btn-success btn-lg" type="submit">Confirmar pedido</button>
+                </form>
+            }
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 rounded-4 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h5">Resumo</h2>
+                    <div class="d-flex justify-content-between"><span>Itens</span><strong>@Model.QuantidadeItens</strong></div>
+                    <hr />
+                    <div class="d-flex justify-content-between fs-5"><span>Total</span><strong>@Model.Total.ToString("C")</strong></div>
+                    <p class="small text-secondary mt-3 mb-0">Valores recalculados no servidor. Nenhum pedido foi criado ainda.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

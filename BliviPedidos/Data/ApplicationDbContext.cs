@@ -110,6 +110,9 @@ namespace BliviPedidos.Data
             // Definir a chave primária para Pedido
             modelBuilder.Entity<Pedido>().HasKey(t => t.Id);
             modelBuilder.Entity<Pedido>()
+                .HasIndex(t => t.CodigoPublico)
+                .IsUnique();
+            modelBuilder.Entity<Pedido>()
                 .HasMany(t => t.Itens)
                 .WithOne(t => t.Pedido)
                 .HasForeignKey(t => t.PedidoId); // Relacionamento entre Pedido e ItemPedido

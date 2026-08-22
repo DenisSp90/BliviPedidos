@@ -133,6 +133,9 @@ namespace BliviPedidos.Models
         public int LojaId { get; set; } = Loja.PadraoId;
         public Loja Loja { get; set; } = null!;
 
+        [MaxLength(CodigoPublicoPedido.Tamanho)]
+        public string? CodigoPublico { get; set; }
+
         [Required]
         public virtual Cadastro Cadastro { get; set; }
 

@@ -8,9 +8,11 @@ using DinkToPdf.Contracts;
 using DinkToPdf;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Syncfusion.Licensing;
 using System.Globalization;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,6 +71,10 @@ builder.Services.AddTransient<IClienteService, ClienteService>();
 builder.Services.AddTransient<IRelatorioService, RelatorioService>();
 builder.Services.AddTransient<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<ILojaAtualService, LojaAtualService>();
+builder.Services.AddScoped<ICarrinhoPublicoService, CarrinhoPublicoService>();
+builder.Services.AddScoped<ICalculadorCarrinhoPublicoService, CalculadorCarrinhoPublicoService>();
+builder.Services.AddScoped<IDadosConsumidorCheckoutService, DadosConsumidorCheckoutService>();
+builder.Services.AddScoped<IConfirmacaoCheckoutService, ConfirmacaoCheckoutService>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
@@ -76,8 +82,58 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(opt =>
 {
     opt.IdleTimeout = TimeSpan.FromMinutes(30);
+    opt.Cookie.Name = "Blivi.Session";
     opt.Cookie.HttpOnly = true;
     opt.Cookie.IsEssential = true;
+    opt.Cookie.SameSite = SameSiteMode.Lax;
+    opt.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+        ? CookieSecurePolicy.SameAsRequest
+        : CookieSecurePolicy.Always;
+});
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.ContentType = "text/plain; charset=utf-8";
+        await context.HttpContext.Response.WriteAsync(
+            "Muitas solicitações. Aguarde alguns instantes e tente novamente.",
+            cancellationToken);
+    };
+
+    options.AddPolicy(PoliticasRateLimit.CarrinhoPublico, httpContext =>
+        RateLimitPartition.GetSlidingWindowLimiter(
+            ObterChaveRateLimit(httpContext),
+            _ => new SlidingWindowRateLimiterOptions
+            {
+                PermitLimit = 60,
+                Window = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow = 6,
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+    options.AddPolicy(PoliticasRateLimit.CheckoutPublico, httpContext =>
+        RateLimitPartition.GetSlidingWindowLimiter(
+            ObterChaveRateLimit(httpContext),
+            _ => new SlidingWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(10),
+                SegmentsPerWindow = 10,
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+    options.AddPolicy(PoliticasRateLimit.ConfirmacaoCheckoutPublico, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            ObterChaveRateLimit(httpContext),
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(10),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
 });
 
 builder.Services.AddCors(options =>
@@ -127,6 +183,7 @@ app.UseAuthentication();
 app.UseMiddleware<LojaAtualMiddleware>();
 app.UseAuthorization();
 app.UseSession();
+app.UseRateLimiter();
 
 app.MapControllerRoute(
     name: "areas",
@@ -156,3 +213,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+static string ObterChaveRateLimit(HttpContext context) =>
+    context.Connection.RemoteIpAddress?.ToString() ?? "endereco-desconhecido";

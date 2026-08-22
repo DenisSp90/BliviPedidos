@@ -45,6 +45,11 @@
             }
             <p class="display-6 fw-bold text-primary mt-4">@Model.Produto.PrecoVenda.ToString("C")</p>
             <span class="badge text-bg-success"><i class="bi bi-check-circle me-1"></i>Disponível</span>
+            <form method="post" action="@Url.RouteUrl("AdicionarCarrinhoLoja", new { lojaSlug = Model.Loja.Slug })" class="mt-4">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="produtoId" value="@Model.Produto.Id" />
+                <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-cart-plus me-2"></i>Adicionar ao carrinho</button>
+            </form>
         </div>
     </div>
 </section>

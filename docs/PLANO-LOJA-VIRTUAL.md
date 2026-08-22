@@ -73,14 +73,14 @@ Conclusao: o consumidor navega em um catalogo isolado sem acessar o administrati
 
 ## Fase 4 - carrinho e checkout
 
-- [ ] Criar um carrinho separado do pedido definitivo.
-- [ ] Manter carrinho anonimo por cookie/sessao com identificador seguro.
-- [ ] Recalcular precos no servidor; nunca confiar no preco do navegador.
-- [ ] Validar quantidades e produtos no servidor.
-- [ ] Coletar ou selecionar os dados do consumidor.
-- [ ] Criar o pedido somente ao confirmar o checkout.
-- [ ] Gerar codigo publico nao sequencial para acompanhamento.
-- [ ] Proteger formularios e limitar requisicoes abusivas.
+- [x] Criar um carrinho separado do pedido definitivo.
+- [x] Manter carrinho anonimo por cookie/sessao com identificador seguro.
+- [x] Recalcular precos no servidor; nunca confiar no preco do navegador.
+- [x] Validar quantidades e produtos no servidor.
+- [x] Coletar ou selecionar os dados do consumidor.
+- [x] Criar o pedido somente ao confirmar o checkout.
+- [x] Gerar codigo publico nao sequencial para acompanhamento.
+- [x] Proteger formularios e limitar requisicoes abusivas.
 
 Conclusao: o visitante confirma um pedido sem poder manipular preco ou estoque.
 

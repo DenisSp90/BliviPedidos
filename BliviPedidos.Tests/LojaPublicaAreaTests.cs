@@ -3,7 +3,9 @@ using BliviPedidos.Data;
 using BliviPedidos.Models;
 using BliviPedidos.Models.ViewModels;
 using BliviPedidos.Services.Interfaces;
+using BliviPedidos.Seguranca;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
@@ -31,6 +33,29 @@ public class LojaPublicaAreaTests
         Assert.Equal("Loja", area.RouteValue);
         Assert.Single(controllerType.GetCustomAttributes(typeof(AllowAnonymousAttribute), true));
         Assert.Empty(controllerType.GetCustomAttributes(typeof(AuthorizeAttribute), true));
+    }
+
+    [Fact]
+    public void FormulariosPublicosDevemTerAntifalsificacaoRateLimitETamanhoLimitado()
+    {
+        var acoesPost = typeof(HomeController).GetMethods()
+            .Where(metodo => metodo.GetCustomAttributes(typeof(HttpPostAttribute), true).Any())
+            .ToArray();
+
+        Assert.Equal(4, acoesPost.Length);
+        Assert.All(acoesPost, metodo =>
+        {
+            Assert.Single(metodo.GetCustomAttributes(typeof(ValidateAntiForgeryTokenAttribute), true));
+            Assert.Single(metodo.GetCustomAttributes(typeof(EnableRateLimitingAttribute), true));
+            Assert.Single(metodo.GetCustomAttributes(typeof(RequestSizeLimitAttribute), true));
+            Assert.Single(metodo.GetCustomAttributes(typeof(RequestFormLimitsAttribute), true));
+        });
+
+        var confirmar = typeof(HomeController).GetMethod(nameof(HomeController.ConfirmarCheckout));
+        var politica = Assert.Single(confirmar!
+            .GetCustomAttributes(typeof(EnableRateLimitingAttribute), true)
+            .Cast<EnableRateLimitingAttribute>());
+        Assert.Equal(PoliticasRateLimit.ConfirmacaoCheckoutPublico, politica.PolicyName);
     }
 
     [Fact]
@@ -180,13 +205,50 @@ public class LojaPublicaAreaTests
         BliviPedidos.Models.Loja loja,
         ApplicationDbContext context)
     {
-        return new HomeController(new LojaAtualServiceFake(loja), context)
+        return new HomeController(
+            new LojaAtualServiceFake(loja),
+            context,
+            new CarrinhoPublicoServiceFake(),
+            new CalculadorCarrinhoPublicoServiceFake(),
+            new DadosConsumidorCheckoutServiceFake(),
+            new ConfirmacaoCheckoutServiceFake())
         {
             ControllerContext = new ControllerContext
             {
                 HttpContext = new DefaultHttpContext()
             }
         };
+    }
+
+    private sealed class CarrinhoPublicoServiceFake : ICarrinhoPublicoService
+    {
+        public CarrinhoPublico Obter(int lojaId) => new() { Identificador = "teste", LojaId = lojaId };
+        public CarrinhoPublico Adicionar(int lojaId, int produtoId, int quantidade = 1) => Obter(lojaId);
+        public CarrinhoPublico Remover(int lojaId, int produtoId) => Obter(lojaId);
+        public void Limpar(int lojaId) { }
+    }
+
+    private sealed class CalculadorCarrinhoPublicoServiceFake : ICalculadorCarrinhoPublicoService
+    {
+        public Task<ResultadoValidacaoCarrinhoPublico> ValidarERecalcularAsync(
+            CarrinhoPublico carrinho,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(new ResultadoValidacaoCarrinhoPublico());
+    }
+
+    private sealed class DadosConsumidorCheckoutServiceFake : IDadosConsumidorCheckoutService
+    {
+        public DadosConsumidorCheckout? Obter(int lojaId) => null;
+        public void Salvar(int lojaId, DadosConsumidorCheckout dados) { }
+        public void Limpar(int lojaId) { }
+    }
+
+    private sealed class ConfirmacaoCheckoutServiceFake : IConfirmacaoCheckoutService
+    {
+        public Task<ResultadoConfirmacaoCheckout> ConfirmarAsync(
+            int lojaId,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(ResultadoConfirmacaoCheckout.Confirmado(1, "codigo-teste"));
     }
 
     private static async Task<ApplicationDbContext> CriarContextoAsync(SqliteConnection connection)

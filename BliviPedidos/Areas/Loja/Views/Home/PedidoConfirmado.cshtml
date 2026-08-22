@@ -1,0 +1,24 @@
+@model BliviPedidos.Models.ViewModels.PedidoConfirmadoViewModel
+
+@{
+    ViewData["Title"] = "Pedido confirmado";
+    ViewData["LojaNome"] = Model.Loja.Nome;
+    ViewData["LojaSlug"] = Model.Loja.Slug;
+    ViewData["LojaLogo"] = Model.Loja.LogoUrl;
+    ViewData["LojaCorPrimaria"] = Model.Loja.CorPrimaria;
+    ViewData["LojaCorSecundaria"] = Model.Loja.CorSecundaria;
+}
+
+<section class="container py-5 text-center">
+    <div class="bg-white border rounded-4 shadow-sm p-5 mx-auto" style="max-width: 680px">
+        <i class="bi bi-check-circle-fill text-success display-3"></i>
+        <h1 class="h2 mt-3">Pedido confirmado</h1>
+        <p class="text-secondary">Recebemos seu pedido. A loja dará continuidade ao atendimento.</p>
+        <div class="alert alert-light border my-4">
+            <span class="d-block small text-secondary">Código para acompanhamento</span>
+            <strong class="fs-4 font-monospace user-select-all">@Model.CodigoPublico</strong>
+        </div>
+        <p class="small text-secondary">Guarde este código. Ele não corresponde ao número interno do pedido.</p>
+        <a class="btn btn-primary" href="@Url.RouteUrl("CatalogoLoja", new { lojaSlug = Model.Loja.Slug })">Voltar à loja</a>
+    </div>
+</section>

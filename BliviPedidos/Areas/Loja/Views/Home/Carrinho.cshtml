@@ -1,0 +1,88 @@
+@model BliviPedidos.Models.ViewModels.CarrinhoPublicoViewModel
+
+@{
+    ViewData["Title"] = "Carrinho";
+    ViewData["LojaNome"] = Model.Loja.Nome;
+    ViewData["LojaSlug"] = Model.Loja.Slug;
+    ViewData["LojaLogo"] = Model.Loja.LogoUrl;
+    ViewData["LojaCorPrimaria"] = Model.Loja.CorPrimaria;
+    ViewData["LojaCorSecundaria"] = Model.Loja.CorSecundaria;
+    ViewData["LojaWhatsapp"] = Model.Loja.Whatsapp;
+    ViewData["LojaEmail"] = Model.Loja.EmailContato;
+    ViewData["LojaInstagram"] = Model.Loja.InstagramUrl;
+}
+
+<section class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <span class="text-uppercase small fw-semibold text-primary">Sua seleção</span>
+            <h1 class="h2 fw-bold mb-0">Carrinho</h1>
+        </div>
+        <a class="btn btn-outline-secondary" href="@Url.RouteUrl("CatalogoLoja", new { lojaSlug = Model.Loja.Slug })">Continuar comprando</a>
+    </div>
+
+    @if (TempData["CarrinhoMensagem"] is string mensagem)
+    {
+        <div class="alert alert-success">@mensagem</div>
+    }
+
+    @if (TempData["CarrinhoErro"] is string erro)
+    {
+        <div class="alert alert-danger">@erro</div>
+    }
+
+    @if (!Model.Valido)
+    {
+        <div class="alert alert-warning">
+            <strong>Revise o carrinho antes de continuar:</strong>
+            <ul class="mb-0 mt-2">
+                @foreach (var erroValidacao in Model.Erros)
+                {
+                    <li>@erroValidacao</li>
+                }
+            </ul>
+        </div>
+    }
+
+    @if (Model.Itens.Count == 0)
+    {
+        <div class="bg-white border rounded-4 p-5 text-center">
+            <i class="bi bi-cart-x display-4 text-secondary"></i>
+            <h2 class="h5 mt-3">Seu carrinho está vazio</h2>
+            <a class="btn btn-primary mt-2" href="@Url.RouteUrl("CatalogoLoja", new { lojaSlug = Model.Loja.Slug })">Ver produtos</a>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 rounded-4 shadow-sm">
+            <div class="card-body p-0">
+                @foreach (var item in Model.Itens)
+                {
+                    <div class="d-flex align-items-center gap-3 p-3 border-bottom">
+                        <div class="flex-grow-1">
+                            <strong>@item.Produto.Nome</strong>
+                            <div class="small text-secondary">@item.Quantidade × @item.Produto.PrecoVenda.ToString("C")</div>
+                        </div>
+                        <strong>@item.Subtotal.ToString("C")</strong>
+                        <form method="post" action="@Url.RouteUrl("RemoverCarrinhoLoja", new { lojaSlug = Model.Loja.Slug })">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="produtoId" value="@item.Produto.Id" />
+                            <button class="btn btn-sm btn-outline-danger" type="submit" aria-label="Remover @item.Produto.Nome"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </div>
+                }
+                <div class="d-flex justify-content-between align-items-center p-4">
+                    <span class="fs-5">Total estimado</span>
+                    <strong class="fs-4">@Model.Total.ToString("C")</strong>
+                </div>
+            </div>
+        </div>
+        @if (Model.Valido)
+        {
+            <div class="text-end mt-3">
+                <a class="btn btn-primary btn-lg" href="@Url.RouteUrl("CheckoutLoja", new { lojaSlug = Model.Loja.Slug })">Continuar para o checkout</a>
+            </div>
+        }
+        <p class="small text-secondary mt-3">O pedido definitivo ainda não foi criado. Os valores e a disponibilidade serão confirmados no checkout.</p>
+    }
+</section>
