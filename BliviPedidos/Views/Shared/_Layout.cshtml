@@ -2,7 +2,7 @@
 @{
     var administrador = User.IsInRole(BliviPedidos.Services.Implementations.InicializadorSistema.PerfilAdministrador);
     var podeVender = administrador || User.IsInRole(BliviPedidos.Services.Implementations.InicializadorSistema.PerfilVendedor);
-    var podeGerenciarEstoque = administrador || User.IsInRole(BliviPedidos.Services.Implementations.InicializadorSistema.PerfilEstoquista);
+    var podeGerenciarEstoque = podeVender || User.IsInRole(BliviPedidos.Services.Implementations.InicializadorSistema.PerfilEstoquista);
 }
 <html lang="en">
 <head>

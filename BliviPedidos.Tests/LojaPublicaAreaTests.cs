@@ -23,7 +23,7 @@ public class LojaPublicaAreaTests
     }
 
     [Fact]
-    public void HomeController_DevePertencerAAreaLojaEPermitirAcessoAnonimo()
+    public void HomeController_DeveManterCatalogoPublicoEExigirContaNoCheckout()
     {
         var controllerType = typeof(HomeController);
         var area = Assert.Single(controllerType
@@ -31,8 +31,14 @@ public class LojaPublicaAreaTests
             .Cast<AreaAttribute>());
 
         Assert.Equal("Loja", area.RouteValue);
-        Assert.Single(controllerType.GetCustomAttributes(typeof(AllowAnonymousAttribute), true));
         Assert.Empty(controllerType.GetCustomAttributes(typeof(AuthorizeAttribute), true));
+
+        Assert.Empty(controllerType.GetMethod(nameof(HomeController.Index))!
+            .GetCustomAttributes(typeof(AuthorizeAttribute), true));
+        Assert.Single(controllerType.GetMethod(nameof(HomeController.ConfirmarCheckout))!
+            .GetCustomAttributes(typeof(AuthorizeAttribute), true));
+        Assert.All(controllerType.GetMethods().Where(metodo => metodo.Name == nameof(HomeController.Checkout)), metodo =>
+            Assert.Single(metodo.GetCustomAttributes(typeof(AuthorizeAttribute), true)));
     }
 
     [Fact]

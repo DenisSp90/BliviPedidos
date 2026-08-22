@@ -16,6 +16,14 @@
 </div>
 
 <section class="section dashboard">
+    @if (TempData["MensagemSucesso"] is string mensagemSucesso)
+    {
+        <div class="alert alert-success" role="alert">@mensagemSucesso</div>
+    }
+    @if (TempData["MensagemErro"] is string mensagemErro)
+    {
+        <div class="alert alert-danger" role="alert">@mensagemErro</div>
+    }
     <div class="row">
         <div class="container">
             <div class="row">
@@ -276,20 +284,30 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Segunda coluna -->
                                             <div class="col-md-8">
-                                                @if (Model.Pedido.StatusPagamento != StatusPagamento.Pago)
-                                                {
-                                                    <button type="button" class="btn btn-outline-success btn-sm mb-2 w-100" onclick="atualizarEstadoPedido(@Model.Pedido.Id, 'Pago')">
-                                                        <i class="bi bi-check2-square"></i> Marcar como Pago
+                                                <form asp-controller="Store" asp-action="AtualizarSituacaoPedido" method="post" class="mb-3">
+                                                    <input type="hidden" name="idPedido" value="@Model.Pedido.Id" />
+                                                    <label for="statusPedido" class="form-label">Situação do pedido</label>
+                                                    <select id="statusPedido" name="statusPedido" class="form-select form-select-sm mb-2"
+                                                            asp-items="Html.GetEnumSelectList<StatusPedido>()"
+                                                            disabled="@(Model.Pedido.Status == StatusPedido.Cancelado)"></select>
+                                                    <button type="submit" class="btn btn-outline-primary btn-sm w-100"
+                                                            disabled="@(Model.Pedido.Status == StatusPedido.Cancelado)">
+                                                        Atualizar pedido
                                                     </button>
-                                                }
-                                                @if (Model.Pedido.Status != StatusPedido.Cancelado && Model.Pedido.Status != StatusPedido.Concluido)
-                                                {
-                                                    <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="cancelarPedido(@Model.Pedido.Id)">
-                                                        <i class="bi bi-x-square"></i> Cancelar Pedido
+                                                </form>
+
+                                                <form asp-controller="Store" asp-action="AtualizarEstadoPagamento" method="post">
+                                                    <input type="hidden" name="idPedido" value="@Model.Pedido.Id" />
+                                                    <label for="statusPagamento" class="form-label">Situação do pagamento</label>
+                                                    <select id="statusPagamento" name="statusPagamento" class="form-select form-select-sm mb-2"
+                                                            asp-items="Html.GetEnumSelectList<StatusPagamento>()"
+                                                            disabled="@(Model.Pedido.Status == StatusPedido.Cancelado)"></select>
+                                                    <button type="submit" class="btn btn-outline-success btn-sm w-100"
+                                                            disabled="@(Model.Pedido.Status == StatusPedido.Cancelado)">
+                                                        Atualizar pagamento
                                                     </button>
-                                                }
+                                                </form>
                                             </div>
 
                                         </div>
@@ -375,6 +393,8 @@
 <script src="~/js/controllers/Store-Cadastro.js"></script>
 <script>
     $(document).ready(function () {
+        $('#statusPedido').val('@((int)Model.Pedido.Status)');
+        $('#statusPagamento').val('@((int)Model.Pedido.StatusPagamento)');
         $('#btnCopyPix').click(function () {
             var pixKey = $('#hiddenPixKey').val();
 

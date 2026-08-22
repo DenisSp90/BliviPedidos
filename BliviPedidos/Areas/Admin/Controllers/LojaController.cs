@@ -79,6 +79,70 @@ public class LojaController : Controller
         return View("Formulario", ParaViewModel(loja));
     }
 
+    [HttpGet("/Admin/Loja/{slug}/Pix", Name = "ConfigurarPixLojaAdmin")]
+    public async Task<IActionResult> Pix(string slug)
+    {
+        var loja = await _context.Loja.AsNoTracking()
+            .SingleOrDefaultAsync(item => item.Slug == slug);
+        if (loja == null)
+            return NotFound();
+
+        return View(new LojaPixViewModel
+        {
+            LojaId = loja.Id,
+            LojaNome = loja.Nome,
+            Slug = loja.Slug,
+            Ativo = loja.PixAtivo,
+            Responsavel = loja.PixResponsavel,
+            Tipo = loja.PixTipo,
+            Chave = loja.PixChave,
+            Cidade = loja.PixCidade
+        });
+    }
+
+    [HttpPost("/Admin/Loja/{slug}/Pix")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Pix(string slug, LojaPixViewModel model)
+    {
+        var loja = await _context.Loja.SingleOrDefaultAsync(item => item.Slug == slug);
+        if (loja == null)
+            return NotFound();
+        if (model.LojaId != loja.Id)
+            return BadRequest();
+
+        model.LojaNome = loja.Nome;
+        model.Slug = loja.Slug;
+        model.Responsavel = NormalizarOpcional(model.Responsavel);
+        model.Tipo = NormalizarOpcional(model.Tipo);
+        model.Chave = NormalizarOpcional(model.Chave);
+        model.Cidade = NormalizarOpcional(model.Cidade)?.ToUpperInvariant();
+
+        var tipos = new[] { "CPF", "CNPJ", "Telefone", "Email", "ChaveAleatoria" };
+        if (model.Ativo)
+        {
+            if (string.IsNullOrWhiteSpace(model.Responsavel))
+                ModelState.AddModelError(nameof(model.Responsavel), "Informe o favorecido.");
+            if (string.IsNullOrWhiteSpace(model.Chave))
+                ModelState.AddModelError(nameof(model.Chave), "Informe a chave PIX.");
+            if (string.IsNullOrWhiteSpace(model.Cidade))
+                ModelState.AddModelError(nameof(model.Cidade), "Informe a cidade.");
+            if (!tipos.Contains(model.Tipo, StringComparer.OrdinalIgnoreCase))
+                ModelState.AddModelError(nameof(model.Tipo), "Selecione um tipo de chave válido.");
+        }
+
+        if (!ModelState.IsValid)
+            return View(model);
+
+        loja.PixAtivo = model.Ativo;
+        loja.PixResponsavel = model.Responsavel;
+        loja.PixTipo = model.Tipo;
+        loja.PixChave = model.Chave;
+        loja.PixCidade = model.Cidade;
+        await _context.SaveChangesAsync();
+        TempData["Sucesso"] = $"Configuração PIX da loja {loja.Nome} atualizada.";
+        return RedirectToRoute("ConfigurarPixLojaAdmin", new { slug = loja.Slug });
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Editar(int id, LojaViewModel model)

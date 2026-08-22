@@ -112,6 +112,12 @@ namespace BliviPedidos.Data
             modelBuilder.Entity<Pedido>()
                 .HasIndex(t => t.CodigoPublico)
                 .IsUnique();
+
+            modelBuilder.Entity<Pedido>()
+                .HasOne(p => p.ConsumidorUsuario)
+                .WithMany()
+                .HasForeignKey(p => p.ConsumidorUsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Pedido>()
                 .HasMany(t => t.Itens)
                 .WithOne(t => t.Pedido)

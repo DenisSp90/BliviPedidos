@@ -9,6 +9,7 @@ using DinkToPdf;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Syncfusion.Licensing;
 using System.Globalization;
@@ -43,10 +44,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.Configure<PixAppSettingsModel>(builder.Configuration.GetSection("PixAppSettings"));
 builder.Services.Configure<ReservaEstoqueOptions>(builder.Configuration.GetSection(ReservaEstoqueOptions.Secao));
+builder.Services.Configure<ConfirmacaoConsumidorOptions>(builder.Configuration.GetSection(ConfirmacaoConsumidorOptions.Secao));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+var confirmacaoConsumidor = builder.Configuration
+    .GetSection(ConfirmacaoConsumidorOptions.Secao)
+    .Get<ConfirmacaoConsumidorOptions>() ?? new ConfirmacaoConsumidorOptions();
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+    {
+        options.SignIn.RequireConfirmedEmail = confirmacaoConsumidor.ExigirEmail;
+        options.SignIn.RequireConfirmedPhoneNumber = confirmacaoConsumidor.ExigirTelefone;
+    })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AdicionarPoliticasAutorizacao();
@@ -67,6 +76,8 @@ builder.Services.AddTransient<IPedidoService, PedidoService>();
 builder.Services.AddTransient<IItemPedidoService, ItemPedidoService>();
 builder.Services.AddTransient<ICadastroService, CadastroService>();
 builder.Services.AddTransient<IEmailEnviarService, EmailEnviarService>();
+builder.Services.AddTransient<IEmailSender, IdentityEmailSender>();
+builder.Services.AddHttpClient<IEnvioSmsService, EnvioSmsService>();
 builder.Services.AddTransient<IClienteService, ClienteService>();
 
 builder.Services.AddTransient<IRelatorioService, RelatorioService>();
@@ -76,6 +87,7 @@ builder.Services.AddScoped<ICarrinhoPublicoService, CarrinhoPublicoService>();
 builder.Services.AddScoped<ICalculadorCarrinhoPublicoService, CalculadorCarrinhoPublicoService>();
 builder.Services.AddScoped<IDadosConsumidorCheckoutService, DadosConsumidorCheckoutService>();
 builder.Services.AddScoped<IConfirmacaoCheckoutService, ConfirmacaoCheckoutService>();
+builder.Services.AddScoped<IPagamentoService, PagamentoPixService>();
 builder.Services.AddHostedService<ExpiracaoReservaService>();
 
 builder.Services.AddHttpContextAccessor();
@@ -127,6 +139,16 @@ builder.Services.AddRateLimiter(options =>
                 AutoReplenishment = true
             }));
     options.AddPolicy(PoliticasRateLimit.ConfirmacaoCheckoutPublico, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            ObterChaveRateLimit(httpContext),
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(10),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+    options.AddPolicy(PoliticasRateLimit.ContaConsumidor, httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
             ObterChaveRateLimit(httpContext),
             _ => new FixedWindowRateLimiterOptions

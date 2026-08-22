@@ -13,10 +13,11 @@ public sealed class DadosConsumidorCheckout
     [RegularExpression(@"^\+?[0-9 ()-]{10,20}$", ErrorMessage = "Informe um telefone válido.")]
     public string Telefone { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "Informe seu e-mail.")]
     [EmailAddress(ErrorMessage = "Informe um e-mail válido.")]
     [StringLength(150)]
     [Display(Name = "E-mail")]
-    public string? Email { get; set; }
+    public string Email { get; set; } = string.Empty;
 
     [StringLength(9)]
     [RegularExpression(@"^$|^[0-9]{5}-?[0-9]{3}$", ErrorMessage = "Informe um CEP válido.")]

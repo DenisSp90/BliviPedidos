@@ -63,10 +63,19 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
 
     public async Task AtualizarStatusPagamentoAsync(int pedidoId, StatusPagamento novoStatusPagamento)
     {
+        if (!Enum.IsDefined(novoStatusPagamento))
+            throw new ArgumentOutOfRangeException(
+                nameof(novoStatusPagamento), "Situação do pagamento inválida.");
+
         var pedido = await GetPedidoByIdAsync(pedidoId);
 
         if (pedido != null)
         {
+            if (pedido.Status == StatusPedido.Cancelado
+                && novoStatusPagamento != StatusPagamento.Cancelado)
+                throw new InvalidOperationException(
+                    "O pagamento de um pedido cancelado não pode ser alterado.");
+
             pedido.StatusPagamento = novoStatusPagamento;
             pedido.DataPagamento = novoStatusPagamento == StatusPagamento.Pago
                 ? DateTime.Now
@@ -274,6 +283,30 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
             await transaction.RollbackAsync();
             throw;
         }
+    }
+
+    public async Task AtualizarStatusPedidoAsync(int pedidoId, StatusPedido novoStatus)
+    {
+        if (!Enum.IsDefined(novoStatus))
+            throw new ArgumentOutOfRangeException(nameof(novoStatus), "Situação do pedido inválida.");
+
+        var pedido = await GetPedidoByIdAsync(pedidoId)
+            ?? throw new InvalidOperationException("Pedido não encontrado.");
+
+        if (pedido.Status == StatusPedido.Cancelado)
+            throw new InvalidOperationException("Um pedido cancelado não pode ser reaberto.");
+
+        if (novoStatus == StatusPedido.Carrinho)
+            throw new InvalidOperationException("Um pedido confirmado não pode voltar para o carrinho.");
+
+        if (novoStatus == StatusPedido.Cancelado)
+        {
+            await RegistrarCancelamentoPedido(pedidoId);
+            return;
+        }
+
+        pedido.Status = novoStatus;
+        await _context.SaveChangesAsync();
     }
 
     public Pedido UpdateCadastro(Cadastro cadastro)

@@ -8,11 +8,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace BliviPedidos.Areas.Loja.Controllers;
 
 [Area("Loja")]
-[AllowAnonymous]
 public class HomeController : Controller
 {
     private readonly ILojaAtualService _lojaAtualService;
@@ -21,6 +21,7 @@ public class HomeController : Controller
     private readonly ICalculadorCarrinhoPublicoService _calculadorCarrinhoService;
     private readonly IDadosConsumidorCheckoutService _dadosConsumidorService;
     private readonly IConfirmacaoCheckoutService _confirmacaoCheckoutService;
+    private readonly IPagamentoService? _pagamentoService;
 
     public HomeController(
         ILojaAtualService lojaAtualService,
@@ -28,7 +29,8 @@ public class HomeController : Controller
         ICarrinhoPublicoService carrinhoService,
         ICalculadorCarrinhoPublicoService calculadorCarrinhoService,
         IDadosConsumidorCheckoutService dadosConsumidorService,
-        IConfirmacaoCheckoutService confirmacaoCheckoutService)
+        IConfirmacaoCheckoutService confirmacaoCheckoutService,
+        IPagamentoService? pagamentoService = null)
     {
         _lojaAtualService = lojaAtualService;
         _context = context;
@@ -36,6 +38,7 @@ public class HomeController : Controller
         _calculadorCarrinhoService = calculadorCarrinhoService;
         _dadosConsumidorService = dadosConsumidorService;
         _confirmacaoCheckoutService = confirmacaoCheckoutService;
+        _pagamentoService = pagamentoService;
     }
 
     [HttpGet("/loja/{lojaSlug}", Name = "CatalogoLoja")]
@@ -173,6 +176,7 @@ public class HomeController : Controller
     }
 
     [HttpGet("/loja/{lojaSlug}/checkout", Name = "CheckoutLoja")]
+    [Authorize]
     public async Task<IActionResult> Checkout(string lojaSlug, bool salvo = false)
     {
         var loja = await _lojaAtualService.ObterLojaAsync();
@@ -184,8 +188,11 @@ public class HomeController : Controller
 
         var dados = _dadosConsumidorService.Obter(loja.Id) ?? new DadosConsumidorCheckout
         {
-            Nome = User.Identity?.IsAuthenticated == true ? User.Identity.Name ?? string.Empty : string.Empty,
-            Email = User.Identity?.IsAuthenticated == true ? User.FindFirst("email")?.Value : null
+            Nome = User.FindFirst(ContaController.ClaimNomeConsumidor)?.Value ?? string.Empty,
+            Telefone = User.FindFirst(ContaController.ClaimCelularConsumidor)?.Value ?? string.Empty,
+            Email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+                ?? User.Identity?.Name
+                ?? string.Empty
         };
 
         return View(new CheckoutConsumidorViewModel
@@ -199,6 +206,7 @@ public class HomeController : Controller
     }
 
     [HttpPost("/loja/{lojaSlug}/checkout", Name = "SalvarDadosCheckoutLoja")]
+    [Authorize]
     [ValidateAntiForgeryToken]
     [EnableRateLimiting(PoliticasRateLimit.CheckoutPublico)]
     [RequestSizeLimit(16 * 1024)]
@@ -251,6 +259,7 @@ public class HomeController : Controller
     }
 
     [HttpPost("/loja/{lojaSlug}/checkout/confirmar", Name = "ConfirmarCheckoutLoja")]
+    [Authorize]
     [ValidateAntiForgeryToken]
     [EnableRateLimiting(PoliticasRateLimit.ConfirmacaoCheckoutPublico)]
     [RequestSizeLimit(4 * 1024)]
@@ -272,6 +281,7 @@ public class HomeController : Controller
     }
 
     [HttpGet("/loja/{lojaSlug}/checkout/confirmado", Name = "PedidoConfirmadoLoja")]
+    [Authorize]
     public async Task<IActionResult> PedidoConfirmado(string lojaSlug)
     {
         var loja = await _lojaAtualService.ObterLojaAsync();
@@ -281,10 +291,36 @@ public class HomeController : Controller
             return RedirectToRoute("CatalogoLoja", new { lojaSlug = loja.Slug });
         }
 
+        var usuarioId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+        var pedido = await _context.Pedido.AsNoTracking()
+            .Where(item => item.CodigoPublico == codigoPublico
+                && item.ConsumidorUsuarioId == usuarioId)
+            .Select(item => new { item.ValorTotalPedido })
+            .SingleOrDefaultAsync(HttpContext.RequestAborted);
+        if (pedido == null)
+            return NotFound();
+
+        PagamentoPix? pagamento = null;
+        string? pagamentoErro = null;
+        try
+        {
+            pagamento = _pagamentoService?.GerarPix(loja, pedido.ValorTotalPedido, codigoPublico);
+            if (pagamento == null)
+                pagamentoErro = "O serviço de pagamento não está disponível.";
+        }
+        catch (Exception ex)
+        {
+            pagamentoErro = ex.Message;
+        }
+
         return View(new PedidoConfirmadoViewModel
         {
             Loja = ProjetarLojaPublica(loja),
-            CodigoPublico = codigoPublico
+            CodigoPublico = codigoPublico,
+            Total = pedido.ValorTotalPedido,
+            PixCopiaECola = pagamento?.CopiaECola,
+            PixQrCodeBase64 = pagamento?.QrCodeBase64,
+            PagamentoErro = pagamentoErro
         });
     }
 

@@ -233,6 +233,25 @@ namespace BliviPedidos.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("varchar(120)");
 
+                    b.Property<bool>("PixAtivo")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("PixChave")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("PixCidade")
+                        .HasMaxLength(80)
+                        .HasColumnType("varchar(80)");
+
+                    b.Property<string>("PixResponsavel")
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
+
+                    b.Property<string>("PixTipo")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(80)
@@ -260,6 +279,7 @@ namespace BliviPedidos.Migrations
                             CorPrimaria = "#0d6efd",
                             CorSecundaria = "#ffffff",
                             Nome = "Blivi Pedidos",
+                            PixAtivo = false,
                             Slug = "blivi-pedidos"
                         });
                 });
@@ -278,6 +298,10 @@ namespace BliviPedidos.Migrations
                     b.Property<string>("CodigoPublico")
                         .HasMaxLength(22)
                         .HasColumnType("varchar(22)");
+
+                    b.Property<string>("ConsumidorUsuarioId")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTime?>("DataPagamento")
                         .HasColumnType("datetime(6)");
@@ -309,6 +333,8 @@ namespace BliviPedidos.Migrations
 
                     b.HasIndex("CodigoPublico")
                         .IsUnique();
+
+                    b.HasIndex("ConsumidorUsuarioId");
 
                     b.HasIndex("LojaId");
 
@@ -374,13 +400,13 @@ namespace BliviPedidos.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("Data")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<string>("Ator")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
+
+                    b.Property<DateTime>("Data")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("LojaId")
                         .HasColumnType("int");
@@ -696,11 +722,18 @@ namespace BliviPedidos.Migrations
                         .WithMany("Pedidos")
                         .HasForeignKey("ClienteId");
 
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "ConsumidorUsuario")
+                        .WithMany()
+                        .HasForeignKey("ConsumidorUsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("BliviPedidos.Models.Loja", "Loja")
                         .WithMany("Pedidos")
                         .HasForeignKey("LojaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("ConsumidorUsuario");
 
                     b.Navigation("Loja");
                 });

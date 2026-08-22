@@ -101,18 +101,22 @@ Conclusao: concorrencia nao deixa estoque negativo e cancelamento nao devolve du
 
 ## Fase 6 - consumidor e pagamentos
 
-- [ ] Decidir entre visitante, conta opcional ou conta obrigatoria.
-- [ ] Permitir ao consumidor consultar somente os proprios pedidos.
-- [ ] Implementar confirmacao de e-mail/telefone quando necessaria.
-- [ ] Integrar pagamento por uma interface propria.
+- [x] Decidir entre visitante, conta opcional ou conta obrigatoria: conta obrigatoria para checkout.
+- [x] Permitir ao consumidor consultar somente os proprios pedidos.
+- [x] Implementar confirmacao de e-mail/telefone quando necessaria.
+- [x] Integrar pagamento por uma interface propria.
+  Implementacao atual: `IPagamentoService` com PIX copia e cola e QR Code.
+  Cada loja configura seu proprio PIX em `/Admin/Loja/{slug}/Pix`.
 - [ ] Validar webhooks com assinatura e idempotencia.
-- [ ] Nunca aceitar do navegador a confirmacao de pagamento.
+- [x] Nunca aceitar do navegador a confirmacao de pagamento.
+  O PIX fixo permanece como `AguardandoPagamento`; somente usuario interno autorizado
+  altera a situacao do pagamento.
 
 ## Fase 7 - testes e publicacao
 
-- [ ] Testes unitarios de pedido, estoque e isolamento por loja.
+- [x] Testes unitarios de pedido, estoque e isolamento por loja.
 - [ ] Testes de integracao dos endpoints e autorizacao.
-- [ ] Teste concorrente para compra da ultima unidade.
+- [x] Teste concorrente para compra da ultima unidade.
 - [ ] Politica de backup e restauracao.
 - [ ] Observabilidade, auditoria e alertas.
 - [ ] Privacidade e retencao de dados pessoais.

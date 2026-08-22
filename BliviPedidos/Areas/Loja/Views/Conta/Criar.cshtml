@@ -1,0 +1,59 @@
+@model CriarContaConsumidorViewModel
+@{
+    ViewData["Title"] = "Criar conta";
+    ViewData["LojaNome"] = Model.Loja.Nome;
+    ViewData["LojaSlug"] = Model.Loja.Slug;
+    ViewData["LojaLogo"] = Model.Loja.LogoUrl;
+    ViewData["LojaCorPrimaria"] = Model.Loja.CorPrimaria;
+    ViewData["LojaCorSecundaria"] = Model.Loja.CorSecundaria;
+    ViewData["LojaWhatsapp"] = Model.Loja.Whatsapp;
+    ViewData["LojaEmail"] = Model.Loja.EmailContato;
+    ViewData["LojaInstagram"] = Model.Loja.InstagramUrl;
+}
+
+<section class="container py-5" style="max-width: 680px">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4 p-lg-5">
+            <h1 class="h3 mb-2">Crie sua conta</h1>
+            <p class="text-secondary mb-4">A conta é obrigatória para confirmar pedidos.</p>
+
+            <form method="post">
+                @Html.AntiForgeryToken()
+                <input asp-for="ReturnUrl" type="hidden" />
+                <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Nome" class="form-label"></label>
+                    <input asp-for="Nome" class="form-control" autocomplete="name" />
+                    <span asp-validation-for="Nome" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Celular" class="form-label"></label>
+                    <input asp-for="Celular" class="form-control" autocomplete="tel" />
+                    <span asp-validation-for="Celular" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" autocomplete="email" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Senha" class="form-label"></label>
+                    <input asp-for="Senha" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="Senha" class="text-danger"></span>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="ConfirmarSenha" class="form-label"></label>
+                    <input asp-for="ConfirmarSenha" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="ConfirmarSenha" class="text-danger"></span>
+                </div>
+
+                <button class="btn btn-primary w-100" type="submit">Criar conta e continuar</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -38,6 +38,20 @@ public class Loja
     [MaxLength(500)]
     public string? InstagramUrl { get; set; }
 
+    public bool PixAtivo { get; set; }
+
+    [MaxLength(120)]
+    public string? PixResponsavel { get; set; }
+
+    [MaxLength(20)]
+    public string? PixTipo { get; set; }
+
+    [MaxLength(255)]
+    public string? PixChave { get; set; }
+
+    [MaxLength(80)]
+    public string? PixCidade { get; set; }
+
     public bool Ativa { get; set; } = true;
 
     public ICollection<Produto> Produtos { get; set; } = new List<Produto>();

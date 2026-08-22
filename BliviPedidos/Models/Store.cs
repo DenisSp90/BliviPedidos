@@ -141,6 +141,10 @@ namespace BliviPedidos.Models
         public int LojaId { get; set; } = Loja.PadraoId;
         public Loja Loja { get; set; } = null!;
 
+        [MaxLength(255)]
+        public string? ConsumidorUsuarioId { get; set; }
+        public Microsoft.AspNetCore.Identity.IdentityUser? ConsumidorUsuario { get; set; }
+
         [MaxLength(CodigoPublicoPedido.Tamanho)]
         public string? CodigoPublico { get; set; }
 

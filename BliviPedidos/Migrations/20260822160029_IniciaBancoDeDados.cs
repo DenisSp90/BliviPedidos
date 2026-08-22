@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BliviPedidos.Migrations
 {
     /// <inheritdoc />
-    public partial class IniciaBanco : Migration
+    public partial class IniciaBancoDeDados : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -94,6 +94,15 @@ namespace BliviPedidos.Migrations
                     EmailContato = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     InstagramUrl = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    PixAtivo = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    PixResponsavel = table.Column<string>(type: "varchar(120)", maxLength: 120, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    PixTipo = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    PixChave = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    PixCidade = table.Column<string>(type: "varchar(80)", maxLength: 80, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Ativa = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
@@ -369,11 +378,14 @@ namespace BliviPedidos.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     LojaId = table.Column<int>(type: "int", nullable: false),
+                    ConsumidorUsuarioId = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     CodigoPublico = table.Column<string>(type: "varchar(22)", maxLength: 22, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    Pago = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    StatusPagamento = table.Column<int>(type: "int", nullable: false),
                     DataPedido = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    ReservaExpiraEm = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     DataPagamento = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     ValorTotalPedido = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
                     EmailResponsavel = table.Column<string>(type: "longtext", nullable: true)
@@ -383,6 +395,12 @@ namespace BliviPedidos.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Pedido", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Pedido_AspNetUsers_ConsumidorUsuarioId",
+                        column: x => x.ConsumidorUsuarioId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Pedido_Cliente_ClienteId",
                         column: x => x.ClienteId,
@@ -394,31 +412,6 @@ namespace BliviPedidos.Migrations
                         principalTable: "Loja",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "ProdutoMovimentacao",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    ProdutoId = table.Column<int>(type: "int", nullable: true),
-                    Data = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Quantidade = table.Column<int>(type: "int", nullable: false),
-                    Tipo = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Observacao = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProdutoMovimentacao", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ProdutoMovimentacao_Produto_ProdutoId",
-                        column: x => x.ProdutoId,
-                        principalTable: "Produto",
-                        principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -499,10 +492,53 @@ namespace BliviPedidos.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "ProdutoMovimentacao",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    ProdutoId = table.Column<int>(type: "int", nullable: true),
+                    LojaId = table.Column<int>(type: "int", nullable: false),
+                    PedidoId = table.Column<int>(type: "int", nullable: true),
+                    Data = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Quantidade = table.Column<int>(type: "int", nullable: false),
+                    Tipo = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Ator = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Origem = table.Column<string>(type: "varchar(64)", maxLength: 64, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Observacao = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProdutoMovimentacao", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProdutoMovimentacao_Loja_LojaId",
+                        column: x => x.LojaId,
+                        principalTable: "Loja",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ProdutoMovimentacao_Pedido_PedidoId",
+                        column: x => x.PedidoId,
+                        principalTable: "Pedido",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ProdutoMovimentacao_Produto_ProdutoId",
+                        column: x => x.ProdutoId,
+                        principalTable: "Produto",
+                        principalColumn: "Id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.InsertData(
                 table: "Loja",
-                columns: new[] { "Id", "Ativa", "CorPrimaria", "CorSecundaria", "Descricao", "Dominio", "EmailContato", "InstagramUrl", "LogoUrl", "Nome", "Slug", "Whatsapp" },
-                values: new object[] { 1, true, "#0d6efd", "#ffffff", null, null, null, null, null, "Blivi Pedidos", "blivi-pedidos", null });
+                columns: new[] { "Id", "Ativa", "CorPrimaria", "CorSecundaria", "Descricao", "Dominio", "EmailContato", "InstagramUrl", "LogoUrl", "Nome", "PixAtivo", "PixChave", "PixCidade", "PixResponsavel", "PixTipo", "Slug", "Whatsapp" },
+                values: new object[] { 1, true, "#0d6efd", "#ffffff", null, null, null, null, null, "Blivi Pedidos", false, null, null, null, null, "blivi-pedidos", null });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -596,6 +632,11 @@ namespace BliviPedidos.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Pedido_ConsumidorUsuarioId",
+                table: "Pedido",
+                column: "ConsumidorUsuarioId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Pedido_LojaId",
                 table: "Pedido",
                 column: "LojaId");
@@ -609,6 +650,16 @@ namespace BliviPedidos.Migrations
                 name: "IX_Produto_LojaId",
                 table: "Produto",
                 column: "LojaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProdutoMovimentacao_LojaId",
+                table: "ProdutoMovimentacao",
+                column: "LojaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProdutoMovimentacao_PedidoId",
+                table: "ProdutoMovimentacao",
+                column: "PedidoId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProdutoMovimentacao_ProdutoId",

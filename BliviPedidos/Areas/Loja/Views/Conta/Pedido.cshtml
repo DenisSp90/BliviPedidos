@@ -1,0 +1,49 @@
+@model PedidoConsumidorDetalheViewModel
+@{
+    ViewData["Title"] = "Pedido " + Model.CodigoPublico;
+    ViewData["LojaNome"] = Model.Loja.Nome;
+    ViewData["LojaSlug"] = Model.Loja.Slug;
+    ViewData["LojaLogo"] = Model.Loja.LogoUrl;
+    ViewData["LojaCorPrimaria"] = Model.Loja.CorPrimaria;
+    ViewData["LojaCorSecundaria"] = Model.Loja.CorSecundaria;
+}
+
+<section class="container py-5">
+    <a class="text-decoration-none" href="@Url.RouteUrl("MeusPedidosConsumidorLoja", new { lojaSlug = Model.Loja.Slug })">&larr; Meus pedidos</a>
+    <div class="bg-white border rounded-3 shadow-sm p-4 mt-3">
+        <div class="d-flex flex-wrap justify-content-between gap-3">
+            <div><span class="text-secondary d-block">Código</span><strong class="font-monospace">@Model.CodigoPublico</strong></div>
+            <div><span class="text-secondary d-block">Status</span><strong>@Model.Status</strong></div>
+            <div><span class="text-secondary d-block">Pagamento</span><strong>@Model.StatusPagamento</strong></div>
+        </div>
+        <hr />
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Produto</th><th>Quantidade</th><th>Preço</th><th>Subtotal</th></tr></thead>
+                <tbody>
+                @foreach (var item in Model.Itens)
+                {
+                    <tr><td>@item.Produto</td><td>@item.Quantidade</td><td>@item.PrecoUnitario.ToString("C")</td><td>@item.Subtotal.ToString("C")</td></tr>
+                }
+                </tbody>
+                <tfoot><tr><th colspan="3">Total</th><th>@Model.Total.ToString("C")</th></tr></tfoot>
+            </table>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.PixQrCodeBase64) && !string.IsNullOrWhiteSpace(Model.PixCopiaECola))
+        {
+            <hr />
+            <div class="text-center">
+                <h2 class="h4">Pagar com PIX</h2>
+                <img src="data:image/png;base64,@Model.PixQrCodeBase64" alt="QR Code PIX do pedido" class="img-fluid mb-3" style="max-width: 280px" />
+                <div class="input-group mx-auto" style="max-width: 760px">
+                    <input id="pixCopiaECola" class="form-control font-monospace" value="@Model.PixCopiaECola" readonly />
+                    <button class="btn btn-outline-primary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('pixCopiaECola').value)">Copiar</button>
+                </div>
+            </div>
+        }
+        else if (!string.IsNullOrWhiteSpace(Model.PagamentoErro))
+        {
+            <div class="alert alert-warning mt-3">@Model.PagamentoErro</div>
+        }
+    </div>
+</section>

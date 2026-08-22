@@ -1,0 +1,16 @@
+@model BliviPedidos.Dtos.Publico.LojaPublicaDto
+@{
+    ViewData["Title"] = "Confirme sua conta";
+    ViewData["LojaNome"] = Model.Nome;
+    ViewData["LojaSlug"] = Model.Slug;
+    ViewData["LojaLogo"] = Model.LogoUrl;
+    ViewData["LojaCorPrimaria"] = Model.CorPrimaria;
+    ViewData["LojaCorSecundaria"] = Model.CorSecundaria;
+}
+<section class="container py-5" style="max-width: 680px">
+    <div class="alert alert-info">
+        <h1 class="h4">Confirme seu e-mail</h1>
+        <p class="mb-0">Enviamos um link de confirmação. Depois de confirmar, entre na sua conta para continuar.</p>
+    </div>
+    <a class="btn btn-primary" asp-route="EntrarConsumidorLoja" asp-route-lojaSlug="@Model.Slug">Entrar</a>
+</section>

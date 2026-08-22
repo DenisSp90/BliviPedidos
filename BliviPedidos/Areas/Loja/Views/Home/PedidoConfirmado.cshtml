@@ -19,6 +19,24 @@
             <strong class="fs-4 font-monospace user-select-all">@Model.CodigoPublico</strong>
         </div>
         <p class="small text-secondary">Guarde este código. Ele não corresponde ao número interno do pedido.</p>
+        @if (!string.IsNullOrWhiteSpace(Model.PixQrCodeBase64) && !string.IsNullOrWhiteSpace(Model.PixCopiaECola))
+        {
+            <hr class="my-4" />
+            <h2 class="h4">Pagamento por PIX</h2>
+            <p class="text-secondary">Valor: <strong>@Model.Total.ToString("C")</strong></p>
+            <img src="data:image/png;base64,@Model.PixQrCodeBase64" alt="QR Code PIX do pedido" class="img-fluid mb-3" style="max-width: 280px" />
+            <label for="pixCopiaECola" class="form-label d-block">PIX copia e cola</label>
+            <div class="input-group mb-4">
+                <input id="pixCopiaECola" class="form-control font-monospace" value="@Model.PixCopiaECola" readonly />
+                <button class="btn btn-outline-primary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('pixCopiaECola').value)">Copiar</button>
+            </div>
+            <p class="small text-secondary">Após o pagamento, a loja confirmará o recebimento do pedido.</p>
+        }
+        else if (!string.IsNullOrWhiteSpace(Model.PagamentoErro))
+        {
+            <div class="alert alert-warning">@Model.PagamentoErro Entre em contato com a loja para realizar o pagamento.</div>
+        }
         <a class="btn btn-primary" href="@Url.RouteUrl("CatalogoLoja", new { lojaSlug = Model.Loja.Slug })">Voltar à loja</a>
+        <a class="btn btn-outline-primary" href="@Url.RouteUrl("MeusPedidosConsumidorLoja", new { lojaSlug = Model.Loja.Slug })">Meus pedidos</a>
     </div>
 </section>

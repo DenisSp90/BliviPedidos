@@ -2,10 +2,13 @@ using BliviPedidos.Data;
 using BliviPedidos.Models;
 using BliviPedidos.Services.Implementations;
 using BliviPedidos.Services.Interfaces;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Identity;
 using Xunit;
 
 namespace BliviPedidos.Tests;
@@ -29,6 +32,7 @@ public class ConfirmacaoCheckoutServiceTests
             IsAtivo = true
         };
         context.Produto.Add(produto);
+        context.Users.Add(CriarUsuario());
         await context.SaveChangesAsync();
 
         var carrinho = new CarrinhoFake(produto.Id, quantidade: 2);
@@ -38,7 +42,8 @@ public class ConfirmacaoCheckoutServiceTests
             carrinho,
             dados,
             NullLogger<ConfirmacaoCheckoutService>.Instance,
-            Options.Create(new ReservaEstoqueOptions { ExpiracaoMinutos = 30 }));
+            Options.Create(new ReservaEstoqueOptions { ExpiracaoMinutos = 30 }),
+            CriarAcessor());
 
         Assert.Empty(context.Pedido);
         var resultado = await service.ConfirmarAsync(Loja.PadraoId);
@@ -52,6 +57,7 @@ public class ConfirmacaoCheckoutServiceTests
         Assert.Equal(resultado.CodigoPublico, pedido.CodigoPublico);
         Assert.Equal(StatusPedido.Confirmado, pedido.Status);
         Assert.Equal(StatusPagamento.AguardandoPagamento, pedido.StatusPagamento);
+        Assert.Equal("consumidor-1", pedido.ConsumidorUsuarioId);
         Assert.InRange(pedido.ReservaExpiraEm!.Value, DateTime.UtcNow.AddMinutes(29), DateTime.UtcNow.AddMinutes(31));
         Assert.Equal(50m, pedido.ValorTotalPedido);
         Assert.Equal(2, Assert.Single(pedido.Itens).Quantidade);
@@ -100,6 +106,7 @@ public class ConfirmacaoCheckoutServiceTests
             IsAtivo = true
         };
         context.Produto.Add(produto);
+        context.Users.Add(CriarUsuario());
         await context.SaveChangesAsync();
         var carrinho = new CarrinhoFake(produto.Id, quantidade: 2);
         var dados = new DadosFake();
@@ -108,7 +115,8 @@ public class ConfirmacaoCheckoutServiceTests
             carrinho,
             dados,
             NullLogger<ConfirmacaoCheckoutService>.Instance,
-            Options.Create(new ReservaEstoqueOptions()));
+            Options.Create(new ReservaEstoqueOptions()),
+            CriarAcessor());
 
         var resultado = await service.ConfirmarAsync(Loja.PadraoId);
 
@@ -142,6 +150,7 @@ public class ConfirmacaoCheckoutServiceTests
                 IsAtivo = true
             };
             preparacao.Produto.Add(produto);
+            preparacao.Users.Add(CriarUsuario());
             await preparacao.SaveChangesAsync();
             produtoId = produto.Id;
         }
@@ -154,7 +163,8 @@ public class ConfirmacaoCheckoutServiceTests
                 primeiroCarrinho,
                 new DadosFake(),
                 NullLogger<ConfirmacaoCheckoutService>.Instance,
-                Options.Create(new ReservaEstoqueOptions()));
+                Options.Create(new ReservaEstoqueOptions()),
+                CriarAcessor());
             var primeiroResultado = await primeiroServico.ConfirmarAsync(Loja.PadraoId);
             Assert.True(primeiroResultado.Sucesso);
         }
@@ -168,7 +178,8 @@ public class ConfirmacaoCheckoutServiceTests
                 segundoCarrinho,
                 segundoDados,
                 NullLogger<ConfirmacaoCheckoutService>.Instance,
-                Options.Create(new ReservaEstoqueOptions()));
+                Options.Create(new ReservaEstoqueOptions()),
+                CriarAcessor());
             var segundoResultado = await segundoServico.ConfirmarAsync(Loja.PadraoId);
 
             Assert.False(segundoResultado.Sucesso);
@@ -204,6 +215,29 @@ public class ConfirmacaoCheckoutServiceTests
         public CarrinhoPublico Remover(int lojaId, int produtoId) => _carrinho;
         public void Limpar(int lojaId) => Limpo = true;
     }
+
+    private static IHttpContextAccessor CriarAcessor()
+    {
+        var identidade = new ClaimsIdentity(
+            [new Claim(ClaimTypes.NameIdentifier, "consumidor-1")],
+            "TestAuthentication");
+        return new HttpContextAccessor
+        {
+            HttpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(identidade)
+            }
+        };
+    }
+
+    private static IdentityUser CriarUsuario() => new()
+    {
+        Id = "consumidor-1",
+        UserName = "consumidor@example.com",
+        NormalizedUserName = "CONSUMIDOR@EXAMPLE.COM",
+        Email = "consumidor@example.com",
+        NormalizedEmail = "CONSUMIDOR@EXAMPLE.COM"
+    };
 
     private sealed class DadosFake : IDadosConsumidorCheckoutService
     {

@@ -25,6 +25,7 @@ public static class PoliticasAutorizacao
             options.AddPolicy(Estoque, policy =>
                 policy.RequireRole(
                     InicializadorSistema.PerfilAdministrador,
+                    InicializadorSistema.PerfilVendedor,
                     InicializadorSistema.PerfilEstoquista));
 
             options.AddPolicy(Relatorios, policy =>

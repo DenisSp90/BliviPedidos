@@ -1,4 +1,5 @@
 using System.Data;
+using System.Security.Claims;
 using BliviPedidos.Data;
 using BliviPedidos.Models;
 using BliviPedidos.Services.Interfaces;
@@ -14,19 +15,22 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
     private readonly IDadosConsumidorCheckoutService _dadosService;
     private readonly ILogger<ConfirmacaoCheckoutService> _logger;
     private readonly ReservaEstoqueOptions _reservaOptions;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public ConfirmacaoCheckoutService(
         ApplicationDbContext context,
         ICarrinhoPublicoService carrinhoService,
         IDadosConsumidorCheckoutService dadosService,
         ILogger<ConfirmacaoCheckoutService> logger,
-        IOptions<ReservaEstoqueOptions> reservaOptions)
+        IOptions<ReservaEstoqueOptions> reservaOptions,
+        IHttpContextAccessor httpContextAccessor)
     {
         _context = context;
         _carrinhoService = carrinhoService;
         _dadosService = dadosService;
         _logger = logger;
         _reservaOptions = reservaOptions.Value;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<ResultadoConfirmacaoCheckout> ConfirmarAsync(
@@ -35,6 +39,9 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
     {
         var carrinho = _carrinhoService.Obter(lojaId);
         var dados = _dadosService.Obter(lojaId);
+        var consumidorUsuarioId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(consumidorUsuarioId))
+            return ResultadoConfirmacaoCheckout.Falhou("Entre em sua conta para confirmar o pedido.");
         if (carrinho.Itens.Count == 0)
             return ResultadoConfirmacaoCheckout.Falhou("O carrinho está vazio.");
         if (dados == null)
@@ -80,6 +87,7 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
             var pedido = new Pedido(cadastro)
             {
                 LojaId = lojaId,
+                ConsumidorUsuarioId = consumidorUsuarioId,
                 Status = StatusPedido.Confirmado,
                 StatusPagamento = StatusPagamento.AguardandoPagamento,
                 DataPedido = DateTime.UtcNow,

@@ -61,6 +61,7 @@ public class StoreController : Controller
 
     [HttpPost]
     [Authorize(Policy = PoliticasAutorizacao.Vendas)]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> AtualizarEstadoPagamento(int idPedido, StatusPagamento statusPagamento)
     {
         try
@@ -80,11 +81,8 @@ public class StoreController : Controller
                 //    await EnviarEmailPagamento(pedido.Cadastro);
             }
 
-            return Ok(new
-            {
-                StatusPedido = pedido.Status.ToString(),
-                StatusPagamento = statusPagamento.ToString()
-            });
+            TempData["MensagemSucesso"] = "Situação do pagamento atualizada com sucesso.";
+            return RedirectToAction(nameof(PedidoDetalhe), new { id = idPedido });
         }
         catch (Exception ex)
         {
@@ -93,8 +91,30 @@ public class StoreController : Controller
                 "Falha ao atualizar pagamento do pedido. PedidoId: {PedidoId}, StatusPagamento: {StatusPagamento}",
                 idPedido,
                 statusPagamento);
-            return BadRequest(ex.Message);
+            TempData["MensagemErro"] = ex.Message;
+            return RedirectToAction(nameof(PedidoDetalhe), new { id = idPedido });
         }
+    }
+
+    [HttpPost]
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AtualizarSituacaoPedido(int idPedido, StatusPedido statusPedido)
+    {
+        try
+        {
+            await _pedidoService.AtualizarStatusPedidoAsync(idPedido, statusPedido);
+            TempData["MensagemSucesso"] = "Situação do pedido atualizada com sucesso.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Falha ao atualizar situação do pedido. PedidoId: {PedidoId}, StatusPedido: {StatusPedido}",
+                idPedido, statusPedido);
+            TempData["MensagemErro"] = ex.Message;
+        }
+
+        return RedirectToAction(nameof(PedidoDetalhe), new { id = idPedido });
     }
 
     [HttpPost]

@@ -150,6 +150,67 @@ public class PedidoServiceTests
     }
 
     [Fact]
+    public async Task AtualizarStatusPedido_DeveAlterarSomenteSituacaoOperacional()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>().UseSqlite(connection).Options;
+        await using var context = new ApplicationDbContext(options);
+        await context.Database.EnsureCreatedAsync();
+        var pedido = new Pedido
+        {
+            Status = StatusPedido.Confirmado,
+            StatusPagamento = StatusPagamento.Pago,
+            Cadastro = new Cadastro { Nome = "Cliente", Telefone = "55 11 99999-9999" }
+        };
+        context.Pedido.Add(pedido);
+        await context.SaveChangesAsync();
+        var accessor = CriarHttpContextAccessor("operador@teste.com");
+        var service = new PedidoService(
+            accessor, context, Mock.Of<IItemPedidoService>(), Mock.Of<ICadastroService>(),
+            Mock.Of<IProdutoService>(), accessor, NullLogger<PedidoService>.Instance);
+
+        await service.AtualizarStatusPedidoAsync(pedido.Id, StatusPedido.EmPreparacao);
+
+        Assert.Equal(StatusPedido.EmPreparacao, pedido.Status);
+        Assert.Equal(StatusPagamento.Pago, pedido.StatusPagamento);
+    }
+
+    [Fact]
+    public async Task AtualizarStatusPedido_ParaCancelado_DeveUsarRotinaDeReposicaoDoEstoque()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>().UseSqlite(connection).Options;
+        await using var context = new ApplicationDbContext(options);
+        await context.Database.EnsureCreatedAsync();
+        var produto = new Produto { Nome = "Produto", PrecoVenda = 10m, Quantidade = 3, IsAtivo = true };
+        var pedido = new Pedido
+        {
+            Status = StatusPedido.Confirmado,
+            StatusPagamento = StatusPagamento.AguardandoPagamento,
+            Cadastro = new Cadastro { Nome = "Cliente", Telefone = "55 11 99999-9999" }
+        };
+        pedido.Itens.Add(new ItemPedido(pedido, produto, 2, produto.PrecoVenda));
+        context.Pedido.Add(pedido);
+        await context.SaveChangesAsync();
+        var accessor = CriarHttpContextAccessor("operador@teste.com");
+        var service = new PedidoService(
+            accessor, context, Mock.Of<IItemPedidoService>(), Mock.Of<ICadastroService>(),
+            Mock.Of<IProdutoService>(), accessor, NullLogger<PedidoService>.Instance);
+
+        await service.AtualizarStatusPedidoAsync(pedido.Id, StatusPedido.Cancelado);
+
+        context.ChangeTracker.Clear();
+        var atualizado = await context.Pedido.Include(p => p.Itens).ThenInclude(i => i.Produto)
+            .SingleAsync(p => p.Id == pedido.Id);
+        Assert.Equal(StatusPedido.Cancelado, atualizado.Status);
+        Assert.Equal(StatusPagamento.Cancelado, atualizado.StatusPagamento);
+        Assert.Equal(5, atualizado.Itens.Single().Produto.Quantidade);
+        Assert.Single(await context.ProdutoMovimentacao.ToListAsync());
+    }
+
+    [Fact]
     public async Task RegistrarCancelamentoPedido_ComPedidoInexistente_DeveFalharSemMovimentarEstoque()
     {
         await using var connection = new SqliteConnection("Data Source=:memory:");

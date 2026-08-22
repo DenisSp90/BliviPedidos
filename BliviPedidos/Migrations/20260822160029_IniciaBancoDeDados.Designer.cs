@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BliviPedidos.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260822035217_IniciaBanco")]
-    partial class IniciaBanco
+    [Migration("20260822160029_IniciaBancoDeDados")]
+    partial class IniciaBancoDeDados
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -236,6 +236,25 @@ namespace BliviPedidos.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("varchar(120)");
 
+                    b.Property<bool>("PixAtivo")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("PixChave")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("PixCidade")
+                        .HasMaxLength(80)
+                        .HasColumnType("varchar(80)");
+
+                    b.Property<string>("PixResponsavel")
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
+
+                    b.Property<string>("PixTipo")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(80)
@@ -263,6 +282,7 @@ namespace BliviPedidos.Migrations
                             CorPrimaria = "#0d6efd",
                             CorSecundaria = "#ffffff",
                             Nome = "Blivi Pedidos",
+                            PixAtivo = false,
                             Slug = "blivi-pedidos"
                         });
                 });
@@ -282,6 +302,10 @@ namespace BliviPedidos.Migrations
                         .HasMaxLength(22)
                         .HasColumnType("varchar(22)");
 
+                    b.Property<string>("ConsumidorUsuarioId")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
                     b.Property<DateTime?>("DataPagamento")
                         .HasColumnType("datetime(6)");
 
@@ -294,10 +318,13 @@ namespace BliviPedidos.Migrations
                     b.Property<int>("LojaId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("Pago")
-                        .HasColumnType("tinyint(1)");
+                    b.Property<DateTime?>("ReservaExpiraEm")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StatusPagamento")
                         .HasColumnType("int");
 
                     b.Property<decimal>("ValorTotalPedido")
@@ -309,6 +336,8 @@ namespace BliviPedidos.Migrations
 
                     b.HasIndex("CodigoPublico")
                         .IsUnique();
+
+                    b.HasIndex("ConsumidorUsuarioId");
 
                     b.HasIndex("LojaId");
 
@@ -374,11 +403,27 @@ namespace BliviPedidos.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Ator")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
                     b.Property<DateTime>("Data")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int>("LojaId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Observacao")
                         .HasColumnType("longtext");
+
+                    b.Property<string>("Origem")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<int?>("PedidoId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("ProdutoId")
                         .HasColumnType("int");
@@ -391,6 +436,10 @@ namespace BliviPedidos.Migrations
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LojaId");
+
+                    b.HasIndex("PedidoId");
 
                     b.HasIndex("ProdutoId");
 
@@ -676,11 +725,18 @@ namespace BliviPedidos.Migrations
                         .WithMany("Pedidos")
                         .HasForeignKey("ClienteId");
 
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "ConsumidorUsuario")
+                        .WithMany()
+                        .HasForeignKey("ConsumidorUsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("BliviPedidos.Models.Loja", "Loja")
                         .WithMany("Pedidos")
                         .HasForeignKey("LojaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("ConsumidorUsuario");
 
                     b.Navigation("Loja");
                 });
@@ -705,9 +761,24 @@ namespace BliviPedidos.Migrations
 
             modelBuilder.Entity("BliviPedidos.Models.ProdutoMovimentacao", b =>
                 {
+                    b.HasOne("BliviPedidos.Models.Loja", "Loja")
+                        .WithMany()
+                        .HasForeignKey("LojaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BliviPedidos.Models.Pedido", "Pedido")
+                        .WithMany()
+                        .HasForeignKey("PedidoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("BliviPedidos.Models.Produto", "Produto")
                         .WithMany("ProdutoMovimentacao")
                         .HasForeignKey("ProdutoId");
+
+                    b.Navigation("Loja");
+
+                    b.Navigation("Pedido");
 
                     b.Navigation("Produto");
                 });

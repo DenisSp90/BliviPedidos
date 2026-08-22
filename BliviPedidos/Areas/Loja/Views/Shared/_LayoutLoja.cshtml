@@ -30,6 +30,21 @@
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-3">
                     <li class="nav-item"><a class="nav-link" href="@Url.RouteUrl("CatalogoLoja", new { lojaSlug = ViewData["LojaSlug"] })">Produtos</a></li>
                     <li class="nav-item"><a class="nav-link" href="@Url.RouteUrl("CarrinhoLoja", new { lojaSlug = ViewData["LojaSlug"] })"><i class="bi bi-cart3 me-1"></i>Carrinho</a></li>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li class="nav-item"><a class="nav-link" href="@Url.RouteUrl("MeusPedidosConsumidorLoja", new { lojaSlug = ViewData["LojaSlug"] })"><i class="bi bi-bag-check me-1"></i>Meus pedidos</a></li>
+                        <li class="nav-item">
+                            <form method="post" action="@Url.RouteUrl("SairConsumidorLoja", new { lojaSlug = ViewData["LojaSlug"] })">
+                                @Html.AntiForgeryToken()
+                                <button class="btn btn-link nav-link" type="submit"><i class="bi bi-person-check me-1"></i>Sair</button>
+                            </form>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item"><a class="nav-link" href="@Url.RouteUrl("CriarContaConsumidorLoja", new { lojaSlug = ViewData["LojaSlug"] })"><i class="bi bi-person-plus me-1"></i>Criar conta</a></li>
+                        <li class="nav-item"><a class="nav-link" href="@Url.RouteUrl("EntrarConsumidorLoja", new { lojaSlug = ViewData["LojaSlug"] })"><i class="bi bi-box-arrow-in-right me-1"></i>Entrar</a></li>
+                    }
                 </ul>
             </div>
         </nav>

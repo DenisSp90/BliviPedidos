@@ -22,7 +22,11 @@ public class PoliticasAutorizacaoTests
         },
         {
             PoliticasAutorizacao.Estoque,
-            [InicializadorSistema.PerfilAdministrador, InicializadorSistema.PerfilEstoquista]
+            [
+                InicializadorSistema.PerfilAdministrador,
+                InicializadorSistema.PerfilVendedor,
+                InicializadorSistema.PerfilEstoquista
+            ]
         },
         {
             PoliticasAutorizacao.Relatorios,

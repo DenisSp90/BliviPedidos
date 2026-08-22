@@ -15,19 +15,8 @@ namespace BliviPedidos.Services.Implementations
             _emailSettings = emailSettings.Value;
         }
 
-        public Task SendEmailAsync(string? email, string? subject, string? message)
-        {
-            try
-            {
-                Execute(email, subject, message).Wait();
-                return Task.FromResult(0);
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
+        public Task SendEmailAsync(string? email, string? subject, string? message) =>
+            Execute(email!, subject!, message!);
 
         public async Task Execute(string email, string subject, string message)
         {
@@ -35,15 +24,19 @@ namespace BliviPedidos.Services.Implementations
             {
                 string ToEmail = email;
 
+                var remetente = string.IsNullOrWhiteSpace(_emailSettings.FromEmail)
+                    ? _emailSettings.UsernameEmail
+                    : _emailSettings.FromEmail;
                 MailMessage mail = new MailMessage()
                 {
-                    From = new MailAddress(_emailSettings.UsernameEmail, "Gorila Smoke")
+                    From = new MailAddress(remetente, "Blivi Pedidos")
                 };
 
                 mail.To.Add(new MailAddress(ToEmail));
-                mail.CC.Add(new MailAddress(_emailSettings.CcEmail));
+                if (!string.IsNullOrWhiteSpace(_emailSettings.CcEmail))
+                    mail.CC.Add(new MailAddress(_emailSettings.CcEmail));
 
-                mail.Subject = "Gorila Smoke - " + subject;
+                mail.Subject = "Blivi Pedidos - " + subject;
                 mail.Body = message;
                 mail.IsBodyHtml = true;
                 mail.Priority = MailPriority.High;
