@@ -2,14 +2,10 @@
 using BliviPedidos.Data;
 using BliviPedidos.Models;
 using BliviPedidos.Models.ViewModels;
+using BliviPedidos.Seguranca;
 using BliviPedidos.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using BliviPedidos.Seguranca;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Mvc.ViewEngines;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.EntityFrameworkCore;
 
 namespace BliviPedidos.Controllers;
 

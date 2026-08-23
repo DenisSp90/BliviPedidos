@@ -48,7 +48,7 @@ public class LojaPublicaAreaTests
             .Where(metodo => metodo.GetCustomAttributes(typeof(HttpPostAttribute), true).Any())
             .ToArray();
 
-        Assert.Equal(4, acoesPost.Length);
+        Assert.Equal(5, acoesPost.Length);
         Assert.All(acoesPost, metodo =>
         {
             Assert.Single(metodo.GetCustomAttributes(typeof(ValidateAntiForgeryTokenAttribute), true));

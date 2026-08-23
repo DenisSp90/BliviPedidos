@@ -20,9 +20,12 @@ public sealed class PagamentoPixService : IPagamentoService
             || string.IsNullOrWhiteSpace(loja.PixCidade))
             throw new InvalidOperationException("Os dados PIX desta loja não estão configurados.");
 
-        var referenciaNumerica = new string(referencia.Where(char.IsDigit).Take(23).ToArray());
-        if (string.IsNullOrEmpty(referenciaNumerica))
-            referenciaNumerica = BitConverter.ToUInt64(
+        // O txid do PIX aceita até 25 caracteres alfanuméricos. Os novos códigos
+        // públicos já seguem essa regra e, portanto, chegam ao banco exatamente
+        // como são exibidos para consumidor e balcão.
+        var referenciaPix = new string(referencia.Where(char.IsLetterOrDigit).Take(25).ToArray());
+        if (string.IsNullOrEmpty(referenciaPix))
+            referenciaPix = BitConverter.ToUInt64(
                     SHA256.HashData(Encoding.UTF8.GetBytes(referencia)), 0)
                 .ToString(CultureInfo.InvariantCulture);
 
@@ -31,7 +34,7 @@ public sealed class PagamentoPixService : IPagamentoService
             ObterTipo(loja.PixTipo),
             loja.PixChave,
             loja.PixCidade,
-            referenciaNumerica,
+            referenciaPix,
             valor.ToString("F2", CultureInfo.GetCultureInfo("pt-BR")));
         var payload = pix.GetPayLoad();
         if (payload.Contains("INVÁLIDO", StringComparison.OrdinalIgnoreCase))

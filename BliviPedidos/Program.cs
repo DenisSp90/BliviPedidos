@@ -1,15 +1,12 @@
 using BliviPedidos.Data;
-using BliviPedidos.Models;
 using BliviPedidos.Middleware;
+using BliviPedidos.Models;
+using BliviPedidos.Seguranca;
 using BliviPedidos.Services.Implementations;
 using BliviPedidos.Services.Interfaces;
-using BliviPedidos.Seguranca;
-using DinkToPdf.Contracts;
-using DinkToPdf;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Localization;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Syncfusion.Licensing;
 using System.Globalization;
@@ -224,7 +221,9 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var dbContext = services.GetRequiredService<ApplicationDbContext>();
-        await dbContext.Database.EnsureCreatedAsync();
+        // O projeto usa migrations. EnsureCreated não grava o histórico das
+        // migrations e faz a migration inicial falhar com "table already exists".
+        await dbContext.Database.MigrateAsync();
         await InicializadorSistema.InicializarAsync(services, app.Configuration);
     }
     catch (Exception ex)

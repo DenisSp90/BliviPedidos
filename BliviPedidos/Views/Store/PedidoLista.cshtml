@@ -49,8 +49,8 @@
                                     <i class="bi bi-cart"></i>
                                 </div>
                                 <div class="ps-3">
-                                    <h6>@Model.Pedidos.Count(p => p.Status != StatusPedido.Carrinho && p.Status != StatusPedido.Concluido && p.Status != StatusPedido.Cancelado)</h6>
-                                    <span class="text-success small pt-1 fw-bold">Em andamento</span>
+                                    <h6>@Model.Pedidos.Count</h6>
+                                    <span class="text-success small pt-1 fw-bold">Registrados no filtro atual</span>
                                 </div>
                             </div>
                         </div>
@@ -113,7 +113,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Lista de pedidos</h5>
                     <p>
-                        A lista de pedidos contém exclusivamente os pedidos ativos. Nela, é possível alterar tanto o status de pagamento quanto a situação do pedido conforme necessário.
+                        A lista apresenta todos os pedidos confirmados, inclusive concluídos e cancelados. Carrinhos ainda não finalizados não entram na contagem.
                     </p>
                 </div>
 

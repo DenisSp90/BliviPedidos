@@ -47,6 +47,8 @@ namespace BliviPedidos.Areas.Identity.Pages.Account
         /// </summary>
         public string ReturnUrl { get; set; }
 
+        public string CriarContaConsumidorUrl { get; private set; }
+
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
@@ -101,6 +103,7 @@ namespace BliviPedidos.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             ReturnUrl = returnUrl;
+            ConfigurarCadastroConsumidor(returnUrl);
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
@@ -108,6 +111,8 @@ namespace BliviPedidos.Areas.Identity.Pages.Account
             returnUrl ??= Url.Content("~/");
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            ReturnUrl = returnUrl;
+            ConfigurarCadastroConsumidor(returnUrl);
 
             if (ModelState.IsValid)
             {
@@ -137,6 +142,27 @@ namespace BliviPedidos.Areas.Identity.Pages.Account
 
             // If we got this far, something failed, redisplay form
             return Page();
+        }
+
+        private void ConfigurarCadastroConsumidor(string returnUrl)
+        {
+            if (!Url.IsLocalUrl(returnUrl))
+                return;
+
+            var caminho = returnUrl.Split('?', 2)[0].Trim('/');
+            var segmentos = caminho.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            if (segmentos.Length < 2 ||
+                !string.Equals(segmentos[0], "loja", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            var lojaSlug = segmentos[1];
+            if (string.IsNullOrWhiteSpace(lojaSlug) ||
+                lojaSlug.Any(caractere => !char.IsLetterOrDigit(caractere) && caractere != '-'))
+                return;
+
+            CriarContaConsumidorUrl = Url.RouteUrl(
+                "CriarContaConsumidorLoja",
+                new { lojaSlug, returnUrl });
         }
     }
 }

@@ -85,6 +85,7 @@ public class ConfirmacaoCheckoutServiceTests
             Assert.DoesNotContain("+", codigo);
             Assert.DoesNotContain("/", codigo);
             Assert.DoesNotContain("=", codigo);
+            Assert.All(codigo, caractere => Assert.True(char.IsLetterOrDigit(caractere)));
         });
         Assert.Equal(codigos.Length, codigos.Distinct().Count());
     }

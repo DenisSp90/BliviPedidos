@@ -447,8 +447,8 @@ public class StoreController : Controller
             StoreViewModel storeViewModel = new StoreViewModel();
 
             IEnumerable<Pedido> pedidos = filtro == 1
-                ? _pedidoService.GetListaPedidosAtivos()
-                : _pedidoService.GetListaPedidosAtivosByEmail(HttpContext.User.Identity!.Name!);
+                ? _pedidoService.GetListaPedidosRegistrados()
+                : _pedidoService.GetListaPedidosRegistradosByEmail(HttpContext.User.Identity!.Name!);
 
             var buscaNormalizada = busca?.Trim();
             if (!string.IsNullOrWhiteSpace(buscaNormalizada))
@@ -496,8 +496,20 @@ public class StoreController : Controller
         pedido.ValorTotalPedido = pedido.Itens.Sum(i => i.Subtotal);
         cadastro.Pedido = pedido;
 
-        // Validar o telefone antes de verificar ModelState
-        if (!ValidarTelefone(cadastro.Telefone))
+        if (cadastro.VendaAvulsa)
+        {
+            ModelState.Remove(nameof(Cadastro.Nome));
+            ModelState.Remove(nameof(Cadastro.Telefone));
+            ModelState.Remove(nameof(Cadastro.Email));
+
+            cadastro.Nome = "Consumidor avulso - loja física";
+            cadastro.Telefone = "Não informado";
+            cadastro.Email = string.Empty;
+            cadastro.Cliente = null;
+            cadastro.ClienteId = null;
+            pedido.ConsumidorUsuarioId = null;
+        }
+        else if (!ValidarTelefone(cadastro.Telefone))
             ModelState.AddModelError("Telefone", "O telefone deve estar no formato '55 11 99999-9999'.");
 
         if (ModelState.IsValid)
@@ -510,28 +522,26 @@ public class StoreController : Controller
                     return RedirectToAction("PedidoCadastro", "Store");
                 }
 
-                var cliente = await _clienteService.ProcurarClienteByTelefoneAsync(cadastro.Telefone);
-
-                if (cliente == null || cliente.Id == 0)
+                if (!cadastro.VendaAvulsa)
                 {
-                    var clienteNew = await _clienteService.RegistrarClienteAsync(cadastro);
-                    cadastro.Cliente = _mapper.Map<Cliente>(clienteNew);
-                    cadastro.ClienteId = clienteNew.Id;
+                    var cliente = await _clienteService.ProcurarClienteByTelefoneAsync(cadastro.Telefone);
 
-                }
-                else
-                {
+                    if (cliente == null || cliente.Id == 0)
+                        cliente = await _clienteService.RegistrarClienteAsync(cadastro);
+
                     cadastro.Cliente = _mapper.Map<Cliente>(cliente);
                     cadastro.ClienteId = cliente.Id;
                 }
 
                 cadastro.Pedido.Status = StatusPedido.Confirmado;
                 cadastro.Pedido.StatusPagamento = StatusPagamento.AguardandoPagamento;
+                cadastro.Pedido.CodigoPublico ??= CodigoPublicoPedido.Gerar();
                 cadastro.Pedido.EmailResponsavel = HttpContext.User.Identity.Name;
                 cadastro.Pedido.DataPedido = DateTime.Now;
 
                 _pedidoService.UpdateCadastro(cadastro);
-                EnviarEmailPedido(cadastro).Wait(); 
+                if (!cadastro.VendaAvulsa && !string.IsNullOrWhiteSpace(cadastro.Email))
+                    await EnviarEmailPedido(cadastro);
 
                 _pedidoService.ClearPedido();
 

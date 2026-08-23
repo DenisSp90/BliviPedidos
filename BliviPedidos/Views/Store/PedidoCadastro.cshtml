@@ -31,7 +31,7 @@
 
                     <div class="card-body">
                         <br />
-                        <form class="row g-3" asp-action="PedidoResumo" class="form-horizontal">
+                        <form class="row g-3" asp-action="PedidoResumo" method="post">
                             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                             <input type="hidden" asp-for="@Model.Pedido.Id" />
                             <input type="hidden" asp-for="@Model.Cliente.Id" />
@@ -40,8 +40,8 @@
 
                                 <div class="col-12">
                                     <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="avulsoCheckbox">
-                                        <label class="form-check-label" for="avulsoCheckbox">Registrar pedido avulso (Marque essa opção para não registrar o cliente do pedido)</label>
+                                        <input asp-for="VendaAvulsa" class="form-check-input" id="avulsoCheckbox">
+                                        <label class="form-check-label" for="avulsoCheckbox">Venda avulsa na loja física (sem cadastro do cliente)</label>
                                     </div>
                                 </div>
 
@@ -51,21 +51,18 @@
                                         <input asp-for="@Model.Telefone" type="text" placeholder="Telefone" class="form-control" id="telefoneInput">
                                         <label asp-for="@Model.Telefone" class="col-sm-2 col-form-label"></label>                                        
                                     </div>
-                                    <input asp-for="@Model.Telefone" type="hidden" id="telefoneInputHidden">
                                     <span asp-validation-for="@Model.Telefone" class="text-danger"></span>
                                 </div>
 
                                 <div class="col-12">
                                     <label asp-for="@Model.Nome" class="col-sm-2 col-form-label"></label>
                                     <input asp-for="@Model.Nome" type="text" placeholder="Nome" class="form-control" id="nomeInput">
-                                    <input asp-for="@Model.Nome" type="hidden" id="nomeInputHidden">
                                     <span asp-validation-for="@Model.Nome" class="text-danger"></span>
                                 </div>
 
                                 <div class="col-12">
                                     <label asp-for="@Model.Email" class="col-sm-2 col-form-label"></label>
                                     <input asp-for="@Model.Email" type="text" placeholder="E-mail" class="form-control" id="emailInput">
-                                    <input asp-for="@Model.Email" type="hidden" id="emailInputHidden">
                                     <span asp-validation-for="@Model.Email" class="text-danger"></span>
                                 </div>
 

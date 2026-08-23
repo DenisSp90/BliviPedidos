@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 
 namespace BliviPedidos.Models
@@ -21,6 +22,9 @@ namespace BliviPedidos.Models
 
         public int? ClienteId { get; set; }
         public virtual Cliente? Cliente{ get; set; }
+
+        [NotMapped]
+        public bool VendaAvulsa { get; set; }
 
         [MinLength(5, ErrorMessage = "Nome deve ter no minimo 5 caracteres")]
         [MaxLength(50, ErrorMessage = "Nome deve ter no minimo 50 caracteres")]

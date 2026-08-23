@@ -114,7 +114,7 @@ public class Pix
     {
         pixModel.PixCity = RemoverAcentos(pixModel.PixCity.Trim());
         pixModel.DnsReverso = "br.gov.bcb.pix";
-        pixModel.DescricaoPagamento = "ID" + MaskIdTransaction(pixModel.IdReferenciaPagamento);
+        pixModel.DescricaoPagamento = pixModel.IdReferenciaPagamento;
 
         if (PixKeyIsValid(pixModel.MyPixType, pixModel.PixKey))
         {
@@ -166,48 +166,6 @@ public class Pix
         catch { }
 
         return false;
-    }
-
-    private string MaskIdTransaction(string idTransaction)
-    {
-        string[,] table = new string[10, 2];
-
-        table[0, 0] = "0";
-        table[0, 1] = "k";
-        table[1, 0] = "1";
-        table[1, 1] = "T";
-        table[2, 0] = "2";
-        table[2, 1] = "e";
-        table[3, 0] = "3";
-        table[3, 1] = "Y";
-        table[4, 0] = "4";
-        table[4, 1] = "H";
-        table[5, 0] = "5";
-        table[5, 1] = "P";
-        table[6, 0] = "6";
-        table[6, 1] = "p";
-        table[7, 0] = "7";
-        table[7, 1] = "n";
-        table[8, 0] = "8";
-        table[8, 1] = "X";
-        table[9, 0] = "9";
-        table[9, 1] = "M";
-
-        string newId = "";
-
-        foreach (var c in idTransaction)
-        {
-            for (int n = 0; n < 10; n++)
-            {
-                if (table[n, 0].Equals(c.ToString()))
-                {
-                    newId += table[n, 1];
-                    break;
-                }
-            }
-        }
-
-        return newId;
     }
 
     private string RemoverAcentos(string texto)

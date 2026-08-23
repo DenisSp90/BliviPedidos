@@ -58,7 +58,7 @@
             <div class="card-body p-0">
                 @foreach (var item in Model.Itens)
                 {
-                    <div class="d-flex align-items-center gap-3 p-3 border-bottom">
+                    <div class="d-flex align-items-center flex-wrap flex-md-nowrap gap-3 p-3 border-bottom">
                         @if (!string.IsNullOrWhiteSpace(item.Produto.Foto))
                         {
                             <img src="@item.Produto.Foto" alt="@item.Produto.Nome" width="72" height="72" referrerpolicy="no-referrer"
@@ -72,9 +72,41 @@
                         }
                         <div class="flex-grow-1">
                             <strong>@item.Produto.Nome</strong>
-                            <div class="small text-secondary">@item.Quantidade × @item.Produto.PrecoVenda.ToString("C")</div>
+                            <div class="small text-secondary">Valor unitário: @item.Produto.PrecoVenda.ToString("C")</div>
                         </div>
-                        <strong>@item.Subtotal.ToString("C")</strong>
+                        <div class="d-flex align-items-center gap-1" aria-label="Quantidade de @item.Produto.Nome">
+                            <form method="post" action="@Url.RouteUrl("AtualizarCarrinhoLoja", new { lojaSlug = Model.Loja.Slug })">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="produtoId" value="@item.Produto.Id" />
+                                <input type="hidden" name="quantidade" value="@(item.Quantidade - 1)" />
+                                <button class="btn btn-sm btn-outline-secondary" type="submit"
+                                        aria-label="Diminuir quantidade de @item.Produto.Nome"
+                                        disabled="@(item.Quantidade <= 1)">
+                                    <i class="bi bi-dash-lg" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                            <form method="post" action="@Url.RouteUrl("AtualizarCarrinhoLoja", new { lojaSlug = Model.Loja.Slug })"
+                                  class="d-flex align-items-center gap-1">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="produtoId" value="@item.Produto.Id" />
+                                <input class="form-control form-control-sm text-center quantidade-carrinho"
+                                       type="number" name="quantidade" value="@item.Quantidade" min="1"
+                                       inputmode="numeric" aria-label="Quantidade de @item.Produto.Nome" />
+                                <button class="btn btn-sm btn-outline-primary" type="submit" aria-label="Atualizar quantidade">
+                                    <i class="bi bi-check-lg" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                            <form method="post" action="@Url.RouteUrl("AtualizarCarrinhoLoja", new { lojaSlug = Model.Loja.Slug })">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="produtoId" value="@item.Produto.Id" />
+                                <input type="hidden" name="quantidade" value="@(item.Quantidade + 1)" />
+                                <button class="btn btn-sm btn-outline-secondary" type="submit"
+                                        aria-label="Aumentar quantidade de @item.Produto.Nome">
+                                    <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <strong class="ms-auto">@item.Subtotal.ToString("C")</strong>
                         <form method="post" action="@Url.RouteUrl("RemoverCarrinhoLoja", new { lojaSlug = Model.Loja.Slug })">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="produtoId" value="@item.Produto.Id" />

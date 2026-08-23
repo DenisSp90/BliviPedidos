@@ -49,7 +49,13 @@ namespace BliviPedidos.Services.Implementations
 
         public async Task<ClienteViewModel> ProcurarClienteByTelefoneAsync(string telefone)
         {
-            var c = await _context.Cliente.FirstOrDefaultAsync(cliente => cliente.Telefone == telefone);
+            var telefoneNormalizado = NormalizarTelefone(telefone);
+            if (string.IsNullOrEmpty(telefoneNormalizado))
+                return new ClienteViewModel();
+
+            var clientes = await _context.Cliente.AsNoTracking().ToListAsync();
+            var c = clientes.FirstOrDefault(cliente =>
+                NormalizarTelefone(cliente.Telefone) == telefoneNormalizado);
 
             if (c == null)
                 return new ClienteViewModel();
@@ -130,7 +136,16 @@ namespace BliviPedidos.Services.Implementations
 
         private async Task<Cliente> ProcurarClienteByTelefoneAsync2(string telefone)
         {
-            return await _context.Cliente.FirstOrDefaultAsync(c => c.Telefone == telefone);
+            var telefoneNormalizado = NormalizarTelefone(telefone);
+            var clientes = await _context.Cliente.ToListAsync();
+            return clientes.FirstOrDefault(c =>
+                NormalizarTelefone(c.Telefone) == telefoneNormalizado);
+        }
+
+        private static string NormalizarTelefone(string? telefone)
+        {
+            var digitos = new string((telefone ?? string.Empty).Where(char.IsDigit).ToArray());
+            return digitos.Length > 11 ? digitos[^11..] : digitos;
         }
 
     }

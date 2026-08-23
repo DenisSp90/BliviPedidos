@@ -19,11 +19,13 @@ public sealed class PagamentoPixServiceTests
             PixCidade = "SAO PAULO"
         };
 
-        var pagamento = service.GerarPix(loja, 49.90m, "PEDIDO-123");
+        var codigoPublico = CodigoPublicoPedido.Gerar();
+        var pagamento = service.GerarPix(loja, 49.90m, codigoPublico);
 
         Assert.Equal("PIX", pagamento.Tipo);
         Assert.Equal(49.90m, pagamento.Valor);
         Assert.Contains("br.gov.bcb.pix", pagamento.CopiaECola);
+        Assert.Contains($"05{CodigoPublicoPedido.Tamanho:00}{codigoPublico}", pagamento.CopiaECola);
         Assert.NotEmpty(Convert.FromBase64String(pagamento.QrCodeBase64));
     }
 

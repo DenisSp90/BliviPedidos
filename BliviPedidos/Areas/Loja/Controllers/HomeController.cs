@@ -175,6 +175,55 @@ public class HomeController : Controller
         return RedirectToRoute("CarrinhoLoja", new { lojaSlug = loja.Slug });
     }
 
+    [HttpPost("/loja/{lojaSlug}/carrinho/atualizar", Name = "AtualizarCarrinhoLoja")]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting(PoliticasRateLimit.CarrinhoPublico)]
+    [RequestSizeLimit(4 * 1024)]
+    [RequestFormLimits(ValueCountLimit = 4, ValueLengthLimit = 2 * 1024)]
+    public async Task<IActionResult> AtualizarCarrinho(
+        string lojaSlug,
+        int produtoId,
+        int quantidade)
+    {
+        var loja = await _lojaAtualService.ObterLojaAsync();
+        var itemAtual = _carrinhoService.Obter(loja.Id).Itens
+            .SingleOrDefault(item => item.ProdutoId == produtoId);
+        if (itemAtual == null)
+        {
+            TempData["CarrinhoErro"] = "O produto não está mais no carrinho.";
+            return RedirectToRoute("CarrinhoLoja", new { lojaSlug = loja.Slug });
+        }
+
+        if (quantidade < 1)
+        {
+            TempData["CarrinhoErro"] = "A quantidade deve ser de pelo menos uma unidade.";
+            return RedirectToRoute("CarrinhoLoja", new { lojaSlug = loja.Slug });
+        }
+
+        var produto = await _context.Produto
+            .AsNoTracking()
+            .Where(item => item.Id == produtoId && item.IsAtivo)
+            .Select(item => new { item.Quantidade })
+            .SingleOrDefaultAsync(HttpContext.RequestAborted);
+        if (produto == null)
+        {
+            _carrinhoService.Remover(loja.Id, produtoId);
+            TempData["CarrinhoErro"] = "O produto não está mais disponível e foi removido do carrinho.";
+            return RedirectToRoute("CarrinhoLoja", new { lojaSlug = loja.Slug });
+        }
+
+        if (quantidade > produto.Quantidade)
+        {
+            TempData["CarrinhoErro"] = $"Existem apenas {produto.Quantidade} unidade(s) disponíveis desse produto.";
+            return RedirectToRoute("CarrinhoLoja", new { lojaSlug = loja.Slug });
+        }
+
+        _carrinhoService.Remover(loja.Id, produtoId);
+        _carrinhoService.Adicionar(loja.Id, produtoId, quantidade);
+        TempData["CarrinhoMensagem"] = "Quantidade atualizada.";
+        return RedirectToRoute("CarrinhoLoja", new { lojaSlug = loja.Slug });
+    }
+
     [HttpGet("/loja/{lojaSlug}/checkout", Name = "CheckoutLoja")]
     [Authorize]
     public async Task<IActionResult> Checkout(string lojaSlug, bool salvo = false)

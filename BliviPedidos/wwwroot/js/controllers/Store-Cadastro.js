@@ -5,6 +5,10 @@ $(document).ready(function () {
     $('#telefoneInput').val('55 11 '); 
 
     $('#telefoneInput').blur(function () {
+        if ($('#avulsoCheckbox').is(':checked')) {
+            return;
+        }
+
         var telefone = $(this).val().replace(/\D/g, ''); 
 
         var regex = /^\d{10}$/;
@@ -62,38 +66,25 @@ $(document).ready(function () {
         });
     });
 
-    if ($('#avulsoCheckbox').is(':checked')) {
-        $('#nomeInput').prop('disabled', true).val('AVULSO');
-        $('#emailInput').prop('disabled', true).val('email@email.com.br');
-        $('#telefoneInput').prop('disabled', true).val('00 00 00000-0000');
-    } else {
-        $('#nomeInput').prop('disabled', false).val('');
-        $('#emailInput').prop('disabled', false).val('');
-        $('#telefoneInput').prop('disabled', false).val('55 11 ');
-    }
+    atualizarModoVendaAvulsa(false);
 
     $('#avulsoCheckbox').change(function () {
-        if (this.checked) {
-            $('#nomeInput').prop('disabled', true).val('AVULSO');
-            $('#emailInput').prop('disabled', true).val('email@email.com.br');
-            $('#telefoneInput').prop('disabled', true).val('00 00 00000-0000');
-
-            $('#nomeInputHidden').val('AVULSO');
-            $('#emailInputHidden').val('email@email.com.br');
-            $('#telefoneInputHidden').val('00 00 00000-0000');
-
-        } else {
-            $('#nomeInput').prop('disabled', false).val('');
-            $('#emailInput').prop('disabled', false).val('');
-            $('#telefoneInput').prop('disabled', false).val('55 11 ');
-
-            $('#nomeInputHidden').val('AVULSO');
-            $('#emailInputHidden').val('email@email.com.br');
-            $('#telefoneInputHidden').val('00 00 00000-0000');
-
-        }
+        atualizarModoVendaAvulsa(true);
     });
 });
+
+function atualizarModoVendaAvulsa(limparCampos) {
+    var vendaAvulsa = $('#avulsoCheckbox').is(':checked');
+    $('#nomeInput, #emailInput, #telefoneInput, #cep, #logradouro, #complemento, #bairro, #cidade, #uf')
+        .prop('disabled', vendaAvulsa);
+
+    if (vendaAvulsa && limparCampos) {
+        limparFormulario();
+        $('#telefoneInput').val('');
+    } else if (!vendaAvulsa && limparCampos) {
+        $('#telefoneInput').val('55 11 ');
+    }
+}
 
 function atualizarEstadoPedido(idPedido, novoStatusPagamento) {
     // Exibir mensagem de confirmação usando SweetAlert

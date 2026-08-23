@@ -37,7 +37,9 @@ public class HomeController : Controller
     {
         var produtosTask = _produtoService.GetProdutosAtivosAsync();
         var produtos = produtosTask.GetAwaiter().GetResult();
-        var pedidos = _pedidoService.GetListaPedidosAtivos();
+        // O dashboard representa pedidos efetivamente registrados. Carrinhos ainda
+        // não confirmados ficam de fora, mas concluídos e cancelados permanecem no histórico.
+        var pedidos = _pedidoService.GetListaPedidosRegistrados();
         var movimentacoes = _produtoService.GetMovimentacaoEstoque();
 
         decimal totalValorPedidos = pedidos.Sum(pedido => pedido.ValorTotalPedido);

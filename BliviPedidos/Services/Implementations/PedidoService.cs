@@ -109,6 +109,36 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
                 .ToList();
     }
 
+    public IList<Pedido> GetListaPedidosRegistrados()
+    {
+        return ConsultaPedidosRegistrados()
+            .OrderByDescending(p => p.DataPedido)
+            .ThenByDescending(p => p.Id)
+            .ToList();
+    }
+
+    public IList<Pedido> GetListaPedidosRegistradosByEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return new List<Pedido>();
+
+        return ConsultaPedidosRegistrados()
+            .Where(p => p.EmailResponsavel == email)
+            .OrderByDescending(p => p.DataPedido)
+            .ThenByDescending(p => p.Id)
+            .ToList();
+    }
+
+    private IQueryable<Pedido> ConsultaPedidosRegistrados()
+    {
+        return dbSet
+            .Include(p => p.Itens)
+                .ThenInclude(i => i.Produto)
+            .Include(p => p.Cadastro)
+                .ThenInclude(c => c.Cliente)
+            .Where(p => p.Status != StatusPedido.Carrinho);
+    }
+
     public IList<Pedido> GetListaPedidosAtivos()
     {
         return dbSet.Include(p => p.Itens)

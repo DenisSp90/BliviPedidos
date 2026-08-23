@@ -1,3 +1,23 @@
+@using BliviPedidos.Services.Interfaces
+@inject ILojaAtualService LojaAtualService
+@{
+    var lojaAtualLayout = await LojaAtualService.ObterLojaAsync();
+    var whatsappCadastrado = lojaAtualLayout.Whatsapp;
+    var whatsappNumero = string.IsNullOrWhiteSpace(whatsappCadastrado)
+        ? string.Empty
+        : new string(whatsappCadastrado.Where(char.IsDigit).ToArray());
+
+    if (whatsappNumero.Length is 10 or 11)
+    {
+        whatsappNumero = $"55{whatsappNumero}";
+    }
+
+    var nomeLojaWhatsapp = lojaAtualLayout.Nome;
+    var mensagemWhatsapp = Uri.EscapeDataString($"Olá! Vim pela loja virtual {nomeLojaWhatsapp} e gostaria de mais informações.");
+    var whatsappUrl = whatsappNumero.Length >= 12
+        ? $"https://wa.me/{whatsappNumero}?text={mensagemWhatsapp}"
+        : null;
+}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -54,9 +74,9 @@
         <div class="container py-4 d-flex flex-column flex-md-row justify-content-between gap-2">
             <span>&copy; @DateTime.Now.Year @(ViewData["LojaNome"] ?? "Loja")</span>
             <div class="d-flex flex-wrap gap-3">
-                @if (ViewData["LojaWhatsapp"] is string whatsapp && !string.IsNullOrWhiteSpace(whatsapp))
+                @if (whatsappUrl != null)
                 {
-                    <a href="https://wa.me/@whatsapp" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>
+                    <a href="@whatsappUrl" target="_blank" rel="noopener noreferrer"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>
                 }
                 @if (ViewData["LojaEmail"] is string email && !string.IsNullOrWhiteSpace(email))
                 {
@@ -69,6 +89,17 @@
             </div>
         </div>
     </footer>
+    @if (whatsappUrl != null)
+    {
+        <a class="whatsapp-flutuante"
+           href="@whatsappUrl"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Conversar com @nomeLojaWhatsapp pelo WhatsApp"
+           title="Fale conosco pelo WhatsApp">
+            <i class="bi bi-whatsapp" aria-hidden="true"></i>
+        </a>
+    }
     <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

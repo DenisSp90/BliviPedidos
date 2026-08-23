@@ -144,6 +144,58 @@ public class StoreControllerTests
         pedidoService.Verify(service => service.ClearPedido(), Times.Never);
     }
 
+    [Fact]
+    public async Task PedidoResumo_VendaAvulsa_DeveUsarDadosDaLojaFisicaSemCadastrarCliente()
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlite("Data Source=:memory:")
+            .Options;
+        await using var context = new ApplicationDbContext(options);
+
+        var produto = new Produto { Nome = "Produto", PrecoVenda = 12m, Quantidade = 5 };
+        var pedido = new Pedido();
+        pedido.Itens.Add(new ItemPedido(pedido, produto, 1, produto.PrecoVenda));
+        var cadastro = new Cadastro { VendaAvulsa = true };
+
+        var pedidoService = new Mock<IPedidoService>();
+        pedidoService.Setup(service => service.GetPedido()).Returns(pedido);
+        pedidoService.Setup(service => service.UpdateCadastro(cadastro)).Returns(pedido);
+        var produtoService = new Mock<IProdutoService>();
+        produtoService.Setup(service => service.UpdateQuantidade(pedido.Itens)).Returns(true);
+        var clienteService = new Mock<IClienteService>();
+
+        var controller = new StoreController(
+            context,
+            Mock.Of<IMapper>(),
+            pedidoService.Object,
+            produtoService.Object,
+            Mock.Of<IEmailEnviarService>(),
+            clienteService.Object,
+            Mock.Of<IItemPedidoService>(),
+            new ConfigurationBuilder().Build(),
+            Mock.Of<ICategoriaService>(),
+            NullLogger<StoreController>.Instance)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = CriarHttpContext("balcao@teste.com")
+            }
+        };
+
+        var result = await controller.PedidoResumo(cadastro);
+
+        Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("Consumidor avulso - loja física", cadastro.Nome);
+        Assert.Equal("Não informado", cadastro.Telefone);
+        Assert.Null(cadastro.ClienteId);
+        Assert.NotNull(pedido.CodigoPublico);
+        clienteService.Verify(
+            service => service.ProcurarClienteByTelefoneAsync(It.IsAny<string>()), Times.Never);
+        clienteService.Verify(
+            service => service.RegistrarClienteAsync(It.IsAny<Cadastro>()), Times.Never);
+        pedidoService.Verify(service => service.UpdateCadastro(cadastro), Times.Once);
+    }
+
     private static DefaultHttpContext CriarHttpContext(string usuario)
     {
         var identity = new ClaimsIdentity(

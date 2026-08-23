@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BliviPedidos.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260822182949_IniciaBD")]
+    [Migration("20260823043834_IniciaBD")]
     partial class IniciaBD
     {
         /// <inheritdoc />

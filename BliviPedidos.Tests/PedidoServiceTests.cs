@@ -15,6 +15,53 @@ namespace BliviPedidos.Tests;
 public class PedidoServiceTests
 {
     [Fact]
+    public async Task PedidosRegistrados_DeveContarConcluidosECanceladosMasNaoCarrinhos()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>().UseSqlite(connection).Options;
+        await using var context = new ApplicationDbContext(options);
+        await context.Database.EnsureCreatedAsync();
+
+        foreach (var status in new[]
+                 {
+                     StatusPedido.Carrinho,
+                     StatusPedido.Confirmado,
+                     StatusPedido.Concluido,
+                     StatusPedido.Cancelado
+                 })
+        {
+            context.Pedido.Add(new Pedido
+            {
+                Status = status,
+                EmailResponsavel = status == StatusPedido.Cancelado
+                    ? "outro@teste.com"
+                    : "vendedor@teste.com",
+                Cadastro = new Cadastro
+                {
+                    Nome = "Cliente teste",
+                    Telefone = "55 11 99999-9999"
+                }
+            });
+        }
+
+        await context.SaveChangesAsync();
+        var accessor = CriarHttpContextAccessor("vendedor@teste.com");
+        var service = new PedidoService(
+            accessor, context, Mock.Of<IItemPedidoService>(), Mock.Of<ICadastroService>(),
+            Mock.Of<IProdutoService>(), accessor, NullLogger<PedidoService>.Instance);
+
+        var todos = service.GetListaPedidosRegistrados();
+        var meus = service.GetListaPedidosRegistradosByEmail("vendedor@teste.com");
+
+        Assert.Equal(3, todos.Count);
+        Assert.Contains(todos, pedido => pedido.Status == StatusPedido.Concluido);
+        Assert.Contains(todos, pedido => pedido.Status == StatusPedido.Cancelado);
+        Assert.Equal(2, meus.Count);
+        Assert.DoesNotContain(todos, pedido => pedido.Status == StatusPedido.Carrinho);
+    }
+
+    [Fact]
     public async Task RegistrarCancelamentoPedido_DeveMarcarCanceladoERestaurarEstoqueUmaVez()
     {
         await using var connection = new SqliteConnection("Data Source=:memory:");
