@@ -10,6 +10,21 @@ namespace BliviPedidos.Tests;
 public class AdminAreaTests
 {
     [Fact]
+    public void UsuarioController_DevePertencerAAreaAdminEExigirAdministrador()
+    {
+        var controllerType = typeof(UsuarioController);
+        var area = Assert.Single(controllerType
+            .GetCustomAttributes(typeof(AreaAttribute), true)
+            .Cast<AreaAttribute>());
+        var authorize = Assert.Single(controllerType
+            .GetCustomAttributes(typeof(AuthorizeAttribute), true)
+            .Cast<AuthorizeAttribute>());
+
+        Assert.Equal("Admin", area.RouteValue);
+        Assert.Equal(PoliticasAutorizacao.Administracao, authorize.Policy);
+    }
+
+    [Fact]
     public void HomeController_DevePertencerAAreaAdminEExigirAdministrador()
     {
         var controllerType = typeof(HomeController);

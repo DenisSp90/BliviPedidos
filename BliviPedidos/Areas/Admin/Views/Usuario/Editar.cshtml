@@ -1,0 +1,59 @@
+@model BliviPedidos.Models.ViewModels.UsuarioAdminEdicaoViewModel
+
+@{
+    ViewData["Title"] = "Editar usuário";
+}
+
+<div class="pagetitle">
+    <h1>Editar usuário interno</h1>
+    <nav><ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index">Administração</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Usuários</a></li>
+        <li class="breadcrumb-item active">Editar</li>
+    </ol></nav>
+</div>
+
+<section class="section">
+    <div class="row"><div class="col-lg-8"><div class="card"><div class="card-body">
+        <h5 class="card-title">Acesso ao sistema</h5>
+        @if (Model.UsuarioAtual)
+        {
+            <div class="alert alert-info">Para sua segurança, sua própria loja, perfil e situação não podem ser alterados nesta sessão.</div>
+        }
+        <form class="row g-3" method="post" asp-action="Editar" asp-route-id="@Model.Id">
+            <input asp-for="Id" type="hidden" />
+            <input asp-for="UsuarioAtual" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="col-12">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" autocomplete="email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="LojaId" class="form-label"></label>
+                <select asp-for="LojaId" asp-items="ViewBag.Lojas" class="form-select" disabled="@Model.UsuarioAtual"></select>
+                @if (Model.UsuarioAtual) { <input asp-for="LojaId" type="hidden" /> }
+                <span asp-validation-for="LojaId" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Perfil" class="form-label"></label>
+                <select asp-for="Perfil" asp-items="ViewBag.Perfis" class="form-select" disabled="@Model.UsuarioAtual"></select>
+                @if (Model.UsuarioAtual) { <input asp-for="Perfil" type="hidden" /> }
+                <span asp-validation-for="Perfil" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <div class="form-check form-switch">
+                    <input asp-for="Ativo" class="form-check-input" disabled="@Model.UsuarioAtual" />
+                    @if (Model.UsuarioAtual) { <input asp-for="Ativo" type="hidden" /> }
+                    <label asp-for="Ativo" class="form-check-label"></label>
+                </div>
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Salvar</button>
+                <a class="btn btn-light" asp-action="Index">Cancelar</a>
+            </div>
+        </form>
+    </div></div></div></div>
+</section>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

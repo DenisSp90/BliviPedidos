@@ -1,0 +1,60 @@
+@model IReadOnlyCollection<BliviPedidos.Models.ViewModels.UsuarioAdminListaViewModel>
+
+@{
+    ViewData["Title"] = "Usuários internos";
+}
+
+<div class="pagetitle">
+    <h1>Gerenciamento de usuários</h1>
+    <nav><ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index">Administração</a></li>
+        <li class="breadcrumb-item active">Usuários</li>
+    </ol></nav>
+</div>
+
+<section class="section">
+    @if (TempData["Sucesso"] is string sucesso)
+    {
+        <div class="alert alert-success">@sucesso</div>
+    }
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title">Usuários internos cadastrados</h5>
+                <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Register">
+                    <i class="bi bi-person-plus"></i> Novo usuário
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead><tr>
+                        <th>E-mail</th><th>Loja</th><th>Perfil</th><th>Status</th><th class="text-end">Ações</th>
+                    </tr></thead>
+                    <tbody>
+                    @foreach (var usuario in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@usuario.Email</strong>
+                                @if (usuario.UsuarioAtual) { <span class="badge bg-info ms-1">Você</span> }
+                            </td>
+                            <td>@usuario.LojaNome</td>
+                            <td><span class="badge bg-primary">@usuario.Perfil</span></td>
+                            <td><span class="badge @(usuario.Ativo ? "bg-success" : "bg-secondary")">@(usuario.Ativo ? "Ativo" : "Inativo")</span></td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-primary" asp-action="Editar" asp-route-id="@usuario.Id">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+            @if (Model.Count == 0)
+            {
+                <div class="alert alert-info">Nenhum usuário interno cadastrado.</div>
+            }
+        </div>
+    </div>
+</section>
