@@ -19,6 +19,35 @@ namespace BliviPedidos.Tests;
 public class ContaConsumidorTests
 {
     [Fact]
+    public void MinhaConta_DeveExigirAutenticacaoEOferecerEdicaoDeDadosESenha()
+    {
+        var minhaConta = typeof(ContaController).GetMethod(nameof(ContaController.MinhaConta));
+        var editarDados = typeof(ContaController).GetMethod(nameof(ContaController.EditarDados));
+        var alterarSenha = typeof(ContaController).GetMethod(nameof(ContaController.AlterarSenha));
+
+        Assert.NotNull(minhaConta);
+        Assert.NotNull(editarDados);
+        Assert.NotNull(alterarSenha);
+        Assert.All(new[] { minhaConta!, editarDados!, alterarSenha! }, metodo =>
+            Assert.NotEmpty(metodo.GetCustomAttributes(typeof(AuthorizeAttribute), true)));
+        Assert.NotEmpty(editarDados!.GetCustomAttributes(typeof(ValidateAntiForgeryTokenAttribute), true));
+        Assert.NotEmpty(alterarSenha!.GetCustomAttributes(typeof(ValidateAntiForgeryTokenAttribute), true));
+    }
+
+    [Fact]
+    public void AlteracaoDeSenha_DeveExigirSenhaAtualENovaConfirmacao()
+    {
+        var model = new AlterarSenhaConsumidorViewModel();
+        var resultados = new List<ValidationResult>();
+
+        Validator.TryValidateObject(model, new ValidationContext(model), resultados, true);
+
+        Assert.Contains(resultados, item => item.MemberNames.Contains(nameof(model.SenhaAtual)));
+        Assert.Contains(resultados, item => item.MemberNames.Contains(nameof(model.NovaSenha)));
+        Assert.Contains(resultados, item => item.MemberNames.Contains(nameof(model.ConfirmarNovaSenha)));
+    }
+
+    [Fact]
     public void CadastroConsumidor_DeveExigirNomeCelularEmailESenha()
     {
         var model = new CriarContaConsumidorViewModel();

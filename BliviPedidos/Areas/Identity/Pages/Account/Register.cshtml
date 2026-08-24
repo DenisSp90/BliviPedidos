@@ -38,6 +38,11 @@
                                     <span asp-validation-for="Input.Email" class="text-danger"></span>
                                 </div>
                                 <div class="form-floating mb-3">
+                                    <input asp-for="Input.Telefone" class="form-control" autocomplete="tel" aria-required="true" placeholder="55 11 99999-9999" />
+                                    <label asp-for="Input.Telefone"></label>
+                                    <span asp-validation-for="Input.Telefone" class="text-danger"></span>
+                                </div>
+                                <div class="form-floating mb-3">
                                     <select asp-for="Input.LojaId" asp-items="Model.Lojas" class="form-select" aria-required="true">
                                         <option value="">Selecione a loja</option>
                                     </select>

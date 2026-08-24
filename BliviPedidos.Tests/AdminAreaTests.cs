@@ -24,6 +24,23 @@ public class AdminAreaTests
         Assert.Equal(PoliticasAutorizacao.Administracao, authorize.Policy);
     }
 
+    [Theory]
+    [InlineData("55 11 99999-9999", "Blivi@5511999999999")]
+    [InlineData("+55 (21) 98888-7777", "Blivi@5521988887777")]
+    public void SenhaPadrao_DeveUsarSomenteDigitosDoCelular(string celular, string senhaEsperada)
+    {
+        Assert.Equal(senhaEsperada, UsuarioController.CriarSenhaPadrao(celular));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("123")]
+    public void SenhaPadrao_DeveRejeitarCelularInvalido(string? celular)
+    {
+        Assert.Null(UsuarioController.CriarSenhaPadrao(celular));
+    }
+
     [Fact]
     public void HomeController_DevePertencerAAreaAdminEExigirAdministrador()
     {

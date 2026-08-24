@@ -1,0 +1,16 @@
+@model BliviPedidos.Models.ViewModels.CriarUsuarioLojaViewModel
+@{ ViewData["Title"] = "Novo usuário da loja"; }
+<div class="pagetitle"><h1>Novo usuário interno</h1></div>
+<section class="section"><div class="row"><div class="col-lg-8"><div class="card"><div class="card-body">
+    <h5 class="card-title">Acesso à loja atual</h5>
+    <form method="post" class="row g-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="col-12"><label asp-for="Email" class="form-label"></label><input asp-for="Email" class="form-control" /><span asp-validation-for="Email" class="text-danger"></span></div>
+        <div class="col-12"><label asp-for="Telefone" class="form-label"></label><input asp-for="Telefone" class="form-control" placeholder="55 11 99999-9999" /><span asp-validation-for="Telefone" class="text-danger"></span></div>
+        <div class="col-12"><label asp-for="Perfil" class="form-label"></label><select asp-for="Perfil" asp-items="ViewBag.Perfis" class="form-select"><option value="">Selecione</option></select><span asp-validation-for="Perfil" class="text-danger"></span></div>
+        <div class="col-md-6"><label asp-for="Senha" class="form-label"></label><input asp-for="Senha" class="form-control" /><span asp-validation-for="Senha" class="text-danger"></span></div>
+        <div class="col-md-6"><label asp-for="ConfirmarSenha" class="form-label"></label><input asp-for="ConfirmarSenha" class="form-control" /><span asp-validation-for="ConfirmarSenha" class="text-danger"></span></div>
+        <div class="col-12"><button class="btn btn-primary">Criar usuário</button> <a asp-action="Index" class="btn btn-light">Cancelar</a></div>
+    </form>
+</div></div></div></div></section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

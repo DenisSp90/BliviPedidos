@@ -92,6 +92,11 @@ namespace BliviPedidos.Areas.Identity.Pages.Account
             [Display(Name = "Email")]
             public string Email { get; set; }
 
+            [Required(ErrorMessage = "Informe o celular.")]
+            [RegularExpression(@"^\+?[0-9 ()-]{10,20}$", ErrorMessage = "Informe um celular válido.")]
+            [Display(Name = "Celular")]
+            public string Telefone { get; set; }
+
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -157,6 +162,8 @@ namespace BliviPedidos.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
+                user.PhoneNumber = Input.Telefone.Trim();
+                user.PhoneNumberConfirmed = true;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);

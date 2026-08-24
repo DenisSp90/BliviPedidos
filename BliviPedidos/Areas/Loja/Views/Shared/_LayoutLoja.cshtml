@@ -52,6 +52,7 @@
                     <li class="nav-item"><a class="nav-link" href="@Url.RouteUrl("CarrinhoLoja", new { lojaSlug = ViewData["LojaSlug"] })"><i class="bi bi-cart3 me-1"></i>Carrinho</a></li>
                     @if (User.Identity?.IsAuthenticated == true)
                     {
+                        <li class="nav-item"><a class="nav-link" href="@Url.RouteUrl("MinhaContaConsumidorLoja", new { lojaSlug = ViewData["LojaSlug"] })"><i class="bi bi-person-circle me-1"></i>Minha conta</a></li>
                         <li class="nav-item"><a class="nav-link" href="@Url.RouteUrl("MeusPedidosConsumidorLoja", new { lojaSlug = ViewData["LojaSlug"] })"><i class="bi bi-bag-check me-1"></i>Meus pedidos</a></li>
                         <li class="nav-item">
                             <form method="post" action="@Url.RouteUrl("SairConsumidorLoja", new { lojaSlug = ViewData["LojaSlug"] })">

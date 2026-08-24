@@ -1,0 +1,40 @@
+@model IReadOnlyCollection<BliviPedidos.Models.ViewModels.UsuarioLojaListaViewModel>
+@{ ViewData["Title"] = "Usuários da loja"; }
+
+<div class="pagetitle"><h1>Usuários da loja</h1></div>
+<section class="section">
+    @if (TempData["Sucesso"] is string sucesso) { <div class="alert alert-success">@sucesso</div> }
+    @if (TempData["Erro"] is string erro) { <div class="alert alert-danger">@erro</div> }
+    <div class="card"><div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title">Acessos internos e consumidores</h5>
+            <a asp-action="Criar" class="btn btn-primary"><i class="bi bi-person-plus"></i> Novo usuário interno</a>
+        </div>
+        <div class="table-responsive"><table class="table table-hover align-middle">
+            <thead><tr><th>E-mail</th><th>Celular</th><th>Tipo</th><th>Perfil</th><th>Status</th><th class="text-end">Ações</th></tr></thead>
+            <tbody>
+            @foreach (var usuario in Model)
+            {
+                <tr>
+                    <td>@usuario.Email @if (usuario.UsuarioAtual) { <span class="badge bg-info">Você</span> }</td>
+                    <td>@(string.IsNullOrWhiteSpace(usuario.Telefone) ? "—" : usuario.Telefone)</td>
+                    <td>@usuario.Tipo</td><td>@usuario.Perfil</td>
+                    <td><span class="badge @(usuario.Ativo ? "bg-success" : "bg-secondary")">@(usuario.Ativo ? "Ativo" : "Inativo")</span></td>
+                    <td class="text-end">
+                        @if (usuario.PodeEditar)
+                        {
+                            <a asp-action="Editar" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Editar</a>
+                            <form asp-action="RedefinirSenhaPadrao" asp-route-id="@usuario.Id" method="post" class="d-inline"
+                                  onsubmit="return confirm('Redefinir para Blivi@@ seguido dos dígitos do celular?');">
+                                <button class="btn btn-sm btn-outline-warning" disabled="@string.IsNullOrWhiteSpace(usuario.Telefone)"><i class="bi bi-key"></i> Resetar</button>
+                            </form>
+                        }
+                        else { <span class="text-muted small">Protegido</span> }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table></div>
+        <div class="form-text">Consumidores aparecem após realizarem um pedido nesta loja. Senha padrão: <code>Blivi@@</code> + dígitos do celular.</div>
+    </div></div>
+</section>

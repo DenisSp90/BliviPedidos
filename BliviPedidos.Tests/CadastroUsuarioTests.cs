@@ -35,6 +35,7 @@ public class CadastroUsuarioTests
         return new RegisterModel.InputModel
         {
             Email = "usuario@teste.com",
+            Telefone = "55 11 99999-9999",
             Password = "SenhaForte!123",
             ConfirmPassword = "SenhaForte!123",
             LojaId = 1,

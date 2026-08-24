@@ -39,19 +39,40 @@ public sealed class UsuarioController : Controller
             .OrderBy(item => item.Loja.Nome)
             .ThenBy(item => item.Usuario.Email)
             .ToListAsync();
+        var vinculosPorUsuario = vinculos.ToDictionary(item => item.UsuarioId);
+        var lojasConsumidores = await _context.Pedido
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(pedido => pedido.ConsumidorUsuarioId != null)
+            .Select(pedido => new { pedido.ConsumidorUsuarioId, pedido.Loja.Nome })
+            .Distinct()
+            .ToListAsync();
+        var lojasPorConsumidor = lojasConsumidores
+            .GroupBy(item => item.ConsumidorUsuarioId!)
+            .ToDictionary(
+                grupo => grupo.Key,
+                grupo => string.Join(", ", grupo.Select(item => item.Nome).OrderBy(nome => nome)));
+        var contas = await _context.Users.AsNoTracking().OrderBy(item => item.Email).ToListAsync();
 
-        var usuarios = new List<UsuarioAdminListaViewModel>(vinculos.Count);
-        foreach (var vinculo in vinculos)
+        var usuarios = new List<UsuarioAdminListaViewModel>(contas.Count);
+        foreach (var conta in contas)
         {
-            var perfis = await _userManager.GetRolesAsync(vinculo.Usuario);
+            vinculosPorUsuario.TryGetValue(conta.Id, out var vinculo);
+            var perfis = await _userManager.GetRolesAsync(conta);
+            var interno = vinculo != null;
             usuarios.Add(new UsuarioAdminListaViewModel
             {
-                Id = vinculo.UsuarioId,
-                Email = vinculo.Usuario.Email ?? vinculo.Usuario.UserName ?? "—",
-                LojaNome = vinculo.Loja.Nome,
-                Perfil = perfis.FirstOrDefault() ?? "Sem perfil",
-                Ativo = UsuarioAtivo(vinculo.Usuario),
-                UsuarioAtual = vinculo.UsuarioId == usuarioAtualId
+                Id = conta.Id,
+                Email = conta.Email ?? conta.UserName ?? "—",
+                Telefone = conta.PhoneNumber ?? string.Empty,
+                LojaNome = interno
+                    ? vinculo!.Loja.Nome
+                    : lojasPorConsumidor.GetValueOrDefault(conta.Id, "Sem pedidos"),
+                Perfil = interno ? perfis.FirstOrDefault() ?? "Sem perfil" : "Consumidor",
+                Tipo = interno ? "Interno" : "Consumidor",
+                Interno = interno,
+                Ativo = UsuarioAtivo(conta),
+                UsuarioAtual = conta.Id == usuarioAtualId
             });
         }
 
@@ -69,6 +90,7 @@ public sealed class UsuarioController : Controller
         {
             Id = vinculo.UsuarioId,
             Email = vinculo.Usuario.Email ?? string.Empty,
+            Telefone = vinculo.Usuario.PhoneNumber ?? string.Empty,
             LojaId = vinculo.LojaId,
             Perfil = perfis.FirstOrDefault() ?? string.Empty,
             Ativo = UsuarioAtivo(vinculo.Usuario),
@@ -93,6 +115,7 @@ public sealed class UsuarioController : Controller
         var perfisAtuais = await _userManager.GetRolesAsync(usuario);
         var perfilAtual = perfisAtuais.FirstOrDefault() ?? string.Empty;
         model.Email = (model.Email ?? string.Empty).Trim().ToLowerInvariant();
+        model.Telefone = (model.Telefone ?? string.Empty).Trim();
         model.UsuarioAtual = id == _userManager.GetUserId(User);
 
         if (!InicializadorSistema.Perfis.Contains(model.Perfil, StringComparer.Ordinal))
@@ -129,6 +152,7 @@ public sealed class UsuarioController : Controller
         {
             usuario.Email = model.Email;
             usuario.UserName = model.Email;
+            usuario.PhoneNumber = model.Telefone;
             usuario.LockoutEnd = model.Ativo ? null : DateTimeOffset.MaxValue;
             usuario.LockoutEnabled = true;
             Validar(await _userManager.UpdateAsync(usuario));
@@ -157,6 +181,37 @@ public sealed class UsuarioController : Controller
         }
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RedefinirSenhaPadrao(string id)
+    {
+        var usuario = await _userManager.FindByIdAsync(id);
+        if (usuario == null)
+            return NotFound();
+
+        var senhaPadrao = CriarSenhaPadrao(usuario.PhoneNumber);
+        if (senhaPadrao == null)
+        {
+            TempData["Erro"] = $"O usuário {usuario.Email} não possui um celular válido cadastrado.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(usuario);
+        var resultado = await _userManager.ResetPasswordAsync(usuario, token, senhaPadrao);
+        if (!resultado.Succeeded)
+        {
+            TempData["Erro"] = string.Join(" ", resultado.Errors.Select(erro => erro.Description));
+            return RedirectToAction(nameof(Index));
+        }
+
+        await _userManager.UpdateSecurityStampAsync(usuario);
+        _logger.LogWarning(
+            "Senha redefinida pelo console administrativo. UsuarioId: {UsuarioId}, Operador: {Operador}",
+            usuario.Id, User.Identity?.Name);
+        TempData["Sucesso"] = $"Senha de {usuario.Email} redefinida para o padrão baseado no celular.";
+        return RedirectToAction(nameof(Index));
+    }
+
     private Task<Models.UsuarioLoja?> ObterVinculoAsync(string id) =>
         _context.UsuarioLoja.IgnoreQueryFilters()
             .Include(item => item.Usuario)
@@ -178,6 +233,12 @@ public sealed class UsuarioController : Controller
 
     private static bool UsuarioAtivo(IdentityUser usuario) =>
         usuario.LockoutEnd == null || usuario.LockoutEnd <= DateTimeOffset.UtcNow;
+
+    public static string? CriarSenhaPadrao(string? telefone)
+    {
+        var digitos = new string((telefone ?? string.Empty).Where(char.IsDigit).ToArray());
+        return digitos.Length >= 10 ? $"Blivi@{digitos}" : null;
+    }
 
     private static void Validar(IdentityResult resultado)
     {

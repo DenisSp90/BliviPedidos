@@ -29,6 +29,12 @@
                 <input asp-for="Email" class="form-control" autocomplete="email" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
+            <div class="col-12">
+                <label asp-for="Telefone" class="form-label"></label>
+                <input asp-for="Telefone" class="form-control" autocomplete="tel" placeholder="55 11 99999-9999" />
+                <span asp-validation-for="Telefone" class="text-danger"></span>
+                <div class="form-text">Este celular será usado para formar a senha padrão em um eventual reset.</div>
+            </div>
             <div class="col-md-6">
                 <label asp-for="LojaId" class="form-label"></label>
                 <select asp-for="LojaId" asp-items="ViewBag.Lojas" class="form-select" disabled="@Model.UsuarioAtual"></select>
