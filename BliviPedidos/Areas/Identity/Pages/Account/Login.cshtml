@@ -20,7 +20,7 @@
                     <div class="card-body">
                         <div class="pt-4 pb-2">
                             <h5 class="card-title text-center pb-0 fs-4">Acesse a sua Conta</h5>
-                            <p class="text-center small">Entrer com seu email & senha para acessar</p>
+                            <p class="text-center small">Entrar com seu email e senha para acessar</p>
                         </div>
                         <form id="account" method="post">
                             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
@@ -48,6 +48,7 @@
                             <div class="col-12">
                                 <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Acessar</button>
                             </div>
+                            </br>
                             @if (!string.IsNullOrWhiteSpace(Model.CriarContaConsumidorUrl))
                             {
                                 <div class="col-12">

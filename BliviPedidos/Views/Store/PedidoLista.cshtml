@@ -15,100 +15,7 @@
 </div>
 <section class="section dashboard">
     <div class="row">
-        <div class="col-12 col-lg-12">
-            <div class="row">
-                @{
-                    var pa = 0;
-                    var valorPrevisto = Convert.ToDecimal(0);
-                    var valorPago = Convert.ToDecimal(0);
-
-                    decimal totalLucroTodosPedidos = Model.Pedidos.Sum(p => p.Itens.Sum(item => (item.PrecoUnitario - item.Produto.PrecoPago) * item.Quantidade));
-
-                    var totalLucroPedidosPagos = Model.Pedidos
-                    .Where(p => p.StatusPagamento == StatusPagamento.Pago)
-                    .Sum(p => p.Itens.Sum(item => (item.PrecoUnitario - item.Produto.PrecoPago) * item.Quantidade));
-
-                    if (Model.Pedidos.Count != 0)
-                    {
-                        valorPrevisto = Model.Pedidos.Sum(x => Convert.ToDecimal(x.ValorTotalPedido));
-                        valorPago = Model.Pedidos.Where(p => p.StatusPagamento == StatusPagamento.Pago).Sum(x => Convert.ToDecimal(x.ValorTotalPedido));
-
-                        if (valorPago != 0)
-                            pa = Convert.ToInt32(Math.Abs((valorPago / valorPrevisto) * 100));
-                        else
-                            pa = 0;
-                    }
-                }
-                <div class="col-xxl-6 col-md-6">
-                    <div class="card info-card sales-card">
-                        <div class="card-body">
-                            <h5 class="card-title">Pedidos<span> | Em andamento</span></h5>
-
-                            <div class="d-flex align-items-center">
-                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-cart"></i>
-                                </div>
-                                <div class="ps-3">
-                                    <h6>@Model.Pedidos.Count</h6>
-                                    <span class="text-success small pt-1 fw-bold">Registrados no filtro atual</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xxl-6 col-md-6">
-                    <div class="card info-card sales-card">
-                        <div class="card-body">
-                            <h5 class="card-title">Lucro<span> | Recebido</span></h5>
-                            <div class="d-flex align-items-center">
-                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-sort-numeric-up-alt"></i>
-                                </div>
-                                <div class="ps-3">
-                                    <h6>@string.Format("{0:0.00}", totalLucroPedidosPagos)</h6>
-                                    <span class="text-secondary small pt-1 fw-bold">Lucro recebido</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xxl-6 col-md-6">
-                    <div class="card info-card sales-card">
-                        <div class="card-body">
-                            <h5 class="card-title">Valores<span> | Recebidos</span></h5>
-                            <div class="d-flex align-items-center">
-                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-currency-dollar"></i>
-                                </div>
-                                <div class="ps-3">
-                                    <h6>@string.Format("{0:0.00}", valorPago)</h6>
-                                    <span class="text-secondary small pt-1 fw-bold">@pa.ToString()% pagos</span>                                    
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xxl-6 col-md-6">
-                    <div class="card info-card revenue-card">
-                        <div class="card-body">
-                            <h5 class="card-title">Total<span> | previsto</span></h5>
-                            <div class="d-flex align-items-center">
-                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-currency-dollar"></i>
-                                </div>
-                                <div class="ps-3">
-                                    <h6>@(Model.Pedidos.Sum(x => Convert.ToDecimal(x.ValorTotalPedido)).ToString("0.00"))</h6>
-                                    <span class="text-secondary small pt-1 fw-bold">Total previsto</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-12 col-lg-12">
+        <div class="col-9 col-lg-9">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Lista de pedidos</h5>
@@ -174,7 +81,6 @@
                                     <th>Pago</th>
                                     <th>Nome</th>
                                     <th>Total</th>
-                                    <th>Vendedor</th>
                                     <th>Feito</th>
                                 </tr>
                             </thead>
@@ -213,7 +119,6 @@
                                             }
                                             @Html.DisplayFor(modelItem => subTotal)
                                         </td>
-                                        <td style="font-size: 10px;">@Html.DisplayFor(modelItem => p.EmailResponsavel)</td>
                                         <td>@Html.DisplayFor(modelItem => p.DataPedido)</td>
                                     </tr>
                                 }
@@ -229,7 +134,167 @@
                 </div>
             </div>
         </div>
+        <div class="col-3 col-lg-3">
+            <div class="row">
 
-    </div>
+                @{
+                    var pa = 0;
+                    var valorPrevisto = Convert.ToDecimal(0);
+                    var valorPago = Convert.ToDecimal(0);
+
+                    decimal totalLucroTodosPedidos = Model.Pedidos.Sum(p =>
+                        p.Itens.Sum(item =>
+                            (item.PrecoUnitario - item.Produto.PrecoPago) * item.Quantidade));
+
+                    var totalLucroPedidosPagos = Model.Pedidos
+                        .Where(p => p.StatusPagamento == StatusPagamento.Pago)
+                        .Sum(p => p.Itens.Sum(item =>
+                            (item.PrecoUnitario - item.Produto.PrecoPago) * item.Quantidade));
+
+                    if (Model.Pedidos.Count != 0)
+                    {
+                        valorPrevisto = Model.Pedidos.Sum(x =>
+                            Convert.ToDecimal(x.ValorTotalPedido));
+
+                        valorPago = Model.Pedidos
+                            .Where(p => p.StatusPagamento == StatusPagamento.Pago)
+                            .Sum(x => Convert.ToDecimal(x.ValorTotalPedido));
+
+                        if (valorPago != 0)
+                            pa = Convert.ToInt32(
+                                Math.Abs((valorPago / valorPrevisto) * 100));
+                        else
+                            pa = 0;
+                    }
+                }
+
+                <!-- PEDIDOS -->
+                <div class="col-12">
+                    <div class="card info-card sales-card">
+                        <div class="card-body">
+
+                            <h5 class="card-title">
+                                Pedidos <span>| Em andamento</span>
+                            </h5>
+
+                            <div class="d-flex align-items-center">
+
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-cart"></i>
+                                </div>
+
+                                <div class="ps-3">
+                                    <h6>@Model.Pedidos.Count</h6>
+
+                                    <span class="text-success small pt-1 fw-bold">
+                                        Registrados no filtro atual
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- LUCRO -->
+                <div class="col-12">
+                    <div class="card info-card sales-card">
+                        <div class="card-body">
+
+                            <h5 class="card-title">
+                                Lucro <span>| Recebido</span>
+                            </h5>
+
+                            <div class="d-flex align-items-center">
+
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-sort-numeric-up-alt"></i>
+                                </div>
+
+                                <div class="ps-3">
+                                    <h6>
+                                        @string.Format("{0:0.00}", totalLucroPedidosPagos)
+                                    </h6>
+
+                                    <span class="text-secondary small pt-1 fw-bold">
+                                        Lucro recebido
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- VALORES RECEBIDOS -->
+                <div class="col-12">
+                    <div class="card info-card sales-card">
+                        <div class="card-body">
+
+                            <h5 class="card-title">
+                                Valores <span>| Recebidos</span>
+                            </h5>
+
+                            <div class="d-flex align-items-center">
+
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-currency-dollar"></i>
+                                </div>
+
+                                <div class="ps-3">
+                                    <h6>
+                                        @string.Format("{0:0.00}", valorPago)
+                                    </h6>
+
+                                    <span class="text-secondary small pt-1 fw-bold">
+                                        @pa.ToString()% pagos
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- TOTAL PREVISTO -->
+                <div class="col-12">
+                    <div class="card info-card revenue-card">
+                        <div class="card-body">
+
+                            <h5 class="card-title">
+                                Total <span>| previsto</span>
+                            </h5>
+
+                            <div class="d-flex align-items-center">
+
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-currency-dollar"></i>
+                                </div>
+
+                                <div class="ps-3">
+
+                                    <h6>
+                                        @(Model.Pedidos
+                                            .Sum(x => Convert.ToDecimal(x.ValorTotalPedido))
+                                            .ToString("0.00"))
+                                    </h6>
+
+                                    <span class="text-secondary small pt-1 fw-bold">
+                                        Total previsto
+                                    </span>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>    
 </section>
 

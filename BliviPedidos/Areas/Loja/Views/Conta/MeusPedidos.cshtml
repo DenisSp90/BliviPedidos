@@ -23,7 +23,6 @@
                 @foreach (var pedido in Model.Pedidos)
                 {
                     <tr>
-                        <td>#@pedido.PedidoId</td>
                         <td class="font-monospace">@pedido.CodigoPublico</td>
                         <td>@pedido.DataPedido?.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
                         <td>@pedido.Status</td>
