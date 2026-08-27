@@ -109,20 +109,18 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Pedidos Recentes <span>| Ultimas</span></h5>
+                    <h5 class="card-title">Pedidos recentes <span>| Últimos 10 lançamentos</span></h5>
 
                     <div class="activity">
-
-                        @{
-                            var startIndex = Math.Max(0, Model.Pedidos.Count - 10);
-                            var endIndex = Model.Pedidos.Count - 1;
-                        }
-
-                        @for (int i = endIndex; i >= startIndex; i--)
+                        @foreach (var pedido in Model.Pedidos
+                            .OrderByDescending(item => item.DataPedido ?? DateTime.MinValue)
+                            .ThenByDescending(item => item.Id)
+                            .Take(10))
                         {
-                            var pedido = Model.Pedidos[i];
                             <div class="activity-item d-flex">
-                                <div class="activite-label">R$@pedido.ValorTotalPedido.ToString("N2")</div>
+                                <div class="activite-label" style="min-width: 125px">
+                                    @(pedido.DataPedido?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "Data não informada")
+                                </div>
 
                                 @if (pedido.StatusPagamento == StatusPagamento.Pago)
                                 {
@@ -137,6 +135,9 @@
                                     <a href="@Url.Action("PedidoDetalhe", "Store", new { id = pedido.Id })" class="text-decoration-none">
                                         @pedido.Cadastro.Nome
                                     </a>
+                                    <div class="small text-muted">
+                                        Pedido #@pedido.Id · R$ @pedido.ValorTotalPedido.ToString("N2")
+                                    </div>
                                 </div>
                             </div>
                         }

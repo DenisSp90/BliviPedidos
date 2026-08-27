@@ -318,12 +318,10 @@ public class StoreController : Controller
     [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public async Task<IActionResult> GetInfoPedidos()
     {
-        var listaPedidosAtivos = _pedidoService.GetListaPedidosAtivosByEmail(HttpContext.User.Identity.Name);
-        var numeroPedidosNaoPagos = listaPedidosAtivos.Count(
-            pedido => pedido.StatusPagamento != StatusPagamento.Pago);
-        var numeroTotalPedidos = listaPedidosAtivos.Count;
+        var numeroPedidosPendentes = await _pedidoService.ContarPedidosPendentesAsync(
+            HttpContext.RequestAborted);
 
-        return Json(new { NumeroTotalPedidos = numeroTotalPedidos, NumeroPedidosNaoPagos = numeroPedidosNaoPagos });
+        return Json(new { NumeroTotalPedidos = numeroPedidosPendentes });
     }
 
     [Authorize(Policy = PoliticasAutorizacao.AcessoInterno)]

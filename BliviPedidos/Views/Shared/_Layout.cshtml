@@ -60,8 +60,9 @@
                 @if (podeVender)
                 {
                     <li class="nav-item dropdown">
-                        <a class="nav-link nav-icon" asp-controller="Store" asp-action="PedidoLista" asp-route-filtro="2">
-                            <i class="bi bi-shop"></i>  <span id="numeroPedidos" class="badge bg-primary badge-number">0</span>
+                        <a class="nav-link nav-icon" asp-controller="Store" asp-action="PedidoLista" asp-route-filtro="1"
+                           title="Pedidos aguardando finalização" aria-label="Abrir pedidos aguardando finalização">
+                            <i class="bi bi-shop"></i><span id="numeroPedidos" class="badge bg-primary badge-number">0</span>
                         </a>
                     </li>
                 }

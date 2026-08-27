@@ -4,6 +4,7 @@ using BliviPedidos.Models;
 using BliviPedidos.Services.Implementations;
 using BliviPedidos.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -14,6 +15,40 @@ namespace BliviPedidos.Tests;
 
 public class PedidoServiceTests
 {
+    [Fact]
+    public async Task ContadorPendente_DeveIncluirCheckoutEBalcaoEIgnorarCarrinhoFinalizadoECancelado()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>().UseSqlite(connection).Options;
+        await using var context = new ApplicationDbContext(options);
+        await context.Database.EnsureCreatedAsync();
+        context.Users.AddRange(
+            new IdentityUser { Id = "consumidor-1", UserName = "c1@teste.com" },
+            new IdentityUser { Id = "consumidor-2", UserName = "c2@teste.com" },
+            new IdentityUser { Id = "consumidor-3", UserName = "c3@teste.com" });
+
+        var pedidos = new[]
+        {
+            CriarPedidoContador(StatusPedido.Carrinho, null, "operador@teste.com"),
+            CriarPedidoContador(StatusPedido.Confirmado, "consumidor-1", "cliente@teste.com"),
+            CriarPedidoContador(StatusPedido.EmPreparacao, null, "operador@teste.com"),
+            CriarPedidoContador(StatusPedido.Pronto, "consumidor-2", "outro@teste.com"),
+            CriarPedidoContador(StatusPedido.Concluido, null, "operador@teste.com"),
+            CriarPedidoContador(StatusPedido.Cancelado, "consumidor-3", "cliente@teste.com")
+        };
+        context.Pedido.AddRange(pedidos);
+        await context.SaveChangesAsync();
+        var accessor = CriarHttpContextAccessor("vendedor@teste.com");
+        var service = new PedidoService(
+            accessor, context, Mock.Of<IItemPedidoService>(), Mock.Of<ICadastroService>(),
+            Mock.Of<IProdutoService>(), accessor, NullLogger<PedidoService>.Instance);
+
+        var quantidade = await service.ContarPedidosPendentesAsync();
+
+        Assert.Equal(3, quantidade);
+    }
+
     [Fact]
     public async Task PedidosRegistrados_DeveContarConcluidosECanceladosMasNaoCarrinhos()
     {
@@ -60,6 +95,15 @@ public class PedidoServiceTests
         Assert.Equal(2, meus.Count);
         Assert.DoesNotContain(todos, pedido => pedido.Status == StatusPedido.Carrinho);
     }
+
+    private static Pedido CriarPedidoContador(
+        StatusPedido status, string? consumidorUsuarioId, string emailResponsavel) => new()
+    {
+        Status = status,
+        ConsumidorUsuarioId = consumidorUsuarioId,
+        EmailResponsavel = emailResponsavel,
+        Cadastro = new Cadastro { Nome = "Cliente teste", Telefone = "55 11 99999-9999" }
+    };
 
     [Fact]
     public async Task RegistrarCancelamentoPedido_DeveMarcarCanceladoERestaurarEstoqueUmaVez()
