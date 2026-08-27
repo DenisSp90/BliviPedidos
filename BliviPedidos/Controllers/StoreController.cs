@@ -7,6 +7,7 @@ using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using BliviPedidos.Seguranca;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using QRCoder;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -24,7 +25,8 @@ public class StoreController : Controller
     private readonly IProdutoService _produtoService;
     private readonly IEmailEnviarService _emailSender;
     private readonly IClienteService _clienteService;
-    private readonly string _imagemPasta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "imagens/produtos");
+    private const long TamanhoMaximoImagem = 5 * 1024 * 1024;
+    private readonly string _imagemPasta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "produtos");
     private readonly IConfiguration _configuration;
     private readonly ICategoriaService _categoriaService;
     private readonly ILogger<StoreController> _logger;
@@ -579,6 +581,7 @@ public class StoreController : Controller
 
     [HttpPost]
     [Authorize(Policy = PoliticasAutorizacao.Estoque)]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> ProdutoCadastro([FromForm] ProdutoViewModel model)
     {
         if (!ModelState.IsValid)
@@ -591,10 +594,33 @@ public class StoreController : Controller
             return View(model);
         }
 
-        var produto = _mapper.Map<Produto>(model);
+        string? novaFoto = null;
+        try
+        {
+            if (model.FotoArquivo is not null)
+            {
+                novaFoto = await SalvarImagemProdutoAsync(model.FotoArquivo);
+                model.Foto = novaFoto;
+            }
 
-        if (await _produtoService.RegistrarProdutoAsync(produto))
-            return RedirectToAction("ProdutoLista");
+            var produto = _mapper.Map<Produto>(model);
+            if (await _produtoService.RegistrarProdutoAsync(produto))
+                return RedirectToAction("ProdutoLista");
+
+            ExcluirImagemLocal(novaFoto);
+            model.Foto = null;
+            ModelState.AddModelError(string.Empty, "Não foi possível cadastrar o produto.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            ExcluirImagemLocal(novaFoto);
+            ModelState.AddModelError(nameof(model.FotoArquivo), ex.Message);
+        }
+        catch
+        {
+            ExcluirImagemLocal(novaFoto);
+            throw;
+        }
 
         model.Categorias = _context.Categoria
             .Where(c => c.IsAtivo)
@@ -617,8 +643,25 @@ public class StoreController : Controller
         try
         {
             var produto = _context.Produto.SingleOrDefault(produto => produto.Id == id);
+            if (produto is null)
+                return Json(new { success = false, errorMessage = "Produto não encontrado." });
+
+            var fotoProduto = produto.Foto;
             _context.Produto.Remove(produto);
             _context.SaveChanges();
+
+            try
+            {
+                ExcluirImagemLocal(fotoProduto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(
+                    ex,
+                    "O produto {ProdutoId} foi excluído, mas não foi possível remover sua imagem local {FotoProduto}.",
+                    id,
+                    fotoProduto);
+            }
 
             return Json(new { success = true });
         }
@@ -659,8 +702,11 @@ public class StoreController : Controller
 
     [HttpPost]
     [Authorize(Policy = PoliticasAutorizacao.Estoque)]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> ProdutoEditar([FromForm] ProdutoViewModel model)
     {
+        string? novaFoto = null;
+        string? fotoAnterior = null;
         try
         {
             if (!ModelState.IsValid)
@@ -673,11 +719,49 @@ public class StoreController : Controller
                 return View(model);
             }
 
+            var produtoExistente = _context.Produto
+                .AsNoTracking()
+                .SingleOrDefault(produto => produto.Id == model.Id);
+            if (produtoExistente is null)
+                return NotFound();
+
+            // O caminho enviado pelo formulário não é confiável. A foto anterior
+            // sempre vem do registro já isolado pela loja atual no banco.
+            fotoAnterior = produtoExistente.Foto;
+            model.Foto = fotoAnterior;
+
+            if (model.FotoArquivo is not null)
+            {
+                novaFoto = await SalvarImagemProdutoAsync(model.FotoArquivo);
+                model.Foto = novaFoto;
+            }
+
             var produto = _mapper.Map<Produto>(model);
 
             // Salvar as alterações no banco de dados
             if (await _produtoService.RegistrarProdutoAsync(produto))
+            {
+                if (novaFoto is not null)
+                    ExcluirImagemLocal(fotoAnterior);
                 return RedirectToAction("ProdutoDetalhe", new { id = produto.Id });
+            }
+
+            ExcluirImagemLocal(novaFoto);
+            model.Foto = fotoAnterior;
+            ModelState.AddModelError(string.Empty, "Não foi possível atualizar o produto.");
+
+            model.Categorias = _context.Categoria
+                .Where(c => c.IsAtivo)
+                .OrderBy(c => c.Nome)
+                .ToList();
+
+            return View(model);
+        }
+        catch (InvalidOperationException ex)
+        {
+            ExcluirImagemLocal(novaFoto);
+            model.Foto = fotoAnterior;
+            ModelState.AddModelError(nameof(model.FotoArquivo), ex.Message);
 
             model.Categorias = _context.Categoria
                 .Where(c => c.IsAtivo)
@@ -688,6 +772,8 @@ public class StoreController : Controller
         }
         catch (Exception ex)
         {
+            ExcluirImagemLocal(novaFoto);
+            model.Foto = fotoAnterior;
             ModelState.AddModelError("", $"Ocorreu um erro ao processar o pedido: {ex.Message}");
 
             model.Categorias = _context.Categoria
@@ -697,6 +783,70 @@ public class StoreController : Controller
 
             return View(model);
         }
+    }
+
+    private async Task<string> SalvarImagemProdutoAsync(IFormFile arquivo)
+    {
+        if (arquivo.Length == 0)
+            throw new InvalidOperationException("Selecione uma imagem válida.");
+
+        if (arquivo.Length > TamanhoMaximoImagem)
+            throw new InvalidOperationException("A imagem deve possuir no máximo 5 MB.");
+
+        var extensao = Path.GetExtension(arquivo.FileName).ToLowerInvariant();
+        if (extensao is not (".jpg" or ".jpeg" or ".png" or ".webp"))
+            throw new InvalidOperationException("Envie uma imagem JPG, PNG ou WEBP.");
+
+        await using var origem = arquivo.OpenReadStream();
+        var cabecalho = new byte[12];
+        var lidos = await origem.ReadAsync(cabecalho, Request.HttpContext.RequestAborted);
+        var jpeg = lidos >= 3 && cabecalho[0] == 0xFF && cabecalho[1] == 0xD8 && cabecalho[2] == 0xFF;
+        var png = lidos >= 8 && cabecalho[..8].SequenceEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A });
+        var webp = lidos >= 12
+            && cabecalho[..4].SequenceEqual("RIFF"u8.ToArray())
+            && cabecalho[8..12].SequenceEqual("WEBP"u8.ToArray());
+
+        var extensaoCompativel = jpeg && extensao is ".jpg" or ".jpeg"
+            || png && extensao == ".png"
+            || webp && extensao == ".webp";
+        if (!extensaoCompativel)
+            throw new InvalidOperationException("O conteúdo do arquivo não corresponde à extensão da imagem.");
+
+        var pastaLoja = Path.Combine(_imagemPasta, _context.LojaIdAtual.ToString());
+        Directory.CreateDirectory(pastaLoja);
+        var nomeArquivo = $"{Guid.NewGuid():N}{extensao}";
+        var caminhoCompleto = Path.Combine(pastaLoja, nomeArquivo);
+
+        try
+        {
+            origem.Position = 0;
+            await using var destino = new FileStream(caminhoCompleto, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+            await origem.CopyToAsync(destino, Request.HttpContext.RequestAborted);
+        }
+        catch
+        {
+            if (System.IO.File.Exists(caminhoCompleto))
+                System.IO.File.Delete(caminhoCompleto);
+            throw;
+        }
+
+        return $"/uploads/produtos/{_context.LojaIdAtual}/{nomeArquivo}";
+    }
+
+    private void ExcluirImagemLocal(string? caminhoPublico)
+    {
+        var prefixoLoja = $"/uploads/produtos/{_context.LojaIdAtual}/";
+        if (string.IsNullOrWhiteSpace(caminhoPublico)
+            || !caminhoPublico.StartsWith(prefixoLoja, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        var relativo = caminhoPublico["/uploads/produtos/".Length..]
+            .Replace('/', Path.DirectorySeparatorChar);
+        var raiz = Path.GetFullPath(_imagemPasta) + Path.DirectorySeparatorChar;
+        var caminhoCompleto = Path.GetFullPath(Path.Combine(_imagemPasta, relativo));
+        if (caminhoCompleto.StartsWith(raiz, StringComparison.OrdinalIgnoreCase)
+            && System.IO.File.Exists(caminhoCompleto))
+            System.IO.File.Delete(caminhoCompleto);
     }
 
     [Authorize(Policy = PoliticasAutorizacao.Estoque)]
