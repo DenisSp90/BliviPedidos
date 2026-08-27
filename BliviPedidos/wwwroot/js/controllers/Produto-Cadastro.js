@@ -54,11 +54,9 @@ $(document).ready(function () {
     var nomeProduto = $('#NomeHidden').val();
     $('#NomeProduto').val(nomeProduto);
 
-    $('#FotoArquivo').on('change', function () {
-        var arquivo = this.files && this.files[0];
-        if (arquivo) {
-            $('#imagemPreview').attr('src', URL.createObjectURL(arquivo));
-        }
+    $('#Foto').on('input change', function () {
+        var url = $(this).val().trim();
+        $('#imagemPreview').attr('src', url || '/img/default.png');
     });
     
 });
