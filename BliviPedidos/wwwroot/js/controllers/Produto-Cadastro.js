@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function () {
-    debugger;
     var precoPagoInput = document.getElementById('PrecoPago');
     var precoVendaInput = document.getElementById('PrecoVenda');
 
@@ -12,19 +11,60 @@ document.addEventListener('DOMContentLoaded', function () {
         radix: ','
     };
 
-    var precoPagoMask = IMask(precoPagoInput, precoMaskOptions);
-    var precoVendaMask = IMask(precoVendaInput, precoMaskOptions);
+    if (precoPagoInput && precoVendaInput) {
+        IMask(precoPagoInput, precoMaskOptions);
+        IMask(precoVendaInput, precoMaskOptions);
 
-    // Corrige os valores antes de enviar o formulário
-    var form = document.querySelector('form');
-    form.addEventListener('submit', function () {
-        // Remove a formatação e substitui ',' por '.' para garantir que o ASP.NET interprete corretamente como número decimal
-        precoPagoInput.value = precoPagoInput.value.replace(/\./g, '').replace(',', '.');
-        precoVendaInput.value = precoVendaInput.value.replace(/\./g, '').replace(',', '.');
-    });
+        // Corrige os valores antes de enviar o formulário
+        var form = document.querySelector('form');
+        form.addEventListener('submit', function () {
+            precoPagoInput.value = precoPagoInput.value.replace(/\./g, '').replace(',', '.');
+            precoVendaInput.value = precoVendaInput.value.replace(/\./g, '').replace(',', '.');
+        });
+    }
 
     formatarCamposEdicao();
+    configurarOrigemImagem();
 });
+
+function configurarOrigemImagem() {
+    var opcoes = document.querySelectorAll('.tipo-imagem');
+    var campoUpload = document.querySelector('.campo-imagem-upload');
+    var campoUrl = document.querySelector('.campo-imagem-url');
+    var arquivo = document.getElementById('FotoArquivo');
+    var url = document.getElementById('FotoUrl');
+    var preview = document.getElementById('imagemPreview');
+
+    if (!opcoes.length || !campoUpload || !campoUrl) return;
+
+    function atualizarCampos() {
+        var selecionada = document.querySelector('.tipo-imagem:checked');
+        var usarUrl = selecionada && selecionada.value === 'Url';
+        campoUpload.classList.toggle('d-none', usarUrl);
+        campoUrl.classList.toggle('d-none', !usarUrl);
+        if (arquivo) arquivo.disabled = usarUrl;
+        if (url) url.disabled = !usarUrl;
+    }
+
+    opcoes.forEach(function (opcao) {
+        opcao.addEventListener('change', atualizarCampos);
+    });
+
+    if (arquivo) {
+        arquivo.addEventListener('change', function () {
+            var imagem = this.files && this.files[0];
+            if (imagem && preview) preview.src = URL.createObjectURL(imagem);
+        });
+    }
+
+    if (url && preview) {
+        url.addEventListener('input', function () {
+            if (this.value) preview.src = this.value;
+        });
+    }
+
+    atualizarCampos();
+}
 
 function formatarCamposEdicao() {
     var precoPagoInput = document.querySelector('.PrecoPagoHidden');
@@ -49,14 +89,6 @@ function formatarCamposEdicao() {
 }
 
 $(document).ready(function () {
-    debugger;
-
     var nomeProduto = $('#NomeHidden').val();
     $('#NomeProduto').val(nomeProduto);
-
-    $('#Foto').on('input change', function () {
-        var url = $(this).val().trim();
-        $('#imagemPreview').attr('src', url || '/img/default.png');
-    });
-    
 });
