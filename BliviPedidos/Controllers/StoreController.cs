@@ -318,15 +318,10 @@ public class StoreController : Controller
     [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     public async Task<IActionResult> GetInfoPedidos()
     {
-        var cancellationToken = HttpContext.RequestAborted;
-        var numeroPedidosPendentes = await _pedidoService.ContarPedidosPendentesAsync(cancellationToken);
-        var numeroPedidosRegistrados = await _pedidoService.ContarPedidosRegistradosAsync(cancellationToken);
+        var numeroPedidosPendentes = await _pedidoService.ContarPedidosPendentesAsync(
+            HttpContext.RequestAborted);
 
-        return Json(new
-        {
-            NumeroTotalPedidos = numeroPedidosPendentes,
-            NumeroPedidosRegistrados = numeroPedidosRegistrados
-        });
+        return Json(new { NumeroTotalPedidos = numeroPedidosPendentes });
     }
 
     [Authorize(Policy = PoliticasAutorizacao.AcessoInterno)]

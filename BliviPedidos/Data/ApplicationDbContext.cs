@@ -1,7 +1,6 @@
 ﻿using BliviPedidos.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 
 namespace BliviPedidos.Data
 {
@@ -18,19 +17,6 @@ namespace BliviPedidos.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Mantem o tamanho das chaves compostas da migration inicial
-            // independentemente da versao MySQL usada pelo tooling de design.
-            modelBuilder.Entity<IdentityUserLogin<string>>(entidade =>
-            {
-                entidade.Property(item => item.LoginProvider).HasMaxLength(128);
-                entidade.Property(item => item.ProviderKey).HasMaxLength(128);
-            });
-            modelBuilder.Entity<IdentityUserToken<string>>(entidade =>
-            {
-                entidade.Property(item => item.LoginProvider).HasMaxLength(128);
-                entidade.Property(item => item.Name).HasMaxLength(128);
-            });
-
             modelBuilder.Entity<Produto>()
                 .HasQueryFilter(entidade => entidade.LojaId == LojaIdAtual);
             modelBuilder.Entity<Categoria>()
@@ -46,8 +32,6 @@ namespace BliviPedidos.Data
             modelBuilder.Entity<Cadastro>()
                 .HasQueryFilter(entidade => entidade.Pedido != null && entidade.Pedido.LojaId == LojaIdAtual);
             modelBuilder.Entity<ProdutoMovimentacao>()
-                .HasQueryFilter(entidade => entidade.LojaId == LojaIdAtual);
-            modelBuilder.Entity<FaixaFreteLoja>()
                 .HasQueryFilter(entidade => entidade.LojaId == LojaIdAtual);
 
             // Definir a chave primária para Produto
@@ -68,27 +52,8 @@ namespace BliviPedidos.Data
                 Slug = "blivi-pedidos",
                 CorPrimaria = "#0d6efd",
                 CorSecundaria = "#ffffff",
-                RetiradaAtiva = true,
-                EntregaAtiva = false,
-                PercentualConsumoEntrega = 2m,
                 Ativa = true
             });
-
-            modelBuilder.Entity<Loja>().Property(l => l.LatitudeOrigem).HasPrecision(10, 7);
-            modelBuilder.Entity<Loja>().Property(l => l.LongitudeOrigem).HasPrecision(10, 7);
-            modelBuilder.Entity<Loja>().Property(l => l.PercentualConsumoEntrega).HasPrecision(5, 2);
-
-            modelBuilder.Entity<FaixaFreteLoja>().Property(f => f.DistanciaInicialKm).HasPrecision(8, 3);
-            modelBuilder.Entity<FaixaFreteLoja>().Property(f => f.DistanciaFinalKm).HasPrecision(8, 3);
-            modelBuilder.Entity<FaixaFreteLoja>().Property(f => f.ValorFrete).HasPrecision(10, 2);
-            modelBuilder.Entity<FaixaFreteLoja>()
-                .HasIndex(f => new { f.LojaId, f.Ordem });
-            modelBuilder.Entity<FaixaFreteLoja>()
-                .HasOne(f => f.Loja)
-                .WithMany(l => l.FaixasFrete)
-                .HasForeignKey(f => f.LojaId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Produto>()
                 .HasOne(p => p.Loja)
@@ -252,7 +217,6 @@ namespace BliviPedidos.Data
                     Pedido entidade => AjustarLoja(entry.State, entidade.LojaId, id => entidade.LojaId = id),
                     UsuarioLoja entidade => AjustarLoja(entry.State, entidade.LojaId, id => entidade.LojaId = id),
                     ProdutoMovimentacao entidade => AjustarLoja(entry.State, entidade.LojaId, id => entidade.LojaId = id),
-                    FaixaFreteLoja entidade => AjustarLoja(entry.State, entidade.LojaId, id => entidade.LojaId = id),
                     _ => LojaIdAtual
                 };
 
@@ -281,7 +245,6 @@ namespace BliviPedidos.Data
         public DbSet<BliviPedidos.Models.ProdutoMovimentacao> ProdutoMovimentacao { get; set; } = default!;
         public DbSet<BliviPedidos.Models.Cliente> Cliente { get; set; } = default!;
         public DbSet<UsuarioLoja> UsuarioLoja { get; set; } = default!;
-        public DbSet<FaixaFreteLoja> FaixaFreteLoja { get; set; } = default!;
 
     }
 }

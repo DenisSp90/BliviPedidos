@@ -112,10 +112,7 @@ public class LojaControllerTests
         {
             _connection = connection;
             Context = context;
-            Controller = new LojaController(
-                context,
-                NullLogger<LojaController>.Instance,
-                new CalculadorFreteLojaService());
+            Controller = new LojaController(context, NullLogger<LojaController>.Instance);
         }
 
         public ApplicationDbContext Context { get; }

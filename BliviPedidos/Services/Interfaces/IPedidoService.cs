@@ -20,7 +20,6 @@ namespace BliviPedidos.Services.Interfaces
         IList<Pedido> GetListaPedidosAtivos();
         Task<List<Pedido>> GetListaPedidosAtivosAsync();
         Task<int> ContarPedidosPendentesAsync(CancellationToken cancellationToken = default);
-        Task<int> ContarPedidosRegistradosAsync(CancellationToken cancellationToken = default);
         IList<Pedido> GetListaPedidosAtivosByEmail(string email);
     }
 }

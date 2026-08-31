@@ -172,13 +172,6 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
             cancellationToken);
     }
 
-    public Task<int> ContarPedidosRegistradosAsync(CancellationToken cancellationToken = default)
-    {
-        return dbSet.CountAsync(
-            pedido => pedido.Status != StatusPedido.Carrinho,
-            cancellationToken);
-    }
-
     public IList<Pedido> GetListaPedidosAtivosByEmail(string email)
     {
         return dbSet.Include(p => p.Itens)

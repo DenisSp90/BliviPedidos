@@ -96,7 +96,6 @@ public class ApplicationDbContextTests
     [InlineData(typeof(ItemPedido))]
     [InlineData(typeof(Cadastro))]
     [InlineData(typeof(ProdutoMovimentacao))]
-    [InlineData(typeof(FaixaFreteLoja))]
     public void Modelo_DevePossuirFiltroGlobalDeLoja(Type entidade)
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()

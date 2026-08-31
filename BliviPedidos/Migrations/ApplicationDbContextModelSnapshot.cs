@@ -160,48 +160,6 @@ namespace BliviPedidos.Migrations
                     b.ToTable("Cliente");
                 });
 
-            modelBuilder.Entity("BliviPedidos.Models.FaixaFreteLoja", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("AlteradaEm")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<bool>("Ativa")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<DateTime>("CriadaEm")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<decimal>("DistanciaFinalKm")
-                        .HasPrecision(8, 3)
-                        .HasColumnType("decimal(8,3)");
-
-                    b.Property<decimal>("DistanciaInicialKm")
-                        .HasPrecision(8, 3)
-                        .HasColumnType("decimal(8,3)");
-
-                    b.Property<int>("LojaId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Ordem")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("ValorFrete")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LojaId", "Ordem");
-
-                    b.ToTable("FaixaFreteLoja");
-                });
-
             modelBuilder.Entity("BliviPedidos.Models.ItemPedido", b =>
                 {
                     b.Property<int>("Id")
@@ -239,26 +197,8 @@ namespace BliviPedidos.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("AssinaturaInicioEm")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("AssinaturaTerminoEm")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<bool>("Ativa")
                         .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("BairroOrigem")
-                        .HasMaxLength(80)
-                        .HasColumnType("varchar(80)");
-
-                    b.Property<string>("CepOrigem")
-                        .HasMaxLength(9)
-                        .HasColumnType("varchar(9)");
-
-                    b.Property<string>("ComplementoOrigem")
-                        .HasMaxLength(80)
-                        .HasColumnType("varchar(80)");
 
                     b.Property<string>("CorPrimaria")
                         .HasMaxLength(20)
@@ -280,45 +220,18 @@ namespace BliviPedidos.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("EnderecoOrigem")
-                        .HasMaxLength(180)
-                        .HasColumnType("varchar(180)");
-
-                    b.Property<bool>("EntregaAtiva")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<string>("InstagramUrl")
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
-
-                    b.Property<decimal?>("LatitudeOrigem")
-                        .HasPrecision(10, 7)
-                        .HasColumnType("decimal(10,7)");
 
                     b.Property<string>("LogoUrl")
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
 
-                    b.Property<decimal?>("LongitudeOrigem")
-                        .HasPrecision(10, 7)
-                        .HasColumnType("decimal(10,7)");
-
-                    b.Property<string>("MunicipioOrigem")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(120)
                         .HasColumnType("varchar(120)");
-
-                    b.Property<string>("NumeroOrigem")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
-
-                    b.Property<decimal>("PercentualConsumoEntrega")
-                        .HasPrecision(5, 2)
-                        .HasColumnType("decimal(5,2)");
 
                     b.Property<bool>("PixAtivo")
                         .HasColumnType("tinyint(1)");
@@ -339,17 +252,10 @@ namespace BliviPedidos.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
 
-                    b.Property<bool>("RetiradaAtiva")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(80)
                         .HasColumnType("varchar(80)");
-
-                    b.Property<string>("UfOrigem")
-                        .HasMaxLength(2)
-                        .HasColumnType("varchar(2)");
 
                     b.Property<string>("Whatsapp")
                         .HasMaxLength(20)
@@ -372,11 +278,8 @@ namespace BliviPedidos.Migrations
                             Ativa = true,
                             CorPrimaria = "#0d6efd",
                             CorSecundaria = "#ffffff",
-                            EntregaAtiva = false,
                             Nome = "Blivi Pedidos",
-                            PercentualConsumoEntrega = 2m,
                             PixAtivo = false,
-                            RetiradaAtiva = true,
                             Slug = "blivi-pedidos"
                         });
                 });
@@ -794,17 +697,6 @@ namespace BliviPedidos.Migrations
                     b.Navigation("Loja");
                 });
 
-            modelBuilder.Entity("BliviPedidos.Models.FaixaFreteLoja", b =>
-                {
-                    b.HasOne("BliviPedidos.Models.Loja", "Loja")
-                        .WithMany("FaixasFrete")
-                        .HasForeignKey("LojaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Loja");
-                });
-
             modelBuilder.Entity("BliviPedidos.Models.ItemPedido", b =>
                 {
                     b.HasOne("BliviPedidos.Models.Pedido", "Pedido")
@@ -973,8 +865,6 @@ namespace BliviPedidos.Migrations
                     b.Navigation("Categorias");
 
                     b.Navigation("Clientes");
-
-                    b.Navigation("FaixasFrete");
 
                     b.Navigation("Pedidos");
 

@@ -85,7 +85,6 @@ builder.Services.AddScoped<ICalculadorCarrinhoPublicoService, CalculadorCarrinho
 builder.Services.AddScoped<IDadosConsumidorCheckoutService, DadosConsumidorCheckoutService>();
 builder.Services.AddScoped<IConfirmacaoCheckoutService, ConfirmacaoCheckoutService>();
 builder.Services.AddScoped<IPagamentoService, PagamentoPixService>();
-builder.Services.AddScoped<ICalculadorFreteLojaService, CalculadorFreteLojaService>();
 builder.Services.AddHostedService<ExpiracaoReservaService>();
 
 builder.Services.AddHttpContextAccessor();
