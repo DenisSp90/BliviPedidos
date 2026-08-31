@@ -3,6 +3,12 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+        (function () {
+            var tema = localStorage.getItem('blivi-tema');
+            if (tema === 'escuro') document.documentElement.setAttribute('data-theme', 'dark');
+        })();
+    </script>
     <title>@ViewData["Title"] - Administração Blivi</title>
 
     <link href="~/img/favicon.png" rel="icon" />
@@ -25,6 +31,12 @@
 
         <nav class="header-nav ms-auto">
             <ul class="d-flex align-items-center">
+                <li class="nav-item">
+                    <button id="alternarTema" class="nav-link nav-icon theme-toggle" type="button"
+                            aria-label="Ativar tema escuro" title="Ativar tema escuro">
+                        <i class="bi bi-moon-stars" aria-hidden="true"></i>
+                    </button>
+                </li>
                 <li class="nav-item dropdown pe-3">
                     <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
                         <i class="bi bi-shield-lock me-2"></i>
@@ -88,6 +100,7 @@
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
     <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/main.js"></script>
+    <script src="~/js/theme.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

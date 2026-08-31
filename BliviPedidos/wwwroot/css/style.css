@@ -11,12 +11,36 @@
 --------------------------------------------------------------*/
 :root {
   scroll-behavior: smooth;
+  color-scheme: light;
+  --blivi-bg: #f6f9ff;
+  --blivi-surface: #ffffff;
+  --blivi-surface-muted: #f6f9ff;
+  --blivi-text: #444444;
+  --blivi-heading: #012970;
+  --blivi-muted: #899bbd;
+  --blivi-border: #ebeef4;
+  --blivi-shadow: rgba(1, 41, 112, 0.1);
+  --blivi-input: #ffffff;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --blivi-bg: #101827;
+  --blivi-surface: #182235;
+  --blivi-surface-muted: #222e43;
+  --blivi-text: #d8e0ed;
+  --blivi-heading: #eef4ff;
+  --blivi-muted: #aab7cc;
+  --blivi-border: #344158;
+  --blivi-shadow: rgba(0, 0, 0, 0.32);
+  --blivi-input: #111b2c;
 }
 
 body {
   font-family: "Open Sans", sans-serif;
-  background: #f6f9ff;
-  color: #444444;
+  background: var(--blivi-bg);
+  color: var(--blivi-text);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 a {
@@ -222,13 +246,15 @@ h6 {
   border: none;
   border-radius: 5px;
   box-shadow: 0px 0 30px rgba(1, 41, 112, 0.1);
+  background-color: var(--blivi-surface);
+  color: var(--blivi-text);
 }
 
 .card-header,
 .card-footer {
-  border-color: #ebeef4;
-  background-color: #fff;
-  color: #798eb3;
+  border-color: var(--blivi-border);
+  background-color: var(--blivi-surface);
+  color: var(--blivi-muted);
   padding: 15px;
 }
 
@@ -471,6 +497,18 @@ h6 {
   color: #012970;
   margin-right: 25px;
   position: relative;
+}
+
+.theme-toggle {
+  border: 0;
+  background: transparent;
+  line-height: 1;
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid #4154f1;
+  outline-offset: 3px;
+  border-radius: 50%;
 }
 
 .header-nav .nav-profile {
@@ -1307,4 +1345,181 @@ h6 {
   text-align: center;
   font-size: 13px;
   color: #012970;
+}
+
+/*--------------------------------------------------------------
+# Tema escuro
+--------------------------------------------------------------*/
+html[data-theme="dark"] body {
+  --bs-body-color: var(--blivi-text);
+  --bs-body-bg: var(--blivi-bg);
+  --bs-border-color: var(--blivi-border);
+  --bs-secondary-color: var(--blivi-muted);
+}
+
+html[data-theme="dark"] .header,
+html[data-theme="dark"] .sidebar,
+html[data-theme="dark"] .dropdown-menu,
+html[data-theme="dark"] .modal-content,
+html[data-theme="dark"] .accordion-item,
+html[data-theme="dark"] .list-group-item,
+html[data-theme="dark"] .dataTable-wrapper,
+html[data-theme="dark"] .offcanvas {
+  background-color: var(--blivi-surface);
+  color: var(--blivi-text);
+  border-color: var(--blivi-border);
+}
+
+html[data-theme="dark"] .header,
+html[data-theme="dark"] .sidebar,
+html[data-theme="dark"] .card {
+  box-shadow: 0 4px 24px var(--blivi-shadow);
+}
+
+html[data-theme="dark"] .logo span,
+html[data-theme="dark"] .header .toggle-sidebar-btn,
+html[data-theme="dark"] .header-nav .nav-icon,
+html[data-theme="dark"] .header-nav .nav-profile,
+html[data-theme="dark"] .pagetitle h1,
+html[data-theme="dark"] .card-title,
+html[data-theme="dark"] .dashboard .info-card h6,
+html[data-theme="dark"] .footer .copyright,
+html[data-theme="dark"] .footer .credits,
+html[data-theme="dark"] .profile .profile-card h2,
+html[data-theme="dark"] .sidebar-nav .nav-link.collapsed,
+html[data-theme="dark"] .sidebar-nav .nav-content a {
+  color: var(--blivi-heading);
+}
+
+html[data-theme="dark"] .sidebar-nav .nav-link.collapsed,
+html[data-theme="dark"] .sidebar-nav .nav-link,
+html[data-theme="dark"] .sidebar::-webkit-scrollbar,
+html[data-theme="dark"] .accordion-button,
+html[data-theme="dark"] .accordion-flush .accordion-button {
+  background-color: var(--blivi-surface);
+}
+
+html[data-theme="dark"] .sidebar-nav .nav-link:hover,
+html[data-theme="dark"] .sidebar-nav .nav-link:not(.collapsed),
+html[data-theme="dark"] .dropdown-menu .dropdown-item:hover,
+html[data-theme="dark"] .header-nav .profile .dropdown-item:hover,
+html[data-theme="dark"] .accordion-button:not(.collapsed),
+html[data-theme="dark"] .nav-tabs-bordered .nav-link.active {
+  background-color: var(--blivi-surface-muted);
+}
+
+html[data-theme="dark"] .dropdown-item,
+html[data-theme="dark"] .dropdown-menu .dropdown-footer a,
+html[data-theme="dark"] .modal-title,
+html[data-theme="dark"] .accordion-body,
+html[data-theme="dark"] .accordion-flush .accordion-body,
+html[data-theme="dark"] .nav-tabs-bordered .nav-link,
+html[data-theme="dark"] label,
+html[data-theme="dark"] legend,
+html[data-theme="dark"] .form-check-label {
+  color: var(--blivi-text);
+}
+
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .form-select,
+html[data-theme="dark"] .dataTable-input,
+html[data-theme="dark"] .dataTable-selector,
+html[data-theme="dark"] .input-group-text {
+  color: var(--blivi-text);
+  background-color: var(--blivi-input);
+  border-color: var(--blivi-border);
+}
+
+html[data-theme="dark"] .form-control:focus,
+html[data-theme="dark"] .form-select:focus,
+html[data-theme="dark"] .dataTable-input:focus {
+  color: var(--blivi-text);
+  background-color: var(--blivi-input);
+  border-color: #7181ff;
+  box-shadow: 0 0 0 0.25rem rgba(113, 129, 255, 0.2);
+}
+
+html[data-theme="dark"] .form-control::placeholder {
+  color: #8190a8;
+}
+
+html[data-theme="dark"] .table {
+  --bs-table-color: var(--blivi-text);
+  --bs-table-bg: transparent;
+  --bs-table-border-color: var(--blivi-border);
+  --bs-table-striped-color: var(--blivi-text);
+  --bs-table-striped-bg: rgba(255, 255, 255, 0.035);
+  --bs-table-hover-color: var(--blivi-heading);
+  --bs-table-hover-bg: rgba(113, 129, 255, 0.1);
+  color: var(--blivi-text);
+}
+
+html[data-theme="dark"] .dashboard .recent-sales .table thead,
+html[data-theme="dark"] .dashboard .top-selling .table thead {
+  background-color: var(--blivi-surface-muted);
+}
+
+html[data-theme="dark"] .modal-header,
+html[data-theme="dark"] .modal-footer,
+html[data-theme="dark"] .accordion-item,
+html[data-theme="dark"] .footer,
+html[data-theme="dark"] hr,
+html[data-theme="dark"] .dropdown-divider {
+  border-color: var(--blivi-border);
+}
+
+html[data-theme="dark"] .btn-close {
+  filter: invert(1) grayscale(100%) brightness(180%);
+}
+
+html[data-theme="dark"] .breadcrumb,
+html[data-theme="dark"] .breadcrumb a,
+html[data-theme="dark"] .breadcrumb .active,
+html[data-theme="dark"] .breadcrumb .breadcrumb-item::before,
+html[data-theme="dark"] .text-muted,
+html[data-theme="dark"] .form-text,
+html[data-theme="dark"] .card-title span,
+html[data-theme="dark"] .sidebar-nav .nav-heading {
+  color: var(--blivi-muted) !important;
+}
+
+html[data-theme="dark"] .pagination {
+  --bs-pagination-color: #aeb9ff;
+  --bs-pagination-bg: var(--blivi-surface);
+  --bs-pagination-border-color: var(--blivi-border);
+  --bs-pagination-hover-color: #ffffff;
+  --bs-pagination-hover-bg: var(--blivi-surface-muted);
+  --bs-pagination-hover-border-color: var(--blivi-border);
+  --bs-pagination-disabled-color: #77849a;
+  --bs-pagination-disabled-bg: var(--blivi-surface);
+  --bs-pagination-disabled-border-color: var(--blivi-border);
+}
+
+html[data-theme="dark"] .apexcharts-text,
+html[data-theme="dark"] .apexcharts-legend-text {
+  fill: var(--blivi-text) !important;
+  color: var(--blivi-text) !important;
+}
+
+html[data-theme="dark"] .apexcharts-gridline {
+  stroke: var(--blivi-border);
+}
+
+html[data-theme="dark"] .apexcharts-tooltip,
+html[data-theme="dark"] .apexcharts-tooltip-title {
+  color: var(--blivi-text);
+  background: var(--blivi-surface) !important;
+  border-color: var(--blivi-border) !important;
+}
+
+html[data-theme="dark"] .card-img-overlay {
+  background-color: rgba(16, 24, 39, 0.72);
+}
+
+html[data-theme="dark"] a:not(.btn):not(.nav-link):not(.dropdown-item) {
+  color: #91a0ff;
+}
+
+html[data-theme="dark"] a:not(.btn):not(.nav-link):not(.dropdown-item):hover {
+  color: #bdc5ff;
 }

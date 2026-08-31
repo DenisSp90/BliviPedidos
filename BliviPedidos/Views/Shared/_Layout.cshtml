@@ -9,6 +9,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <script>
+        (function () {
+            var tema = localStorage.getItem('blivi-tema');
+            if (tema === 'escuro') document.documentElement.setAttribute('data-theme', 'dark');
+        })();
+    </script>
+
     <title>@ViewData["Title"] - BliviPedidos</title>
     <meta content="" name="description">
     <meta content="" name="keywords">
@@ -50,6 +57,13 @@
         </div>
         <nav class="header-nav ms-auto">
             <ul class="d-flex align-items-center">
+
+                <li class="nav-item">
+                    <button id="alternarTema" class="nav-link nav-icon theme-toggle" type="button"
+                            aria-label="Ativar tema escuro" title="Ativar tema escuro">
+                        <i class="bi bi-moon-stars" aria-hidden="true"></i>
+                    </button>
+                </li>
 
                 <li class="nav-item d-block d-lg-none">
                     <a class="nav-link nav-icon search-bar-toggle " href="#">
@@ -261,6 +275,7 @@
 
     <!-- Template Main JS File -->
     <script src="~/js/main.js"></script>
+    <script src="~/js/theme.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
