@@ -16,6 +16,15 @@ public class StoreViewModel
     public decimal ValorPedidosPagos { get; set; }
     public decimal ValorPedidosNaoPagos { get; set; }
 
+    public int QuantidadeProdutosAtivos { get; set; }
+    public int QuantidadeProdutosEstoqueCritico { get; set; }
+    public decimal CustoTotalEstoque { get; set; }
+    public decimal ValorVendaPotencialEstoque { get; set; }
+    public decimal MargemPotencialEstoque => ValorVendaPotencialEstoque - CustoTotalEstoque;
+    public List<ProdutoEstoqueCriticoViewModel> ProdutosEstoqueCritico { get; set; } = [];
+    public List<DashboardGraficoItemViewModel> ProdutosMaisVendidos { get; set; } = [];
+    public List<DashboardGraficoItemViewModel> EstoquePorCategoria { get; set; } = [];
+
     public int FiltroRegistros { get; set; }
     public string? BuscaPedido { get; set; }
     public string PixKey { get; set; }
@@ -24,6 +33,20 @@ public class StoreViewModel
     public IEnumerable<ProdutoMovimentacao> Movimentacoes { get; set; } = new List<ProdutoMovimentacao>();
 
     //public ControleInternoWeb.Areas.Identity.Pages.Account.Manage IndexModel { get; set; }   
+}
+
+public sealed class ProdutoEstoqueCriticoViewModel
+{
+    public int Id { get; init; }
+    public string Nome { get; init; } = string.Empty;
+    public string Categoria { get; init; } = string.Empty;
+    public int Quantidade { get; init; }
+}
+
+public sealed class DashboardGraficoItemViewModel
+{
+    public string Rotulo { get; init; } = string.Empty;
+    public decimal Valor { get; init; }
 }
 
 public class CarrinhoViewModel

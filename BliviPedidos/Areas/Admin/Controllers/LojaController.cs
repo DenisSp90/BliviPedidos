@@ -6,6 +6,7 @@ using BliviPedidos.Seguranca;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using BliviPedidos.Services.Interfaces;
 using LojaModel = BliviPedidos.Models.Loja;
 
 namespace BliviPedidos.Areas.Admin.Controllers;
@@ -16,11 +17,16 @@ public class LojaController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<LojaController> _logger;
+    private readonly ICalculadorFreteLojaService _calculadorFrete;
 
-    public LojaController(ApplicationDbContext context, ILogger<LojaController> logger)
+    public LojaController(
+        ApplicationDbContext context,
+        ILogger<LojaController> logger,
+        ICalculadorFreteLojaService calculadorFrete)
     {
         _context = context;
         _logger = logger;
+        _calculadorFrete = calculadorFrete;
     }
 
     public async Task<IActionResult> Index()
@@ -36,7 +42,12 @@ public class LojaController : Controller
 
     public IActionResult Criar()
     {
-        return View("Formulario", new LojaViewModel());
+        var inicio = DateTime.Today;
+        return View("Formulario", new LojaViewModel
+        {
+            AssinaturaInicioEm = inicio,
+            AssinaturaTerminoEm = inicio.AddYears(1)
+        });
     }
 
     [HttpPost]
@@ -44,6 +55,9 @@ public class LojaController : Controller
     public async Task<IActionResult> Criar(LojaViewModel model)
     {
         Normalizar(model);
+        ValidarConfiguracaoEntrega(model);
+        if (model.EntregaAtiva)
+            ModelState.AddModelError(nameof(model.EntregaAtiva), "Crie a loja, cadastre as faixas de frete e depois ative a entrega.");
         await ValidarUnicidadeAsync(model);
 
         if (!ModelState.IsValid)
@@ -153,6 +167,11 @@ public class LojaController : Controller
         }
 
         Normalizar(model);
+        ValidarConfiguracaoEntrega(model);
+        if (model.EntregaAtiva && !await _context.FaixaFreteLoja
+                .IgnoreQueryFilters()
+                .AnyAsync(item => item.LojaId == id && item.Ativa))
+            ModelState.AddModelError(nameof(model.EntregaAtiva), "Cadastre ao menos uma faixa de frete ativa antes de ativar a entrega.");
         await ValidarUnicidadeAsync(model);
         if (id == LojaModel.PadraoId && !model.Ativa)
         {
@@ -206,6 +225,103 @@ public class LojaController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpGet("/Admin/Loja/{id:int}/Frete", Name = "ConfigurarFreteLojaAdmin")]
+    public async Task<IActionResult> Frete(int id)
+    {
+        var loja = await _context.Loja.AsNoTracking().SingleOrDefaultAsync(item => item.Id == id);
+        if (loja == null)
+            return NotFound();
+
+        var faixas = await _context.FaixaFreteLoja
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(item => item.LojaId == id)
+            .OrderBy(item => item.Ordem)
+            .ThenBy(item => item.DistanciaInicialKm)
+            .ToListAsync();
+
+        return View(new ConfiguracaoFreteLojaViewModel
+        {
+            LojaId = loja.Id,
+            LojaNome = loja.Nome,
+            LojaSlug = loja.Slug,
+            Faixas = faixas,
+            NovaFaixa = new FaixaFreteViewModel
+            {
+                LojaId = loja.Id,
+                DistanciaInicialKm = faixas.Where(item => item.Ativa)
+                    .Select(item => item.DistanciaFinalKm)
+                    .DefaultIfEmpty(0m)
+                    .Max()
+            }
+        });
+    }
+
+    [HttpPost("/Admin/Loja/{id:int}/Frete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AdicionarFaixaFrete(int id, FaixaFreteViewModel model)
+    {
+        if (id != model.LojaId)
+            return BadRequest();
+
+        var loja = await _context.Loja.AsNoTracking().SingleOrDefaultAsync(item => item.Id == id);
+        if (loja == null)
+            return NotFound();
+
+        var existentes = await _context.FaixaFreteLoja
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(item => item.LojaId == id)
+            .ToListAsync();
+        var nova = new FaixaFreteLoja
+        {
+            LojaId = id,
+            DistanciaInicialKm = model.DistanciaInicialKm,
+            DistanciaFinalKm = model.DistanciaFinalKm,
+            ValorFrete = model.ValorFrete,
+            Ativa = model.Ativa,
+            Ordem = existentes.Select(item => item.Ordem).DefaultIfEmpty(0).Max() + 1
+        };
+
+        var erros = _calculadorFrete.Validar(existentes.Append(nova));
+        foreach (var erro in erros)
+            ModelState.AddModelError(string.Empty, erro);
+
+        if (!ModelState.IsValid)
+        {
+            return View("Frete", new ConfiguracaoFreteLojaViewModel
+            {
+                LojaId = loja.Id,
+                LojaNome = loja.Nome,
+                LojaSlug = loja.Slug,
+                Faixas = existentes.OrderBy(item => item.Ordem).ToArray(),
+                NovaFaixa = model
+            });
+        }
+
+        _context.DefinirLojaAtual(id);
+        _context.FaixaFreteLoja.Add(nova);
+        await _context.SaveChangesAsync();
+        TempData["Sucesso"] = "Faixa de frete adicionada.";
+        return RedirectToRoute("ConfigurarFreteLojaAdmin", new { id });
+    }
+
+    [HttpPost("/Admin/Loja/{id:int}/Frete/{faixaId:int}/Excluir")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ExcluirFaixaFrete(int id, int faixaId)
+    {
+        _context.DefinirLojaAtual(id);
+        var faixa = await _context.FaixaFreteLoja
+            .SingleOrDefaultAsync(item => item.Id == faixaId && item.LojaId == id);
+        if (faixa == null)
+            return NotFound();
+
+        _context.FaixaFreteLoja.Remove(faixa);
+        await _context.SaveChangesAsync();
+        TempData["Sucesso"] = "Faixa de frete removida.";
+        return RedirectToRoute("ConfigurarFreteLojaAdmin", new { id });
+    }
+
     private async Task ValidarUnicidadeAsync(LojaViewModel model)
     {
         if (await _context.Loja.AnyAsync(loja => loja.Id != model.Id && loja.Slug == model.Slug))
@@ -234,6 +350,44 @@ public class LojaController : Controller
         model.Whatsapp = string.IsNullOrWhiteSpace(model.Whatsapp)
             ? null
             : new string(model.Whatsapp.Where(char.IsDigit).ToArray());
+        model.CepOrigem = NormalizarOpcional(model.CepOrigem);
+        model.EnderecoOrigem = NormalizarOpcional(model.EnderecoOrigem);
+        model.NumeroOrigem = NormalizarOpcional(model.NumeroOrigem);
+        model.ComplementoOrigem = NormalizarOpcional(model.ComplementoOrigem);
+        model.BairroOrigem = NormalizarOpcional(model.BairroOrigem);
+        model.MunicipioOrigem = NormalizarOpcional(model.MunicipioOrigem);
+        model.UfOrigem = NormalizarOpcional(model.UfOrigem)?.ToUpperInvariant();
+        if (!model.AssinaturaInicioEm.HasValue && !model.AssinaturaTerminoEm.HasValue)
+        {
+            model.AssinaturaInicioEm = DateTime.Today;
+            model.AssinaturaTerminoEm = DateTime.Today.AddYears(1);
+        }
+    }
+
+    private void ValidarConfiguracaoEntrega(LojaViewModel model)
+    {
+        if (!model.RetiradaAtiva && !model.EntregaAtiva)
+            ModelState.AddModelError(string.Empty, "Ative ao menos retirada ou entrega.");
+
+        if (model.EntregaAtiva)
+        {
+            if (string.IsNullOrWhiteSpace(model.CepOrigem))
+                ModelState.AddModelError(nameof(model.CepOrigem), "Informe o CEP de origem.");
+            if (string.IsNullOrWhiteSpace(model.EnderecoOrigem))
+                ModelState.AddModelError(nameof(model.EnderecoOrigem), "Informe o endereço de origem.");
+            if (string.IsNullOrWhiteSpace(model.NumeroOrigem))
+                ModelState.AddModelError(nameof(model.NumeroOrigem), "Informe o número de origem.");
+            if (string.IsNullOrWhiteSpace(model.MunicipioOrigem))
+                ModelState.AddModelError(nameof(model.MunicipioOrigem), "Informe a cidade de origem.");
+            if (string.IsNullOrWhiteSpace(model.UfOrigem))
+                ModelState.AddModelError(nameof(model.UfOrigem), "Informe a UF de origem.");
+        }
+
+        if (model.AssinaturaInicioEm.HasValue != model.AssinaturaTerminoEm.HasValue)
+            ModelState.AddModelError(string.Empty, "Informe início e término da assinatura.");
+        if (model.AssinaturaInicioEm.HasValue && model.AssinaturaTerminoEm.HasValue
+            && model.AssinaturaTerminoEm.Value.Date != model.AssinaturaInicioEm.Value.Date.AddYears(1))
+            ModelState.AddModelError(nameof(model.AssinaturaTerminoEm), "A assinatura deve possuir vigência de 12 meses.");
     }
 
     private static string? NormalizarDominio(string? dominio)
@@ -270,6 +424,18 @@ public class LojaController : Controller
         loja.EmailContato = model.EmailContato;
         loja.InstagramUrl = model.InstagramUrl;
         loja.Ativa = model.Ativa;
+        loja.RetiradaAtiva = model.RetiradaAtiva;
+        loja.EntregaAtiva = model.EntregaAtiva;
+        loja.CepOrigem = model.CepOrigem;
+        loja.EnderecoOrigem = model.EnderecoOrigem;
+        loja.NumeroOrigem = model.NumeroOrigem;
+        loja.ComplementoOrigem = model.ComplementoOrigem;
+        loja.BairroOrigem = model.BairroOrigem;
+        loja.MunicipioOrigem = model.MunicipioOrigem;
+        loja.UfOrigem = model.UfOrigem;
+        loja.PercentualConsumoEntrega = model.PercentualConsumoEntrega;
+        loja.AssinaturaInicioEm = model.AssinaturaInicioEm?.Date;
+        loja.AssinaturaTerminoEm = model.AssinaturaTerminoEm?.Date;
     }
 
     private static LojaViewModel ParaViewModel(LojaModel loja)
@@ -287,6 +453,18 @@ public class LojaController : Controller
             Whatsapp = loja.Whatsapp,
             EmailContato = loja.EmailContato,
             InstagramUrl = loja.InstagramUrl,
+            RetiradaAtiva = loja.RetiradaAtiva,
+            EntregaAtiva = loja.EntregaAtiva,
+            CepOrigem = loja.CepOrigem,
+            EnderecoOrigem = loja.EnderecoOrigem,
+            NumeroOrigem = loja.NumeroOrigem,
+            ComplementoOrigem = loja.ComplementoOrigem,
+            BairroOrigem = loja.BairroOrigem,
+            MunicipioOrigem = loja.MunicipioOrigem,
+            UfOrigem = loja.UfOrigem,
+            PercentualConsumoEntrega = loja.PercentualConsumoEntrega,
+            AssinaturaInicioEm = loja.AssinaturaInicioEm,
+            AssinaturaTerminoEm = loja.AssinaturaTerminoEm,
             Ativa = loja.Ativa
         };
     }

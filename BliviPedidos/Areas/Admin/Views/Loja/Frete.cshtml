@@ -1,0 +1,98 @@
+@model BliviPedidos.Models.ViewModels.ConfiguracaoFreteLojaViewModel
+
+@{
+    ViewData["Title"] = "Faixas de frete";
+}
+
+<div class="pagetitle">
+    <h1>Faixas de frete — @Model.LojaNome</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Loja" asp-action="Index">Lojas</a></li>
+            <li class="breadcrumb-item active">Frete</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    @if (TempData["Sucesso"] is string sucesso)
+    {
+        <div class="alert alert-success">@sucesso</div>
+    }
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Tabela vigente</h5>
+                    @if (Model.Faixas.Count == 0)
+                    {
+                        <p class="text-muted">Nenhuma faixa cadastrada. A primeira deve começar em 0 km.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead><tr><th>De</th><th>Até</th><th>Frete</th><th>Status</th><th></th></tr></thead>
+                                <tbody>
+                                @foreach (var faixa in Model.Faixas)
+                                {
+                                    <tr>
+                                        <td>@faixa.DistanciaInicialKm.ToString("N3") km</td>
+                                        <td>@faixa.DistanciaFinalKm.ToString("N3") km</td>
+                                        <td>@faixa.ValorFrete.ToString("C")</td>
+                                        <td><span class="badge @(faixa.Ativa ? "bg-success" : "bg-secondary")">@(faixa.Ativa ? "Ativa" : "Inativa")</span></td>
+                                        <td class="text-end">
+                                            <form method="post" action="/Admin/Loja/@Model.LojaId/Frete/@faixa.Id/Excluir">
+                                                @Html.AntiForgeryToken()
+                                                <button class="btn btn-sm btn-outline-danger" type="submit">Excluir</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Adicionar faixa</h5>
+                    <form method="post" action="/Admin/Loja/@Model.LojaId/Frete" class="row g-3">
+                        @Html.AntiForgeryToken()
+                        <input asp-for="NovaFaixa.LojaId" name="LojaId" type="hidden" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="col-6">
+                            <label class="form-label" for="DistanciaInicialKm">De (km)</label>
+                            <input class="form-control" id="DistanciaInicialKm" name="DistanciaInicialKm" value="@Model.NovaFaixa.DistanciaInicialKm" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label" for="DistanciaFinalKm">Até (km)</label>
+                            <input class="form-control" id="DistanciaFinalKm" name="DistanciaFinalKm" value="@Model.NovaFaixa.DistanciaFinalKm" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="ValorFrete">Valor do frete</label>
+                            <input class="form-control" id="ValorFrete" name="ValorFrete" value="@Model.NovaFaixa.ValorFrete" />
+                        </div>
+                        <div class="col-12 form-check form-switch ms-2">
+                            <input asp-for="NovaFaixa.Ativa" class="form-check-input" id="Ativa" name="Ativa" type="checkbox" value="true" />
+                            <label class="form-check-label" for="Ativa">Faixa ativa</label>
+                        </div>
+                        <div class="col-12 d-flex gap-2">
+                            <button class="btn btn-primary" type="submit">Adicionar</button>
+                            <a class="btn btn-light" asp-action="Index">Voltar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

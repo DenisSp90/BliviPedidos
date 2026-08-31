@@ -79,6 +79,9 @@
                                     <a class="btn btn-sm btn-outline-success" asp-route="ConfigurarPixLojaAdmin" asp-route-slug="@loja.Slug">
                                         <i class="bi bi-qr-code"></i> PIX
                                     </a>
+                                    <a class="btn btn-sm btn-outline-secondary" asp-route="ConfigurarFreteLojaAdmin" asp-route-id="@loja.Id">
+                                        <i class="bi bi-truck"></i> Frete
+                                    </a>
                                     <form asp-action="AlterarStatus" asp-route-id="@loja.Id" method="post" class="d-inline">
                                         <button type="submit" class="btn btn-sm @(loja.Ativa ? "btn-outline-danger" : "btn-outline-success")">
                                             @(loja.Ativa ? "Desativar" : "Ativar")

@@ -835,6 +835,83 @@ h6 {
   background: #ffecdf;
 }
 
+/* Dashboard - resumo e gráficos de estoque */
+.dashboard-stock-summary .dashboard-stock-card {
+  min-height: 190px;
+}
+
+.dashboard-stock-card .card-body {
+  display: flex;
+  flex-direction: column;
+  padding: 0 22px 24px;
+}
+
+.dashboard-stock-card .card-title {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 76px;
+  margin: 0;
+  padding: 20px 0 12px;
+}
+
+.dashboard-stock-card .card-title span {
+  line-height: 1.35;
+}
+
+.dashboard-stock-metric {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-stock-copy {
+  min-width: 0;
+}
+
+.dashboard .dashboard-stock-card h6 {
+  margin-bottom: 5px;
+  font-size: clamp(22px, 2vw, 28px);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.dashboard-stock-copy .small {
+  display: block;
+  line-height: 1.55;
+}
+
+.dashboard-stock-chart-card .card-body {
+  display: flex;
+  min-height: 430px;
+  flex-direction: column;
+  padding: 0 24px 24px;
+}
+
+.dashboard-stock-chart-card .card-title {
+  margin-bottom: 4px;
+}
+
+.dashboard-stock-chart-card [id^="grafico"] {
+  flex: 1;
+}
+
+@media (max-width: 1399.98px) {
+  .dashboard-stock-summary .dashboard-stock-card {
+    min-height: 180px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .dashboard-stock-card .card-title {
+    min-height: auto;
+  }
+
+  .dashboard-stock-chart-card .card-body {
+    min-height: 390px;
+    padding-inline: 18px;
+  }
+}
+
 /* Activity */
 .dashboard .activity {
   font-size: 14px;

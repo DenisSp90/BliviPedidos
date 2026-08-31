@@ -14,7 +14,7 @@ using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+builder.Configuration.AddJsonFile("appsettings.Local.example.json", optional: true, reloadOnChange: true);
 
 if (builder.Environment.IsDevelopment())
 {
@@ -85,6 +85,7 @@ builder.Services.AddScoped<ICalculadorCarrinhoPublicoService, CalculadorCarrinho
 builder.Services.AddScoped<IDadosConsumidorCheckoutService, DadosConsumidorCheckoutService>();
 builder.Services.AddScoped<IConfirmacaoCheckoutService, ConfirmacaoCheckoutService>();
 builder.Services.AddScoped<IPagamentoService, PagamentoPixService>();
+builder.Services.AddScoped<ICalculadorFreteLojaService, CalculadorFreteLojaService>();
 builder.Services.AddHostedService<ExpiracaoReservaService>();
 
 builder.Services.AddHttpContextAccessor();

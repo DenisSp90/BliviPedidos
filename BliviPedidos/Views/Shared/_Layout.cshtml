@@ -142,13 +142,18 @@
                     @if (podeVender)
                     {
                         <li>
-                            <a asp-area="" asp-controller="Store" asp-action="PedidoLista" asp-route-filtro="1">
+                        <a asp-area="" asp-controller="Store" asp-action="PedidoLista" asp-route-filtro="1">
                                 <i class="bi bi-circle"></i><span>Lista de Pedidos</span>
                             </a>
                         </li>
                         <li>
                             <a class="nav-link" asp-area="" asp-controller="Store" asp-action="PedidoPreparacao">
                                 <i class="bi bi-circle"></i><span>Fazer um novo pedido</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="" asp-controller="Entrega" asp-action="Index">
+                                <i class="bi bi-circle"></i><span>Retirada e Entrega</span>
                             </a>
                         </li>
                     }

@@ -13,7 +13,7 @@
     </nav>
 </div>
 
-<section class="section dashboard">
+<section id="dashboardPedidos" class="section dashboard">
     <div class="row">
         <div class="col-12 col-lg-8">
             <div class="row">
@@ -146,10 +146,146 @@
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-lg-8">
+    <div class="row g-4 mb-4 dashboard-stock-summary">
+        <div class="col-12 col-sm-6 col-xl-3 d-flex">
+            <div class="card info-card sales-card dashboard-stock-card w-100 mb-0">
+                <div class="card-body">
+                    <h5 class="card-title">Produtos ativos <span>Catálogo</span></h5>
+                    <div class="dashboard-stock-metric d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                        <div class="dashboard-stock-copy ps-3">
+                            <h6>@Model.QuantidadeProdutosAtivos</h6>
+                            <span class="text-muted small">Itens disponíveis no catálogo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-lg-4">
+
+        <div class="col-12 col-sm-6 col-xl-3 d-flex">
+            <div class="card info-card dashboard-stock-card w-100 mb-0">
+                <div class="card-body">
+                    <h5 class="card-title">Estoque crítico <span>Até 5 unidades</span></h5>
+                    <div class="dashboard-stock-metric d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-warning-subtle text-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div class="dashboard-stock-copy ps-3">
+                            <h6>@Model.QuantidadeProdutosEstoqueCritico</h6>
+                            <span class="text-muted small">Produtos que precisam de atenção</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3 d-flex">
+            <div class="card info-card revenue-card dashboard-stock-card w-100 mb-0">
+                <div class="card-body">
+                    <h5 class="card-title">Custo do estoque <span>Valor de compra</span></h5>
+                    <div class="dashboard-stock-metric d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                        <div class="dashboard-stock-copy ps-3">
+                            <h6>R$ @Model.CustoTotalEstoque.ToString("N2")</h6>
+                            <span class="text-muted small">Capital investido atualmente</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3 d-flex">
+            <div class="card info-card customers-card dashboard-stock-card w-100 mb-0">
+                <div class="card-body">
+                    <h5 class="card-title">Margem potencial <span>Estimativa de venda</span></h5>
+                    <div class="dashboard-stock-metric d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <div class="dashboard-stock-copy ps-3">
+                            <h6>R$ @Model.MargemPotencialEstoque.ToString("N2")</h6>
+                            <span class="text-muted small">Venda potencial: R$ @Model.ValorVendaPotencialEstoque.ToString("N2")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4 dashboard-stock-charts">
+        <div class="col-12 col-xl-7 d-flex">
+            <div class="card dashboard-stock-chart-card w-100 mb-0">
+                <div class="card-body">
+                    <h5 class="card-title">Produtos mais vendidos <span>| Últimos 30 dias</span></h5>
+                    <div id="graficoProdutosMaisVendidos" style="min-height: 340px"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-5 d-flex">
+            <div class="card dashboard-stock-chart-card w-100 mb-0">
+                <div class="card-body">
+                    <h5 class="card-title">Estoque por categoria <span>| Unidades</span></h5>
+                    <div id="graficoEstoqueCategoria" style="min-height: 340px"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card mb-0">
+                <div class="card-body">
+                    <h5 class="card-title">Produtos que precisam de reposição <span>| Até 5 unidades</span></h5>
+
+                    @if (Model.ProdutosEstoqueCritico.Count == 0)
+                    {
+                        <div class="alert alert-success mb-0" role="status">
+                            <i class="bi bi-check-circle me-1"></i>
+                            Nenhum produto ativo está com estoque crítico.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Produto</th>
+                                        <th>Categoria</th>
+                                        <th class="text-end">Quantidade</th>
+                                        <th class="text-end">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var produto in Model.ProdutosEstoqueCritico)
+                                    {
+                                        <tr>
+                                            <td>@produto.Nome</td>
+                                            <td>@produto.Categoria</td>
+                                            <td class="text-end">
+                                                <span class="badge @(produto.Quantidade <= 0 ? "bg-danger" : "bg-warning text-dark")">
+                                                    @produto.Quantidade
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <a class="btn btn-sm btn-outline-primary"
+                                                   asp-controller="Store" asp-action="ProdutoEditar" asp-route-id="@produto.Id">
+                                                    Repor estoque
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -208,3 +344,11 @@
 </section>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script src="~/js/controllers/Store-Grafico.js"></script>
+<script id="dashboardEstoqueDados" type="application/json">
+    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new
+    {
+        produtosMaisVendidos = Model.ProdutosMaisVendidos.Select(item => new { rotulo = item.Rotulo, valor = item.Valor }),
+        estoquePorCategoria = Model.EstoquePorCategoria.Select(item => new { rotulo = item.Rotulo, valor = item.Valor })
+    }))
+</script>
+<script src="~/js/controllers/Dashboard-Estoque.js" asp-append-version="true"></script>
