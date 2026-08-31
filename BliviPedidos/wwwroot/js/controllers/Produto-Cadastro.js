@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
-    var precoPagoInput = document.getElementById('PrecoPago');
-    var precoVendaInput = document.getElementById('PrecoVenda');
+    var precoPagoInput = document.querySelector('#PrecoPago:not([type="hidden"])');
+    var precoVendaInput = document.querySelector('#PrecoVenda:not([type="hidden"])');
 
     var precoMaskOptions = {
         mask: Number,
@@ -74,9 +74,20 @@ function formatarCamposEdicao() {
     var precoVendaFormatted = document.getElementById('PrecoVendaFormatted');
 
     if (precoPagoInput && precoVendaInput && precoPagoFormatted && precoVendaFormatted) {
+        var precoMaskOptions = {
+            mask: Number,
+            scale: 2,
+            thousandsSeparator: '',
+            padFractionalZeros: true,
+            normalizeZeros: true,
+            radix: ','
+        };
+
         // Formatar os valores para exibição
         precoPagoFormatted.value = precoPagoInput.value.replace('.', ',');
         precoVendaFormatted.value = precoVendaInput.value.replace('.', ',');
+        IMask(precoPagoFormatted, precoMaskOptions);
+        IMask(precoVendaFormatted, precoMaskOptions);
 
         // Corrige os valores antes de enviar o formulário
         var form = document.querySelector('form');
