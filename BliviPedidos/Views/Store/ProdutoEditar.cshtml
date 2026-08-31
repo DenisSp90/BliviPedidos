@@ -30,16 +30,14 @@
 
                             <div class="col-12">
                                 <label asp-for="PrecoPago" class="col-sm-2 col-form-label"></label>
-                                <input asp-for="PrecoPago" type="hidden" class="PrecoPagoHidden">
-                                <input id="PrecoPagoFormatted" name="PrecoPagoFormatted" type="text" inputmode="decimal" placeholder="Preço pago no Produto" class="form-control Preco">
-                                <span asp-validation-for="PrecoPago" class="text-danger"></span>
+                                <input asp-for="PrecoPagoEdicao" type="text" inputmode="decimal" placeholder="Preço pago no Produto" class="form-control Preco">
+                                <span asp-validation-for="PrecoPagoEdicao" class="text-danger"></span>
                             </div>
 
                             <div class="col-12">
                                 <label asp-for="PrecoVenda" class="col-sm-2 col-form-label"></label>
-                                <input asp-for="PrecoVenda" type="hidden" class="PrecoVendaHidden">
-                                <input id="PrecoVendaFormatted" name="PrecoVendaFormatted" type="text" inputmode="decimal" placeholder="Preço venda do Produto" class="form-control Preco">
-                                <span asp-validation-for="PrecoVenda" class="text-danger"></span>
+                                <input asp-for="PrecoVendaEdicao" type="text" inputmode="decimal" placeholder="Preço venda do Produto" class="form-control Preco">
+                                <span asp-validation-for="PrecoVendaEdicao" class="text-danger"></span>
                             </div>
 
                                     <div class="col-12">

@@ -67,13 +67,10 @@ function configurarOrigemImagem() {
 }
 
 function formatarCamposEdicao() {
-    var precoPagoInput = document.querySelector('.PrecoPagoHidden');
-    var precoVendaInput = document.querySelector('.PrecoVendaHidden');
+    var precoPago = document.getElementById('PrecoPagoEdicao');
+    var precoVenda = document.getElementById('PrecoVendaEdicao');
 
-    var precoPagoFormatted = document.getElementById('PrecoPagoFormatted');
-    var precoVendaFormatted = document.getElementById('PrecoVendaFormatted');
-
-    if (precoPagoInput && precoVendaInput && precoPagoFormatted && precoVendaFormatted) {
+    if (precoPago && precoVenda) {
         var precoMaskOptions = {
             mask: Number,
             scale: 2,
@@ -83,19 +80,8 @@ function formatarCamposEdicao() {
             radix: ','
         };
 
-        // Formatar os valores para exibição
-        precoPagoFormatted.value = precoPagoInput.value.replace('.', ',');
-        precoVendaFormatted.value = precoVendaInput.value.replace('.', ',');
-        IMask(precoPagoFormatted, precoMaskOptions);
-        IMask(precoVendaFormatted, precoMaskOptions);
-
-        // Corrige os valores antes de enviar o formulário
-        var form = document.querySelector('form');
-        form.addEventListener('submit', function () {
-            // Remover a formatação e substituir ',' por '.' para garantir que o ASP.NET interprete corretamente como número decimal
-            precoPagoInput.value = precoPagoFormatted.value.replace(/\./g, '').replace(',', '.');
-            precoVendaInput.value = precoVendaFormatted.value.replace(/\./g, '').replace(',', '.');
-        });
+        IMask(precoPago, precoMaskOptions);
+        IMask(precoVenda, precoMaskOptions);
     }
 }
 

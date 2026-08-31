@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using QRCoder;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace BliviPedidos.Controllers;
@@ -713,6 +714,10 @@ public class StoreController : Controller
             produtoViewModel.TipoImagem = "Upload";
         }
 
+        var cultura = CultureInfo.GetCultureInfo("pt-BR");
+        produtoViewModel.PrecoPagoEdicao = produtoViewModel.PrecoPago.ToString("N2", cultura);
+        produtoViewModel.PrecoVendaEdicao = produtoViewModel.PrecoVenda.ToString("N2", cultura);
+
         return View(produtoViewModel);
     }
 
@@ -736,6 +741,7 @@ public class StoreController : Controller
             fotoAnterior = produtoExistente.Foto;
             model.Foto = fotoAnterior;
 
+            AplicarPrecosEdicao(model);
             ValidarTipoImagem(model);
 
             if (!ModelState.IsValid)
@@ -883,6 +889,29 @@ public class StoreController : Controller
         && (url.Scheme == Uri.UriSchemeHttp || url.Scheme == Uri.UriSchemeHttps);
 
     private static string NormalizarUrlImagem(string valor) => valor.Trim();
+
+    private void AplicarPrecosEdicao(ProdutoViewModel model)
+    {
+        if (TentarConverterPreco(model.PrecoPagoEdicao, out var precoPago))
+            model.PrecoPago = precoPago;
+        else
+            ModelState.AddModelError(nameof(model.PrecoPagoEdicao), "Informe um preço pago válido.");
+
+        if (TentarConverterPreco(model.PrecoVendaEdicao, out var precoVenda))
+            model.PrecoVenda = precoVenda;
+        else
+            ModelState.AddModelError(nameof(model.PrecoVendaEdicao), "Informe um preço de venda válido.");
+    }
+
+    private static bool TentarConverterPreco(string? valor, out decimal preco)
+    {
+        if (decimal.TryParse(valor, NumberStyles.Number, CultureInfo.GetCultureInfo("pt-BR"), out preco)
+            && preco >= 0)
+            return true;
+
+        preco = 0;
+        return false;
+    }
 
     private void ExcluirImagemLocal(string? caminhoPublico)
     {

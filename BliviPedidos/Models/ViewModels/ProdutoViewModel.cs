@@ -23,6 +23,10 @@ public class ProdutoViewModel
     [Display(Name = "Preço pago")]
     public decimal PrecoPago { get; set; }
 
+    public string? PrecoPagoEdicao { get; set; }
+
+    public string? PrecoVendaEdicao { get; set; }
+
     public int Quantidade { get; set; }
 
     public string? Tamanho { get; set; }
