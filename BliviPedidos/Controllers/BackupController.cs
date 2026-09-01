@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BliviPedidos.Controllers;
 
-[Authorize(Policy = PoliticasAutorizacao.Administracao)]
+[Authorize(Policy = PoliticasAutorizacao.Vendas)]
 public sealed class BackupController : Controller
 {
     private readonly IBackupLojaService _backupLojaService;

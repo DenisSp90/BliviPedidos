@@ -1,5 +1,6 @@
 using BliviPedidos.Seguranca;
 using BliviPedidos.Services.Implementations;
+using BliviPedidos.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,16 @@ namespace BliviPedidos.Tests;
 
 public class PoliticasAutorizacaoTests
 {
+    [Fact]
+    public void BackupController_DeveUsarPoliticaDeVendas()
+    {
+        var authorize = Assert.Single(typeof(BackupController)
+            .GetCustomAttributes(typeof(AuthorizeAttribute), inherit: true)
+            .Cast<AuthorizeAttribute>());
+
+        Assert.Equal(PoliticasAutorizacao.Vendas, authorize.Policy);
+    }
+
     public static TheoryData<string, string[]> PoliticasEsperadas => new()
     {
         {
