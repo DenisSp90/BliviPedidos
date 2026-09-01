@@ -1,0 +1,51 @@
+@{
+    ViewData["Title"] = "Backup e restauração";
+}
+
+<div class="pagetitle">
+    <h1>Backup e restauração</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Página Inicial</a></li>
+            <li class="breadcrumb-item active">Backup e restauração</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Gerar backup da loja</h5>
+                    <p>
+                        O arquivo ZIP inclui categorias, produtos, estoque, clientes, pedidos,
+                        itens, movimentações e as imagens salvas no servidor para esta loja.
+                    </p>
+
+                    <div class="alert alert-info" role="alert">
+                        Por segurança, senhas, contas de acesso e a chave PIX não são incluídas.
+                    </div>
+
+                    <form asp-action="Gerar" method="post">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-download me-1"></i>Gerar e baixar backup
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Restauração</h5>
+                    <p class="mb-0 text-muted">
+                        A restauração será disponibilizada na próxima etapa, após validarmos
+                        a integridade dos arquivos gerados.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
