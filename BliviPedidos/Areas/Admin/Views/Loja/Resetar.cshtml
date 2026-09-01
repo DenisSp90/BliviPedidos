@@ -1,0 +1,72 @@
+@model BliviPedidos.Models.ViewModels.ResetLojaViewModel
+
+@{
+    ViewData["Title"] = "Resetar dados da loja";
+}
+
+<div class="pagetitle">
+    <h1>Resetar dados da loja</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index">Administração</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index">Lojas</a></li>
+            <li class="breadcrumb-item active">Resetar @Model.LojaNome</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-danger">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">Esta ação é irreversível</h5>
+
+                    <div class="alert alert-danger" role="alert">
+                        Todos os dados comerciais de <strong>@Model.LojaNome</strong> serão apagados.
+                        Um backup automático será criado antes do reset.
+                    </div>
+
+                    <p>Serão removidos:</p>
+                    <ul>
+                        <li>@Model.Categorias categorias</li>
+                        <li>@Model.Produtos produtos e seus estoques</li>
+                        <li>@Model.Clientes clientes</li>
+                        <li>@Model.Pedidos pedidos e seus itens</li>
+                        <li>@Model.Movimentacoes movimentações de estoque</li>
+                        <li>@Model.Imagens imagens armazenadas no servidor</li>
+                    </ul>
+
+                    <div class="alert alert-info" role="alert">
+                        O cadastro da loja, configurações, chave PIX e usuários serão preservados.
+                    </div>
+
+                    <form asp-action="Resetar" asp-route-id="@Model.LojaId" method="post">
+                        <input asp-for="LojaId" type="hidden" />
+                        <input asp-for="LojaNome" type="hidden" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Confirmacao" class="form-label">
+                                Digite <strong>@Model.LojaNome</strong> para confirmar
+                            </label>
+                            <input asp-for="Confirmacao" class="form-control" autocomplete="off" />
+                            <span asp-validation-for="Confirmacao" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash3 me-1"></i>Apagar dados comerciais
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

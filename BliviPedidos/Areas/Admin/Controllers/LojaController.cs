@@ -2,6 +2,7 @@ using BliviPedidos.Data;
 using BliviPedidos.Models;
 using BliviPedidos.Models.ViewModels;
 using BliviPedidos.Services.Implementations;
+using BliviPedidos.Services.Interfaces;
 using BliviPedidos.Seguranca;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -206,6 +207,65 @@ public class LojaController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Resetar(
+        int id,
+        [FromServices] IResetLojaService resetLojaService,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var resumo = await resetLojaService.ObterResumoAsync(id, cancellationToken);
+            return View(ParaResetViewModel(resumo));
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Resetar(
+        int id,
+        ResetLojaViewModel model,
+        [FromServices] IResetLojaService resetLojaService,
+        CancellationToken cancellationToken)
+    {
+        if (id != model.LojaId)
+            return BadRequest();
+
+        ResetLojaResumo resumo;
+        try
+        {
+            resumo = await resetLojaService.ObterResumoAsync(id, cancellationToken);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+
+        if (!string.Equals(model.Confirmacao?.Trim(), resumo.LojaNome, StringComparison.Ordinal))
+            ModelState.AddModelError(nameof(model.Confirmacao), "O nome informado não corresponde ao nome da loja.");
+
+        if (!ModelState.IsValid)
+            return View(ParaResetViewModel(resumo, model.Confirmacao));
+
+        try
+        {
+            var resultado = await resetLojaService.ResetarAsync(id, cancellationToken);
+            TempData["Sucesso"] = $"Os dados comerciais da loja {resumo.LojaNome} foram removidos. "
+                + $"Backup de segurança: {resultado.BackupSeguranca}.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Falha ao resetar dados comerciais. LojaId: {LojaId}", id);
+            TempData["Erro"] = "Não foi possível resetar a loja. Os dados atuais foram preservados.";
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
     private async Task ValidarUnicidadeAsync(LojaViewModel model)
     {
         if (await _context.Loja.AnyAsync(loja => loja.Id != model.Id && loja.Slug == model.Slug))
@@ -288,6 +348,24 @@ public class LojaController : Controller
             EmailContato = loja.EmailContato,
             InstagramUrl = loja.InstagramUrl,
             Ativa = loja.Ativa
+        };
+    }
+
+    private static ResetLojaViewModel ParaResetViewModel(
+        ResetLojaResumo resumo,
+        string? confirmacao = null)
+    {
+        return new ResetLojaViewModel
+        {
+            LojaId = resumo.LojaId,
+            LojaNome = resumo.LojaNome,
+            Categorias = resumo.Categorias,
+            Produtos = resumo.Produtos,
+            Clientes = resumo.Clientes,
+            Pedidos = resumo.Pedidos,
+            Movimentacoes = resumo.Movimentacoes,
+            Imagens = resumo.Imagens,
+            Confirmacao = confirmacao ?? string.Empty
         };
     }
 }

@@ -19,7 +19,6 @@ public sealed class RestauracaoBackupLojaService : IRestauracaoBackupLojaService
     private const string Formato = "BliviPedidos.BackupLoja";
     private const int Versao = 1;
     private const string PrefixoImagens = "imagens/produtos/";
-    private static readonly SemaphoreSlim TravaRestauracao = new(1, 1);
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -50,7 +49,7 @@ public sealed class RestauracaoBackupLojaService : IRestauracaoBackupLojaService
         if (!arquivo.CanRead || !arquivo.CanSeek)
             throw new InvalidDataException("Não foi possível ler o arquivo de backup.");
 
-        await TravaRestauracao.WaitAsync(cancellationToken);
+        await OperacaoDadosLojaLock.Global.WaitAsync(cancellationToken);
         try
         {
             arquivo.Position = 0;
@@ -95,7 +94,7 @@ public sealed class RestauracaoBackupLojaService : IRestauracaoBackupLojaService
         }
         finally
         {
-            TravaRestauracao.Release();
+            OperacaoDadosLojaLock.Global.Release();
         }
     }
 

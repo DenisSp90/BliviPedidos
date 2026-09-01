@@ -19,6 +19,10 @@
     {
         <div class="alert alert-danger">@erro</div>
     }
+    @if (TempData["Sucesso"] is string sucesso)
+    {
+        <div class="alert alert-success">@sucesso</div>
+    }
 
     <div class="card">
         <div class="card-body">
@@ -84,6 +88,9 @@
                                             @(loja.Ativa ? "Desativar" : "Ativar")
                                         </button>
                                     </form>
+                                    <a class="btn btn-sm btn-outline-danger" asp-action="Resetar" asp-route-id="@loja.Id">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Resetar dados
+                                    </a>
                                 </td>
                             </tr>
                         }
