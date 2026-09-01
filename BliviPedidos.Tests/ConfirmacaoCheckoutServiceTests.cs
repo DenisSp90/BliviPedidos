@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Identity;
+using Moq;
 using Xunit;
 
 namespace BliviPedidos.Tests;
@@ -37,13 +38,18 @@ public class ConfirmacaoCheckoutServiceTests
 
         var carrinho = new CarrinhoFake(produto.Id, quantidade: 2);
         var dados = new DadosFake();
+        var configuracaoReserva = new Mock<IConfiguracaoReservaLojaService>();
+        configuracaoReserva
+            .Setup(item => item.ObterExpiracaoMinutosAsync(Loja.PadraoId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(720);
         var service = new ConfirmacaoCheckoutService(
             context,
             carrinho,
             dados,
             NullLogger<ConfirmacaoCheckoutService>.Instance,
             Options.Create(new ReservaEstoqueOptions { ExpiracaoMinutos = 30 }),
-            CriarAcessor());
+            CriarAcessor(),
+            configuracaoReserva.Object);
 
         Assert.Empty(context.Pedido);
         var resultado = await service.ConfirmarAsync(Loja.PadraoId);
@@ -58,7 +64,7 @@ public class ConfirmacaoCheckoutServiceTests
         Assert.Equal(StatusPedido.Confirmado, pedido.Status);
         Assert.Equal(StatusPagamento.AguardandoPagamento, pedido.StatusPagamento);
         Assert.Equal("consumidor-1", pedido.ConsumidorUsuarioId);
-        Assert.InRange(pedido.ReservaExpiraEm!.Value, DateTime.UtcNow.AddMinutes(29), DateTime.UtcNow.AddMinutes(31));
+        Assert.InRange(pedido.ReservaExpiraEm!.Value, DateTime.UtcNow.AddMinutes(719), DateTime.UtcNow.AddMinutes(721));
         Assert.Equal(50m, pedido.ValorTotalPedido);
         Assert.Equal(2, Assert.Single(pedido.Itens).Quantidade);
         Assert.Equal("Maria", pedido.Cadastro.Nome);

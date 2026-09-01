@@ -80,16 +80,6 @@ public class RelatorioService : IRelatorioService
             var campoOrdenacao = configuracoesRelatorio[0];  // Campo para ordenação (ex: "ID", "DataPedido")
             var tipoOrdenacao = configuracoesRelatorio[1];   // Crescente ou Decrescente
 
-            // Ordenar a lista de pedidos conforme os parâmetros de configuração
-            if (tipoOrdenacao == "Crescente")
-            {
-                pedidos = pedidos.OrderBy(p => EF.Property<object>(p, campoOrdenacao));
-            }
-            else if (tipoOrdenacao == "Decrescente")
-            {
-                pedidos = pedidos.OrderByDescending(p => EF.Property<object>(p, campoOrdenacao));
-            }
-
             PdfWriter writer = new PdfWriter(stream);
             PdfDocument pdf = new PdfDocument(writer);
 

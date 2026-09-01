@@ -1,0 +1,61 @@
+@model BliviPedidos.Models.ViewModels.ConfiguracaoReservaEstoqueViewModel
+
+@{
+    ViewData["Title"] = "Prazo dos pedidos";
+}
+
+<div class="pagetitle">
+    <h1>Prazo dos pedidos</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Página inicial</a></li>
+            <li class="breadcrumb-item active">Prazo dos pedidos</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-8">
+            @if (TempData["MensagemSucesso"] is string mensagemSucesso)
+            {
+                <div class="alert alert-success">@mensagemSucesso</div>
+            }
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Prazo para pagamento</h5>
+                    <p>
+                        Pedidos aguardando pagamento serão cancelados automaticamente após esse prazo,
+                        liberando os produtos reservados. A alteração vale somente para novos pedidos.
+                    </p>
+
+                    <form asp-action="Salvar" method="post" class="row g-3 align-items-end">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="col-md-7">
+                            <label asp-for="ExpiracaoMinutos" class="form-label">Prazo para pagamento</label>
+                            <select asp-for="ExpiracaoMinutos" class="form-select">
+                                <option value="30">30 minutos</option>
+                                <option value="60">1 hora</option>
+                                <option value="120">2 horas</option>
+                                <option value="360">6 horas</option>
+                                <option value="720">12 horas</option>
+                                <option value="1440">24 horas</option>
+                                <option value="2880">48 horas</option>
+                                <option value="4320">72 horas</option>
+                            </select>
+                            <span asp-validation-for="ExpiracaoMinutos" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-5">
+                            <button type="submit" class="btn btn-primary">Salvar prazo</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

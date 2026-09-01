@@ -21,6 +21,16 @@ public class PoliticasAutorizacaoTests
         Assert.Equal(PoliticasAutorizacao.Vendas, authorize.Policy);
     }
 
+    [Fact]
+    public void ConfiguracaoReservaController_DevePermitirAdministradorEVendedor()
+    {
+        var authorize = Assert.Single(typeof(ConfiguracaoReservaController)
+            .GetCustomAttributes(typeof(AuthorizeAttribute), inherit: true)
+            .Cast<AuthorizeAttribute>());
+
+        Assert.Equal(PoliticasAutorizacao.Vendas, authorize.Policy);
+    }
+
     public static TheoryData<string, string[]> PoliticasEsperadas => new()
     {
         {

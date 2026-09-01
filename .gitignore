@@ -258,6 +258,7 @@ _UpgradeReport_Files/
 
 # Configuracoes locais e segredos da aplicacao
 **/appsettings.Local.json
+**/App_Data/configuracoes-lojas/*.json
 **/.env
 **/.env.*
 !**/.env.example
@@ -367,3 +368,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/BliviPedidos/wwwroot/uploads/produtos/3/aa1964c753344dc381769250f4fd2b63.jpg
+/BliviPedidos/wwwroot/uploads/produtos/3/f1208bc6a12e4d20a63530601715dcdd.webp

@@ -40,29 +40,76 @@ public class ItemPedidoService : BaseService<ItemPedido>, IItemPedidoService
 
     public async Task UpdateItemPedidoAsync(int itemPedidoId, int novoProdutoId, int quantidade, decimal preco)
     {
+        _ = preco; // O preço recebido da tela não é confiável; usamos sempre o cadastro do produto.
+
+        if (quantidade <= 0)
+            throw new ArgumentOutOfRangeException(nameof(quantidade), "A quantidade deve ser maior que zero.");
 
         var usuario = _httpContextAccessor.HttpContext?.User.Identity?.Name ?? "SISTEMA";
 
         var itemPedido = await dbSet
-            .Include(ip => ip.Produto) 
-            .Include(ip => ip.Pedido)  
+            .AsNoTracking()
+            .Include(ip => ip.Produto)
+            .Include(ip => ip.Pedido)
             .SingleOrDefaultAsync(ip => ip.Id == itemPedidoId);
 
         if (itemPedido == null)
             throw new KeyNotFoundException("Item de pedido não encontrado.");
 
+        if (itemPedido.Pedido.Status is StatusPedido.Carrinho
+            or StatusPedido.Concluido
+            or StatusPedido.Cancelado)
+            throw new InvalidOperationException("Os itens deste pedido não podem mais ser alterados.");
+
         var novoProduto = await _context.Produto
+            .AsNoTracking()
             .SingleOrDefaultAsync(p => p.Id == novoProdutoId);
 
         if (novoProduto == null)
             throw new KeyNotFoundException("Novo produto não encontrado.");
 
-        if (quantidade > novoProduto.Quantidade)
-            throw new InvalidOperationException("A quantidade solicitada excede a quantidade disponível do novo produto.");
-
         var produtoAtual = itemPedido.Produto;
-        produtoAtual.Quantidade += itemPedido.Quantidade; // Reponha a quantidade do produto atual
-        novoProduto.Quantidade -= quantidade; // Deduz a quantidade do novo produto
+
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
+        {
+            if (produtoAtual.Id == novoProduto.Id)
+            {
+                var diferenca = quantidade - itemPedido.Quantidade;
+                if (diferenca > 0)
+                {
+                    var atualizado = await _context.Produto
+                        .Where(p => p.Id == novoProduto.Id && p.Quantidade >= diferenca)
+                        .ExecuteUpdateAsync(setters => setters
+                            .SetProperty(p => p.Quantidade, p => p.Quantidade - diferenca));
+
+                    if (atualizado != 1)
+                        throw new InvalidOperationException("A quantidade solicitada excede a quantidade disponível do produto.");
+                }
+                else if (diferenca < 0)
+                {
+                    await _context.Produto
+                        .Where(p => p.Id == novoProduto.Id)
+                        .ExecuteUpdateAsync(setters => setters
+                            .SetProperty(p => p.Quantidade, p => p.Quantidade - diferenca));
+                }
+            }
+            else
+            {
+                var novoProdutoAtualizado = await _context.Produto
+                    .Where(p => p.Id == novoProduto.Id && p.Quantidade >= quantidade)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(p => p.Quantidade, p => p.Quantidade - quantidade));
+
+                if (novoProdutoAtualizado != 1)
+                    throw new InvalidOperationException("A quantidade solicitada excede a quantidade disponível do novo produto.");
+
+                await _context.Produto
+                    .Where(p => p.Id == produtoAtual.Id)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(p => p.Quantidade, p => p.Quantidade + itemPedido.Quantidade));
+            }
 
         // Criar movimentação de entrada para o produto atual (devolução do estoque)
         var movimentacaoEntrada = new ProdutoMovimentacao
@@ -92,23 +139,38 @@ public class ItemPedidoService : BaseService<ItemPedido>, IItemPedidoService
             Data = DateTime.Now
         };
 
-        // Registrar as movimentações
-        await _produtoService.RegistrarMovimentacaoAsync(movimentacaoEntrada);
-        await _produtoService.RegistrarMovimentacaoAsync(movimentacaoSaida);
+            _context.ProdutoMovimentacao.AddRange(movimentacaoEntrada, movimentacaoSaida);
 
-        // Atualize as propriedades do item de pedido
-        itemPedido.Produto = novoProduto; // Atualize a referência para o novo produto
-        itemPedido.Quantidade = quantidade;
-        itemPedido.PrecoUnitario = novoProduto.PrecoVenda;
+            var itemAtualizado = await dbSet
+                .Where(ip => ip.Id == itemPedido.Id
+                    && ip.Pedido.Status != StatusPedido.Carrinho
+                    && ip.Pedido.Status != StatusPedido.Concluido
+                    && ip.Pedido.Status != StatusPedido.Cancelado)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(ip => ip.ProdutoId, novoProduto.Id)
+                    .SetProperty(ip => ip.Quantidade, quantidade)
+                    .SetProperty(ip => ip.PrecoUnitario, novoProduto.PrecoVenda));
 
-        dbSet.Update(itemPedido);
+            if (itemAtualizado != 1)
+                throw new InvalidOperationException("O pedido mudou de situação e seus itens não podem mais ser alterados.");
 
-        // Atualize os produtos no banco de dados
-        _context.Produto.Update(produtoAtual);
-        _context.Produto.Update(novoProduto);
+            var novoTotal = await dbSet
+                .Where(ip => ip.PedidoId == itemPedido.PedidoId)
+                .SumAsync(ip => ip.Quantidade * ip.PrecoUnitario);
 
-        // Salve as mudanças no banco de dados
-        await _context.SaveChangesAsync();
+            await _context.Pedido
+                .Where(p => p.Id == itemPedido.PedidoId)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(p => p.ValorTotalPedido, novoTotal));
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
 }

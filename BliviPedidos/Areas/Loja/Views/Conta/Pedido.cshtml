@@ -6,6 +6,18 @@
     ViewData["LojaLogo"] = Model.Loja.LogoUrl;
     ViewData["LojaCorPrimaria"] = Model.Loja.CorPrimaria;
     ViewData["LojaCorSecundaria"] = Model.Loja.CorSecundaria;
+    var whatsappNumero = string.IsNullOrWhiteSpace(Model.Loja.Whatsapp)
+        ? string.Empty
+        : new string(Model.Loja.Whatsapp.Where(char.IsDigit).ToArray());
+    if (whatsappNumero.Length is 10 or 11)
+    {
+        whatsappNumero = $"55{whatsappNumero}";
+    }
+    var mensagemComprovante = Uri.EscapeDataString(
+        $"Olá! Acabei de pagar o pedido {Model.CodigoPublico} via PIX e gostaria de enviar o comprovante.");
+    var whatsappComprovanteUrl = whatsappNumero.Length >= 12
+        ? $"https://wa.me/{whatsappNumero}?text={mensagemComprovante}"
+        : null;
 }
 
 <section class="container py-5">
@@ -46,6 +58,27 @@
                 <div class="input-group mx-auto" style="max-width: 760px">
                     <input id="pixCopiaECola" class="form-control font-monospace" value="@Model.PixCopiaECola" readonly />
                     <button class="btn btn-outline-primary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('pixCopiaECola').value)">Copiar</button>
+                </div>
+                <div class="alert alert-success border-success text-start mx-auto mt-4" role="alert" style="max-width: 760px">
+                    <div class="d-flex gap-3 align-items-start">
+                        <i class="bi bi-whatsapp fs-2" aria-hidden="true"></i>
+                        <div>
+                            <h3 class="h5 alert-heading mb-2">Após pagar, envie o comprovante</h3>
+                            <p class="mb-3">
+                                Envie o comprovante do PIX pelo WhatsApp da loja. Você pode usar o ícone verde
+                                disponível no Balcão Online.
+                            </p>
+                            @if (whatsappComprovanteUrl != null)
+                            {
+                                <a class="btn btn-success"
+                                   href="@whatsappComprovanteUrl"
+                                   target="_blank"
+                                   rel="noopener noreferrer">
+                                    <i class="bi bi-whatsapp me-2" aria-hidden="true"></i>Enviar comprovante
+                                </a>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         }

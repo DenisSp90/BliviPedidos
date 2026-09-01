@@ -16,6 +16,7 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
     private readonly ILogger<ConfirmacaoCheckoutService> _logger;
     private readonly ReservaEstoqueOptions _reservaOptions;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IConfiguracaoReservaLojaService? _configuracaoReservaLojaService;
 
     public ConfirmacaoCheckoutService(
         ApplicationDbContext context,
@@ -23,7 +24,8 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
         IDadosConsumidorCheckoutService dadosService,
         ILogger<ConfirmacaoCheckoutService> logger,
         IOptions<ReservaEstoqueOptions> reservaOptions,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor,
+        IConfiguracaoReservaLojaService? configuracaoReservaLojaService = null)
     {
         _context = context;
         _carrinhoService = carrinhoService;
@@ -31,6 +33,7 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
         _logger = logger;
         _reservaOptions = reservaOptions.Value;
         _httpContextAccessor = httpContextAccessor;
+        _configuracaoReservaLojaService = configuracaoReservaLojaService;
     }
 
     public async Task<ResultadoConfirmacaoCheckout> ConfirmarAsync(
@@ -83,6 +86,9 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
             }
             AtualizarCliente(cliente, dados);
 
+            var expiracaoMinutos = _configuracaoReservaLojaService is null
+                ? Math.Max(1, _reservaOptions.ExpiracaoMinutos)
+                : await _configuracaoReservaLojaService.ObterExpiracaoMinutosAsync(lojaId, cancellationToken);
             var cadastro = CriarCadastro(dados, cliente);
             var pedido = new Pedido(cadastro)
             {
@@ -91,7 +97,7 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
                 Status = StatusPedido.Confirmado,
                 StatusPagamento = StatusPagamento.AguardandoPagamento,
                 DataPedido = DateTime.UtcNow,
-                ReservaExpiraEm = DateTime.UtcNow.AddMinutes(Math.Max(1, _reservaOptions.ExpiracaoMinutos)),
+                ReservaExpiraEm = DateTime.UtcNow.AddMinutes(expiracaoMinutos),
                 EmailResponsavel = dados.Email,
                 CodigoPublico = CodigoPublicoPedido.Gerar()
             };

@@ -50,7 +50,12 @@
                                                 <th scope="col">Quantidade</th>
                                                 <th scope="col">Subtotal</th>
                                                 <th scope="col" class="d-none d-md-table-cell">Lucro</th>
-                                                <th scope="col" class="d-none d-md-table-cell">Trocar</th>
+                                                @if (Model.Pedido.Status is not StatusPedido.Carrinho
+                                                    and not StatusPedido.Concluido
+                                                    and not StatusPedido.Cancelado)
+                                                {
+                                                    <th scope="col" class="d-none d-md-table-cell">Trocar</th>
+                                                }
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -80,20 +85,23 @@
                                                     <td class="fw-bold">@item.Quantidade</td>
                                                     <td>@item.Subtotal.ToString("C")</td>
                                                     <td class="d-none d-md-table-cell">@lucro.ToString("C")</td>
-                                                    <td>
-
-                                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                                                data-bs-target="#itemModal"
-                                                                data-itempedido="@item.Id"
-                                                                data-produtoId="@item.Produto.Id"
-                                                                data-nome="@item.Produto.Nome"
-                                                                data-quantidade="@item.Quantidade"
-                                                                data-preco="@item.PrecoUnitario.ToString("C")"
-                                                                data-subtotal="@item.Subtotal.ToString("C")">
-                                                            Editar Item
-                                                        </button>
-
-                                                    </td>
+                                                    @if (Model.Pedido.Status is not StatusPedido.Carrinho
+                                                        and not StatusPedido.Concluido
+                                                        and not StatusPedido.Cancelado)
+                                                    {
+                                                        <td>
+                                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                                    data-bs-target="#itemModal"
+                                                                    data-itempedido="@item.Id"
+                                                                    data-produtoId="@item.Produto.Id"
+                                                                    data-nome="@item.Produto.Nome"
+                                                                    data-quantidade="@item.Quantidade"
+                                                                    data-preco="@item.PrecoUnitario.ToString("C")"
+                                                                    data-subtotal="@item.Subtotal.ToString("C")">
+                                                                Editar Item
+                                                            </button>
+                                                        </td>
+                                                    }
                                                 </tr>
 
                                             }

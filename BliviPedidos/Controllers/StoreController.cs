@@ -1102,6 +1102,7 @@ public class StoreController : Controller
 
     [HttpPost]
     [Authorize(Policy = PoliticasAutorizacao.Vendas)]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateQuantidade2(int itemPedidoId, int produtoId, int quantidade, decimal preco)
     {
         try
@@ -1114,9 +1115,17 @@ public class StoreController : Controller
         {
             return NotFound();
         }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { success = false, message = ex.Message });
+        }
         catch (Exception ex)
         {
-            // Log.Error(ex.Message); // Caso use um logger
+            _logger.LogError(ex, "Falha ao alterar o item {ItemPedidoId} do pedido.", itemPedidoId);
             return StatusCode(500, new { success = false, message = "Ocorreu um erro ao atualizar a quantidade." });
         }
     }

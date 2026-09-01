@@ -175,11 +175,25 @@ public class RelatorioController : Controller
                 break;
         }
 
+        var ordemCrescente = string.Equals(ordem, "asc", StringComparison.OrdinalIgnoreCase);
+        pedidos = ordenarPor switch
+        {
+            "data" => ordemCrescente
+                ? pedidos.OrderBy(p => p.DataPedido).ToList()
+                : pedidos.OrderByDescending(p => p.DataPedido).ToList(),
+            "nomeCliente" => ordemCrescente
+                ? pedidos.OrderBy(p => p.Cadastro.Nome).ToList()
+                : pedidos.OrderByDescending(p => p.Cadastro.Nome).ToList(),
+            _ => ordemCrescente
+                ? pedidos.OrderBy(p => p.Id).ToList()
+                : pedidos.OrderByDescending(p => p.Id).ToList()
+        };
+
         var tituloRelatorio = "Relatório de Pedidos Ativos";
         var configuracoesRelatorio = new string[] { ordenarPor, ordem, filtro };
 
         var pdf = _relatorioService.GerarRelatorioPedidosAtivos(pedidos, tituloRelatorio, configuracoesRelatorio);
-        return File(pdf, "application/pdf", "Relatorio_ProdutosEmEstoque.pdf");
+        return File(pdf, "application/pdf", "Relatorio_PedidosAtivos.pdf");
     }
 
 }

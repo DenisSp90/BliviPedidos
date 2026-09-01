@@ -57,7 +57,7 @@ function searchItems(query) {
 
                     document.getElementById('modalProdutoId').textContent = item.id;
                     document.getElementById('modalProdutoNome').textContent = item.nome;
-                    document.getElementById('modalProdutoQuantidade').textContent = '1';
+                    document.getElementById('modalProdutoQuantidade').value = '1';
                     document.getElementById('modalProdutoPreco').textContent = item.precoVenda.toFixed(2);;  // Exemplo de preço
                     document.getElementById('modalProdutoSubtotal').textContent = 'R$ ' + (1 * item.precoVenda).toFixed(2);
 
@@ -112,6 +112,7 @@ document.getElementById('saveButton').addEventListener('click', function () {
                 url: '/Store/UpdateQuantidade2',  // Altere para sua rota
                 type: 'POST',
                 data: {
+                    __RequestVerificationToken: document.querySelector('#itemModal input[name="__RequestVerificationToken"]').value,
                     itemPedidoId: itemPedidoId,
                     produtoId: produtoId,
                     quantidade: quantidade,
@@ -127,9 +128,12 @@ document.getElementById('saveButton').addEventListener('click', function () {
                     location.reload();
                 },
                 error: function (error) {
+                    var mensagem = error.responseJSON && error.responseJSON.message
+                        ? error.responseJSON.message
+                        : 'Ocorreu um erro ao tentar atualizar a quantidade.';
                     Swal.fire(
                         'Erro!',
-                        'Ocorreu um erro ao tentar atualizar a quantidade.',
+                        mensagem,
                         'error'
                     );
                     console.error('Erro ao atualizar quantidade: ', error);

@@ -1,6 +1,6 @@
-﻿using BliviPedidos.Models;
-using Microsoft.AspNetCore.Authorization;
+using BliviPedidos.Models;
 using BliviPedidos.Seguranca;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
@@ -25,13 +25,12 @@ public class ConfigController : Controller
         var settings = new PixAppSettingsModel();
         _configuration.GetSection("PixAppSettings").Bind(settings);
 
-        // Lista de opções para o PixTipo
         ViewBag.PixTipos = new List<SelectListItem>
         {
-            new SelectListItem { Value = "CPF", Text = "CPF" },
-            new SelectListItem { Value = "CNPJ", Text = "CNPJ" },
-            new SelectListItem { Value = "Telefone", Text = "Telefone" },
-            new SelectListItem { Value = "Email", Text = "Email" }
+            new() { Value = "CPF", Text = "CPF" },
+            new() { Value = "CNPJ", Text = "CNPJ" },
+            new() { Value = "Telefone", Text = "Telefone" },
+            new() { Value = "Email", Text = "Email" }
         };
 
         return View(settings);
@@ -55,7 +54,6 @@ public class ConfigController : Controller
         });
 
         System.IO.File.WriteAllText(jsonPath, jsonObj.ToString(Formatting.Indented));
-
-        return RedirectToAction("Index");
+        return RedirectToAction(nameof(Index));
     }
 }
