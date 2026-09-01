@@ -69,7 +69,8 @@ public sealed record BackupPedidoDto(
     DateTime? ReservaExpiraEm,
     DateTime? DataPagamento,
     decimal ValorTotalPedido,
-    string? EmailResponsavel);
+    string? EmailResponsavel,
+    string? ConsumidorUsuarioId = null);
 
 public sealed record BackupCadastroDto(
     int Id,

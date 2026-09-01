@@ -124,7 +124,7 @@ public sealed class BackupLojaService : IBackupLojaService
                 .Select(item => new BackupPedidoDto(
                     item.Id, item.CodigoPublico, item.Status, item.StatusPagamento,
                     item.DataPedido, item.ReservaExpiraEm, item.DataPagamento,
-                    item.ValorTotalPedido, item.EmailResponsavel))
+                    item.ValorTotalPedido, item.EmailResponsavel, item.ConsumidorUsuarioId))
                 .ToListAsync(cancellationToken),
             Cadastros = await _context.Set<Cadastro>().AsNoTracking()
                 .OrderBy(item => item.Id)

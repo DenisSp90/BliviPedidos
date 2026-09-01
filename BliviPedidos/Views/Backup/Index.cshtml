@@ -13,6 +13,15 @@
 </div>
 
 <section class="section">
+    @if (TempData["BackupSucesso"] is string sucesso)
+    {
+        <div class="alert alert-success" role="alert">@sucesso</div>
+    }
+    @if (TempData["BackupErro"] is string erro)
+    {
+        <div class="alert alert-danger" role="alert">@erro</div>
+    }
+
     <div class="row">
         <div class="col-lg-8">
             <div class="card">
@@ -39,11 +48,32 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Restauração</h5>
-                    <p class="mb-0 text-muted">
-                        A restauração será disponibilizada na próxima etapa, após validarmos
-                        a integridade dos arquivos gerados.
-                    </p>
+                    <h5 class="card-title">Restaurar backup</h5>
+                    <div class="alert alert-warning" role="alert">
+                        Esta ação substituirá categorias, produtos, estoque, clientes, pedidos,
+                        movimentações e imagens atuais desta loja.
+                    </div>
+
+                    <form asp-action="Restaurar" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="arquivo" class="form-label">Arquivo ZIP</label>
+                            <input id="arquivo" name="arquivo" type="file" accept=".zip,application/zip"
+                                   class="form-control" required />
+                            <div class="form-text">Tamanho máximo: 100 MB.</div>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input id="confirmarSubstituicao" name="confirmarSubstituicao" value="true"
+                                   class="form-check-input" type="checkbox" required />
+                            <label for="confirmarSubstituicao" class="form-check-label">
+                                Entendo que os dados atuais serão substituídos.
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>Restaurar backup
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

@@ -80,6 +80,7 @@ builder.Services.AddTransient<IClienteService, ClienteService>();
 builder.Services.AddTransient<IRelatorioService, RelatorioService>();
 builder.Services.AddTransient<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<IBackupLojaService, BackupLojaService>();
+builder.Services.AddScoped<IRestauracaoBackupLojaService, RestauracaoBackupLojaService>();
 builder.Services.AddScoped<ILojaAtualService, LojaAtualService>();
 builder.Services.AddScoped<ICarrinhoPublicoService, CarrinhoPublicoService>();
 builder.Services.AddScoped<ICalculadorCarrinhoPublicoService, CalculadorCarrinhoPublicoService>();
