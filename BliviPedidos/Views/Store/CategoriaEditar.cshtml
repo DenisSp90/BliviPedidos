@@ -1,0 +1,55 @@
+@model BliviPedidos.Models.ViewModels.CategoriaViewModel
+
+@{
+    ViewData["Title"] = "Editar Categoria";
+}
+
+<div class="pagetitle">
+    <h1>Editar Categoria</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Página Inicial</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Store" asp-action="CategoriaLista" asp-route-filtro="3">Categorias</a></li>
+            <li class="breadcrumb-item active">Editar - @Model.Nome</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Editar Categoria</h5>
+
+                    <form class="row g-3" method="post" asp-action="CategoriaEditar">
+                        <input asp-for="Id" type="hidden" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="col-12">
+                            <label asp-for="Nome" class="col-sm-6 col-form-label"></label>
+                            <input asp-for="Nome" type="text" placeholder="Nome da Categoria" class="form-control" />
+                            <span asp-validation-for="Nome" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input asp-for="IsAtivo" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsAtivo" class="form-check-label">Ativo</label>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Salvar alterações</button>
+                            <a asp-action="CategoriaLista" asp-route-filtro="3" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -149,16 +149,53 @@ public class StoreController : Controller
 
     [HttpPost]
     [Authorize(Policy = PoliticasAutorizacao.Estoque)]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> CategoriaCadastro([FromForm] CategoriaViewModel model)
     {
         if (ModelState.IsValid)
         {
             Categoria c = _mapper.Map<Categoria>(model);
             if (await _categoriaService.RegistrarCategoriaAsync(c))
-                return RedirectToAction("CategoriaLista");
+                return RedirectToAction(nameof(CategoriaLista), new { filtro = 3 });
             else
                 return View(model);
         }
+        return View(model);
+    }
+
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
+    public async Task<IActionResult> CategoriaEditar(int id)
+    {
+        if (id <= 0)
+            return NotFound();
+
+        var categoria = await _categoriaService.ProcurarCategoriaAsync(id);
+        if (categoria is null)
+            return NotFound();
+
+        return View(_mapper.Map<CategoriaViewModel>(categoria));
+    }
+
+    [HttpPost]
+    [Authorize(Policy = PoliticasAutorizacao.Estoque)]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CategoriaEditar([FromForm] CategoriaViewModel model)
+    {
+        if (model.Id <= 0)
+            return NotFound();
+
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var categoriaExistente = await _categoriaService.ProcurarCategoriaAsync(model.Id);
+        if (categoriaExistente is null)
+            return NotFound();
+
+        var categoria = _mapper.Map<Categoria>(model);
+        if (await _categoriaService.RegistrarCategoriaAsync(categoria))
+            return RedirectToAction(nameof(CategoriaLista), new { filtro = 3 });
+
+        ModelState.AddModelError(string.Empty, "Não foi possível atualizar a categoria.");
         return View(model);
     }
 

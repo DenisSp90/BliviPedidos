@@ -19,6 +19,13 @@ public class CategoriaService : ICategoriaService
         return await _context.Categoria.ToListAsync();
     }
 
+    public async Task<Categoria?> ProcurarCategoriaAsync(int id)
+    {
+        return await _context.Categoria
+            .AsNoTracking()
+            .FirstOrDefaultAsync(categoria => categoria.Id == id);
+    }
+
     public async Task<bool> RegistrarCategoriaAsync(Categoria categoria)
     {
         try

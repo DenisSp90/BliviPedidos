@@ -84,8 +84,9 @@
                                     <tr>
                                         <td>
                                             <div class="btn-group">
-                                                <a class="btn btn-info btn-sm" asp-action="ProdutoDetalhe" asp-route-id="@item.Id"><i class="bi bi-info-circle"></i></a>
-                                                <a class="btn btn btn-danger btn-sm delete-btn" data-id="@item.Id" href="/Store/ProdutoDelete/@item.Id"><i class="bi bi-trash"></i></a>
+                                                <a class="btn btn-primary btn-sm" asp-action="CategoriaEditar" asp-route-id="@item.Id" title="Editar categoria">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </a>
                                             </div>
                                         </td>
                                         <td>@item.Id</td>
