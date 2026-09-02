@@ -301,7 +301,20 @@
    */
   const datatables = select('.datatable', true)
   datatables.forEach(datatable => {
-    new simpleDatatables.DataTable(datatable);
+    new simpleDatatables.DataTable(datatable, {
+      perPage: 25,
+      perPageSelect: [
+        ['Todos', -1], 25, 50, 75, 100
+      ],
+      labels: {
+        placeholder: 'Pesquisar...',
+        searchTitle: 'Pesquisar na tabela',
+        perPage: 'registros por página',
+        noRows: 'Nenhum registro encontrado',
+        noResults: 'Nenhum resultado corresponde à pesquisa',
+        info: 'Exibindo {start} a {end} de {rows} registros'
+      }
+    });
   })
 
   /**

@@ -7,7 +7,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Página Inicial</a></li>
-            <li class="breadcrumb-item"><a asp-controller="Store" asp-action="ProdutoLista">Produtos</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Store" asp-action="ProdutoLista" asp-route-filtro="3">Produtos</a></li>
             <li class="breadcrumb-item active">Cadastro</li>
         </ol>
     </nav>
@@ -96,7 +96,7 @@
 
                         <div class="card-footer d-flex justify-content-between">
                             <div>
-                                <a asp-action="ProdutoLista" class="btn btn-secondary btn-sm">
+                                <a asp-action="ProdutoLista" asp-route-filtro="3" class="btn btn-secondary btn-sm">
                                     <i class="bi bi-arrow-left"></i> Voltar lista de produtos do shopping
                                 </a>
                             </div>

@@ -348,6 +348,64 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
         await _context.SaveChangesAsync();
     }
 
+    public async Task ExcluirPedidoAdministrativamenteAsync(int pedidoId, bool devolverEstoque)
+    {
+        var usuario = _httpContextAccessor.HttpContext?.User.Identity?.Name ?? "SISTEMA";
+
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            var pedido = await _context.Pedido
+                .Include(item => item.Itens)
+                .Include(item => item.Cadastro)
+                .SingleOrDefaultAsync(item => item.Id == pedidoId)
+                ?? throw new InvalidOperationException("Pedido não encontrado.");
+
+            var estoqueJaFoiDevolvido = pedido.Status is StatusPedido.Cancelado or StatusPedido.Carrinho;
+            if (devolverEstoque && !estoqueJaFoiDevolvido)
+            {
+                foreach (var item in pedido.Itens)
+                {
+                    var produto = await _context.Produto.SingleOrDefaultAsync(p => p.Id == item.ProdutoId)
+                        ?? throw new InvalidOperationException(
+                            $"O produto {item.ProdutoId} não foi encontrado para devolver o estoque.");
+
+                    produto.Quantidade += item.Quantidade;
+                    _context.ProdutoMovimentacao.Add(new ProdutoMovimentacao
+                    {
+                        ProdutoId = produto.Id,
+                        LojaId = pedido.LojaId,
+                        PedidoId = null,
+                        Quantidade = item.Quantidade,
+                        Tipo = "Entrada",
+                        Ator = usuario,
+                        Origem = OrigemMovimentacaoEstoque.ExclusaoAdministrativaPedido,
+                        Observacao = $"[ENTRADA] | [PEDIDO-EXCLUSAO-ADMINISTRATIVA] | [{usuario.ToUpperInvariant()}] | PEDIDO: [{pedido.Id}]",
+                        Data = DateTime.UtcNow
+                    });
+                }
+            }
+
+            // O histórico de estoque é preservado, sem manter uma FK para o pedido removido.
+            await _context.ProdutoMovimentacao
+                .Where(item => item.PedidoId == pedidoId)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(item => item.PedidoId, (int?)null));
+
+            _context.Set<ItemPedido>().RemoveRange(pedido.Itens);
+            if (pedido.Cadastro is not null)
+                _context.Set<Cadastro>().Remove(pedido.Cadastro);
+            _context.Pedido.Remove(pedido);
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
     public Pedido UpdateCadastro(Cadastro cadastro)
     {
         var pedido = GetPedido();

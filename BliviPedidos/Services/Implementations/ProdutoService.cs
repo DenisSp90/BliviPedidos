@@ -274,7 +274,36 @@ namespace BliviPedidos.Services.Implementations
 
         public bool VerificarProdutoVinculadoPedido(int produtoId)
         {
-            return dbSet.Any(item => item.Produto.Id == produtoId);
+            return dbSet.Any(item => item.ProdutoId == produtoId);
+        }
+
+        public async Task<string?> ExcluirProdutoAsync(int produtoId)
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                if (await _context.Set<ItemPedido>().AnyAsync(item => item.ProdutoId == produtoId))
+                    throw new InvalidOperationException(
+                        "Não é possível excluir o produto porque ele está vinculado a um pedido.");
+
+                var produto = await _context.Produto.SingleOrDefaultAsync(item => item.Id == produtoId)
+                    ?? throw new InvalidOperationException("Produto não encontrado.");
+                var foto = produto.Foto;
+
+                await _context.ProdutoMovimentacao
+                    .Where(item => item.ProdutoId == produtoId)
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(item => item.ProdutoId, (int?)null));
+
+                _context.Produto.Remove(produto);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return foto;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public List<ProdutoMovimentacao> GetMovimentacaoEstoque()

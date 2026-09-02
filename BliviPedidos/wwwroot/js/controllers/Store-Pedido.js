@@ -1,109 +1,127 @@
-$(document).ready(function () {
-    $('.adicionar-produto').click(function (e) {
-        e.preventDefault();
-        var produtoId = $(this).data('produto-id');
+document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('click', async (event) => {
+        const botao = event.target.closest('.adicionar-produto');
+        if (!botao) return;
 
-        $.ajax({
-            url: '/Store/Carrinho/' + produtoId,
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ produto: produtoId }),
-            success: function (response) {
-                $('#tblPedidos tbody').empty();
-                var valoresDoCampo;
-                var total = 0;
-                var quantidadeItensPedido = 0;
-
-                var listaItens = response.listaItens;
-                var carrinhoViewModel = response.carrinhoViewModel;
-
-                debugger;
-
-                $.each(listaItens, function (index, item) {
-                    valoresDoCampo = item.pedido.id;
-                    total += parseFloat(item.subtotal);
-
-                    var row = '<tr item-id=' + item.id + ' class="table-primary">' +
-                        '<td>' + item.produto.nome + '</td>' +
-                        '<td>' +
-                        '<input type="text" value="' + item.quantidade + '" style="width: 4em; text-align: center;" class="form-control text-center col-md-4 update-quantidade" onblur="updateQuantidade(this)" oninput="this.value = this.value.replace(/[^0-9]/g, \'\');" pattern="\d*"/>' +
-                        '</td>' +
-                        '<td class="subtotal">' + parseFloat(item.subtotal).toFixed(2) + '</td>' +
-                        '</tr>';
-
-                    $('#tblPedidos tbody').append(row);
-                    quantidadeItensPedido++;
-                });
-
-                $('#quantidadeItens').text(quantidadeItensPedido);
-                $('#numeroPedido').text(valoresDoCampo);
-                $('#total').text(carrinhoViewModel.total.toFixed(2));
-
-                Swal.fire({
-                    icon: "success",
-                    title: "Produto adicionado ao pedido com sucesso"
-                });
-            },
-            error: function (xhr, status, error) {
-                var mensagemErro = xhr.responseJSON ? xhr.responseJSON : "Ocorreu um erro ao adicionar o produto ao carrinho. Por favor, tente novamente mais tarde.";
-
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: mensagemErro
-                });
-            }
-        });
+        event.preventDefault();
+        await adicionarProduto(botao);
     });
 
-    $(document).on('blur', '.update-quantidade', function () {
-        var valor = parseFloat($(this).val());
-        updateQuantidade(this);
+    document.addEventListener('focusout', (event) => {
+        if (event.target.matches('.update-quantidade')) atualizarQuantidade(event.target);
     });
 });
 
-function updateQuantidade(input) {
-    let data = this.getData(input);
-    this.postQuantidade(data);
+async function adicionarProduto(botao) {
+    const produtoId = botao.dataset.produtoId;
+    if (!produtoId || botao.disabled) return;
+
+    botao.disabled = true;
+    try {
+        const response = await fetch(`/Store/Carrinho/${encodeURIComponent(produtoId)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ produto: produtoId })
+        });
+        if (!response.ok) throw new Error(await obterMensagemErro(response));
+
+        const resultado = await response.json();
+        renderizarItens(resultado.listaItens);
+        document.getElementById('quantidadeItens').textContent = resultado.listaItens.length;
+        document.getElementById('numeroPedido').textContent = resultado.listaItens[0]?.pedido?.id ?? '';
+        document.getElementById('total').textContent = resultado.carrinhoViewModel.total.toFixed(2);
+
+        await Swal.fire({ icon: 'success', title: 'Produto adicionado ao pedido com sucesso' });
+    } catch (error) {
+        await Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.message || 'Ocorreu um erro ao adicionar o produto ao carrinho. Por favor, tente novamente mais tarde.'
+        });
+    } finally {
+        botao.disabled = false;
+    }
 }
 
-function getData(elemento) {
-    debugger;
+function renderizarItens(itens) {
+    const tbody = document.querySelector('#tblPedidos tbody');
+    const fragmento = document.createDocumentFragment();
 
-    var linhaDoItem = $(elemento).closest('[item-id]'); // Alterado para closest() para encontrar o ancestral mais próximo com o atributo 'item-id'
-    var itemId = linhaDoItem.attr('item-id');
-    var novaQuantidade = linhaDoItem.find('input').val();
+    itens.forEach((item) => {
+        const linha = document.createElement('tr');
+        linha.dataset.itemId = item.id;
+        linha.className = 'table-primary';
 
-    return {
-        Id: itemId,
-        Quantidade: novaQuantidade
-    };
-}
+        const produto = document.createElement('td');
+        produto.textContent = item.produto.nome;
 
-function postQuantidade(data) {
-    $.ajax({
-        url: '/Store/UpdateQuantidade',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(data),
-        success: function (response) {
-            debugger;
-            var itemPedido = response.itemPedido;
-            var carrinhoViewModel = response.carrinhoViewModel;
-            var linhaDoItem = $('[item-id="' + itemPedido.id + '"]');
+        const quantidade = document.createElement('td');
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = item.quantidade;
+        input.inputMode = 'numeric';
+        input.pattern = '\\d*';
+        input.className = 'form-control text-center col-md-4 update-quantidade';
+        input.style.width = '4em';
+        input.addEventListener('input', () => {
+            input.value = input.value.replace(/[^0-9]/g, '');
+        });
+        quantidade.appendChild(input);
 
-            linhaDoItem.find('input').val(itemPedido.quantidade);
-            linhaDoItem.find('.subtotal').text(itemPedido.subtotal.toFixed(2));
-            $('[numero-itens]').html('Total: ' + carrinhoViewModel.itens.length + ' itens');
-            $('#quantidadeItens').text(carrinhoViewModel.itens.length);
-            $('#total').text(carrinhoViewModel.total.toFixed(2));
+        const subtotal = document.createElement('td');
+        subtotal.className = 'subtotal';
+        subtotal.textContent = Number(item.subtotal).toFixed(2);
 
-            if (itemPedido.quantidade === 0) {
-                linhaDoItem.remove();
-            }
-        },
-        error: function (xhr, status, error) {
-            console.error(xhr.responseText); // Se houver um erro, exibe no console
-        }
+        linha.append(produto, quantidade, subtotal);
+        fragmento.appendChild(linha);
     });
+
+    tbody.replaceChildren(fragmento);
+}
+
+async function atualizarQuantidade(input) {
+    const linha = input.closest('[data-item-id]');
+    if (!linha) return;
+
+    const data = { Id: linha.dataset.itemId, Quantidade: input.value };
+    try {
+        const response = await fetch('/Store/UpdateQuantidade', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error(await obterMensagemErro(response));
+
+        const resultado = await response.json();
+        const item = resultado.itemPedido;
+        const carrinho = resultado.carrinhoViewModel;
+        const linhaAtual = document.querySelector(`[data-item-id="${CSS.escape(String(item.id))}"]`);
+
+        if (item.quantidade === 0) {
+            linhaAtual?.remove();
+        } else if (linhaAtual) {
+            linhaAtual.querySelector('input').value = item.quantidade;
+            linhaAtual.querySelector('.subtotal').textContent = item.subtotal.toFixed(2);
+        }
+
+        document.querySelectorAll('[numero-itens]').forEach((elemento) => {
+            elemento.textContent = `Total: ${carrinho.itens.length} itens`;
+        });
+        document.getElementById('quantidadeItens').textContent = carrinho.itens.length;
+        document.getElementById('total').textContent = carrinho.total.toFixed(2);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+async function obterMensagemErro(response) {
+    const texto = await response.text();
+    if (!texto) return 'Não foi possível concluir a operação.';
+
+    try {
+        const json = JSON.parse(texto);
+        return typeof json === 'string' ? json : json.message || json.title || texto;
+    } catch {
+        return texto;
+    }
 }

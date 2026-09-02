@@ -333,6 +333,54 @@ public class PedidoServiceTests
             Times.Never);
     }
 
+    [Fact]
+    public async Task ExcluirPedidoAdministrativamente_ComDevolucao_DeveReporEstoqueEPreservarHistorico()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>().UseSqlite(connection).Options;
+        await using var context = new ApplicationDbContext(options);
+        await context.Database.EnsureCreatedAsync();
+
+        var produto = new Produto { Nome = "Produto", PrecoVenda = 10m, Quantidade = 4, IsAtivo = true };
+        var pedido = new Pedido
+        {
+            Status = StatusPedido.Confirmado,
+            Cadastro = new Cadastro { Nome = "Cliente", Telefone = "55 11 99999-9999" }
+        };
+        pedido.Itens.Add(new ItemPedido(pedido, produto, 2, produto.PrecoVenda));
+        context.Pedido.Add(pedido);
+        await context.SaveChangesAsync();
+        context.ProdutoMovimentacao.Add(new ProdutoMovimentacao
+        {
+            ProdutoId = produto.Id,
+            PedidoId = pedido.Id,
+            Quantidade = 2,
+            Tipo = "Saída",
+            Ator = "admin@teste.com",
+            Origem = OrigemMovimentacaoEstoque.PedidoInterno
+        });
+        await context.SaveChangesAsync();
+
+        var accessor = CriarHttpContextAccessor("admin@teste.com");
+        var service = new PedidoService(
+            accessor, context, Mock.Of<IItemPedidoService>(), Mock.Of<ICadastroService>(),
+            Mock.Of<IProdutoService>(), accessor, NullLogger<PedidoService>.Instance);
+
+        await service.ExcluirPedidoAdministrativamenteAsync(pedido.Id, devolverEstoque: true);
+
+        context.ChangeTracker.Clear();
+        Assert.Empty(await context.Pedido.ToListAsync());
+        Assert.Equal(6, (await context.Produto.SingleAsync()).Quantidade);
+        var movimentacoes = await context.ProdutoMovimentacao.OrderBy(item => item.Id).ToListAsync();
+        Assert.Equal(2, movimentacoes.Count);
+        Assert.All(movimentacoes, item => Assert.Null(item.PedidoId));
+        Assert.Contains(movimentacoes, item =>
+            item.Origem == OrigemMovimentacaoEstoque.ExclusaoAdministrativaPedido
+            && item.Tipo == "Entrada"
+            && item.Quantidade == 2);
+    }
+
     private static IHttpContextAccessor CriarHttpContextAccessor(string usuario)
     {
         var identity = new ClaimsIdentity(

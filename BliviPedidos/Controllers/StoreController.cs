@@ -649,7 +649,7 @@ public class StoreController : Controller
 
             var produto = _mapper.Map<Produto>(model);
             if (await _produtoService.RegistrarProdutoAsync(produto))
-                return RedirectToAction("ProdutoLista");
+                return RedirectToAction(nameof(ProdutoLista), "Store", new { filtro = 3 });
 
             ExcluirImagemLocal(novaFoto);
             model.Foto = null;
@@ -675,24 +675,13 @@ public class StoreController : Controller
     }
 
     [HttpPost]
-    public ActionResult ProdutoDelete(int id)
+    [Authorize(Policy = PoliticasAutorizacao.Administracao)]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ProdutoDelete(int id)
     {
-        bool produtoVinculadoPedido = _produtoService.VerificarProdutoVinculadoPedido(id);
-
-        if (produtoVinculadoPedido)
-        {
-            return Json(new { success = false, errorMessage = "Não é possível excluir o produto pois está vinculado a um item de pedido." });
-        }
-
         try
         {
-            var produto = _context.Produto.SingleOrDefault(produto => produto.Id == id);
-            if (produto is null)
-                return Json(new { success = false, errorMessage = "Produto não encontrado." });
-
-            var fotoProduto = produto.Foto;
-            _context.Produto.Remove(produto);
-            _context.SaveChanges();
+            var fotoProduto = await _produtoService.ExcluirProdutoAsync(id);
 
             try
             {
@@ -709,9 +698,35 @@ public class StoreController : Controller
 
             return Json(new { success = true });
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Json(new { success = false, errorMessage = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Falha na exclusão administrativa do produto {ProdutoId}.", id);
+            return Json(new { success = false, errorMessage = "Não foi possível excluir o produto. Consulte os registros do sistema." });
+        }
+    }
+
+    [HttpPost]
+    [Authorize(Policy = PoliticasAutorizacao.Administracao)]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PedidoDelete(int id, bool devolverEstoque)
+    {
+        try
+        {
+            await _pedidoService.ExcluirPedidoAdministrativamenteAsync(id, devolverEstoque);
+            return Json(new { success = true });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Json(new { success = false, errorMessage = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Falha na exclusão administrativa do pedido {PedidoId}.", id);
+            return Json(new { success = false, errorMessage = "Não foi possível excluir o pedido. Consulte os registros do sistema." });
         }
     }
 
@@ -1059,7 +1074,7 @@ public class StoreController : Controller
     }
 
     [Authorize(Policy = PoliticasAutorizacao.Estoque)]
-    public async Task<IActionResult> ProdutoLista(int filtro)
+    public async Task<IActionResult> ProdutoLista(int filtro = 3)
     {
         try
         {

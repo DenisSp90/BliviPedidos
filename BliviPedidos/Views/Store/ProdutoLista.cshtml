@@ -16,8 +16,9 @@
 </div>
 
 <section class="section dashboard">
+    @Html.AntiForgeryToken()
     <div class="row">
-        <div class="col-9 col-lg-9">
+        <div class="col-12 col-xl-9">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Produtos</h5>
@@ -80,7 +81,10 @@
                                         <td>
                                             <div class="btn-group">
                                                 <a class="btn btn-info btn-sm" asp-action="ProdutoDetalhe" asp-route-id="@produto.Id"><i class="bi bi-info-circle"></i></a>
-                                                <a class="btn btn btn-danger btn-sm delete-btn" data-id="@produto.Id" href="/Store/ProdutoDelete/@produto.Id"><i class="bi bi-trash"></i></a>
+                                                @if (User.IsInRole(BliviPedidos.Services.Implementations.InicializadorSistema.PerfilAdministrador))
+                                                {
+                                                    <a class="btn btn-danger btn-sm delete-btn" data-id="@produto.Id" href="/Store/ProdutoDelete/@produto.Id" title="Excluir produto"><i class="bi bi-trash"></i></a>
+                                                }
                                             </div>
                                         </td>
                                         <td>
@@ -133,7 +137,7 @@
             </div>
         </div>
 
-        <div class="col-3 col-lg-3">
+        <div class="col-12 col-xl-3">
             <div class="row">
                 @{
                     var produtosTotal = Model.Count();

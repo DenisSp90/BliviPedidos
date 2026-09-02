@@ -14,6 +14,37 @@ namespace BliviPedidos.Tests;
 public sealed class ProdutoServiceTests
 {
     [Fact]
+    public async Task ExcluirProdutoAsync_SemPedido_DevePreservarMovimentacaoSemReferencia()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>().UseSqlite(connection).Options;
+        await using var context = new ApplicationDbContext(options);
+        await context.Database.EnsureCreatedAsync();
+
+        var produto = new Produto { Nome = "Produto", PrecoVenda = 10m, Quantidade = 3, IsAtivo = true };
+        context.Produto.Add(produto);
+        await context.SaveChangesAsync();
+        context.ProdutoMovimentacao.Add(new ProdutoMovimentacao
+        {
+            ProdutoId = produto.Id,
+            Quantidade = 3,
+            Tipo = "Entrada",
+            Ator = "admin@teste.com",
+            Origem = OrigemMovimentacaoEstoque.CadastroProduto
+        });
+        await context.SaveChangesAsync();
+
+        var service = new ProdutoService(context, Mock.Of<IMapper>(), Mock.Of<IHttpContextAccessor>(), NullLogger<ProdutoService>.Instance);
+        await service.ExcluirProdutoAsync(produto.Id);
+
+        context.ChangeTracker.Clear();
+        Assert.Empty(await context.Produto.ToListAsync());
+        var movimentacao = await context.ProdutoMovimentacao.SingleAsync();
+        Assert.Null(movimentacao.ProdutoId);
+    }
+
+    [Fact]
     public async Task RegistrarProdutoAsync_AoEditar_DeveAtualizarAmbosOsPrecos()
     {
         await using var connection = new SqliteConnection("Data Source=:memory:");

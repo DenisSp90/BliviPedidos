@@ -96,4 +96,5 @@ public static class OrigemMovimentacaoEstoque
     public const string CheckoutPublico = "CheckoutPublico";
     public const string CancelamentoPedido = "CancelamentoPedido";
     public const string ExpiracaoReserva = "ExpiracaoReserva";
+    public const string ExclusaoAdministrativaPedido = "ExclusaoAdministrativaPedido";
 }

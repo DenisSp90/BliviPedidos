@@ -8,6 +8,7 @@ namespace BliviPedidos.Services.Interfaces
         Task AtualizarStatusPedidoAsync(int pedidoId, StatusPedido novoStatus);
         void AddItem(int id);
         Task RegistrarCancelamentoPedido(int pedidoId, string? origem = null, string? ator = null);
+        Task ExcluirPedidoAdministrativamenteAsync(int pedidoId, bool devolverEstoque);
         void ClearPedido();
         Pedido GetPedidoById(int id);
         Task<Pedido> GetPedidoByIdAsync(int id);

@@ -77,6 +77,139 @@ h6 {
   }
 }
 
+/* Área administrativa: layout fluido e controles confortáveis em telas pequenas */
+.admin-toolbar {
+  flex-wrap: wrap;
+}
+
+.dataTable-wrapper {
+  width: 100%;
+}
+
+.dataTable-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dataTable-table {
+  min-width: 680px;
+}
+
+.dataTable-top,
+.dataTable-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dataTable-input,
+.dataTable-selector {
+  min-height: 40px;
+  border-radius: 10px;
+}
+
+.admin-quick-order {
+  position: fixed;
+  right: 24px;
+  bottom: 76px;
+  z-index: 1000;
+  display: inline-flex;
+  width: 58px;
+  height: 58px;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: linear-gradient(135deg, #4154f1, #6b7aff);
+  border-radius: 18px;
+  box-shadow: 0 12px 28px rgba(65, 84, 241, 0.32);
+  font-size: 29px;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.admin-quick-order:hover {
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(65, 84, 241, 0.4);
+}
+
+@media (max-width: 575.98px) {
+  #main {
+    padding: 14px 12px 24px;
+  }
+
+  .pagetitle h1 {
+    font-size: 21px;
+  }
+
+  .breadcrumb {
+    font-size: 12px;
+  }
+
+  .card {
+    border-radius: 16px;
+  }
+
+  .card-body {
+    padding-inline: 14px;
+  }
+
+  .admin-toolbar,
+  .card-body > .d-md-flex,
+  .card-footer.d-flex {
+    align-items: stretch !important;
+    flex-direction: column;
+  }
+
+  .admin-toolbar .btn,
+  .card-body > .d-md-flex .btn-group,
+  .card-footer.d-flex .btn {
+    width: 100%;
+  }
+
+  .dataTable-top,
+  .dataTable-bottom {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dataTable-dropdown,
+  .dataTable-search,
+  .dataTable-input {
+    width: 100%;
+  }
+
+  .dataTable-pagination ul {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .dataTable-info {
+    text-align: center;
+  }
+
+  .table > :not(caption) > * > * {
+    padding: .65rem .55rem;
+    white-space: nowrap;
+  }
+
+  .btn-group .btn,
+  td .btn {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .admin-quick-order {
+    right: 16px;
+    bottom: 66px;
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+  }
+}
+
 /*--------------------------------------------------------------
 # Page Title
 --------------------------------------------------------------*/

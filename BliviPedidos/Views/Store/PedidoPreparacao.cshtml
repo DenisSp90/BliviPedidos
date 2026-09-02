@@ -47,9 +47,9 @@
                                             @{
                                                 if (item.Quantidade != 0)
                                                 {
-                                                    <a href="#" class="btn btn-primary btn-sm adicionar-produto" data-produto-id="@item.Id">
+                                                    <button type="button" class="btn btn-primary btn-sm adicionar-produto" data-produto-id="@item.Id" aria-label="Adicionar @item.Nome ao pedido">
                                                         <i class="bi bi-cart-plus"></i>
-                                                    </a>
+                                                    </button>
                                                 }
                                                 else
                                                 {
@@ -143,7 +143,7 @@
                                             <tbody>
                                                 @foreach (var i in Model.Pedido.Itens)
                                                 {
-                                                    <tr item-id="@i.Id" class="table-primary">
+                                                    <tr data-item-id="@i.Id" class="table-primary">
                                                         <td>@i.Produto.Nome</td>
                                                         <td>
                                                             <input type="text"
@@ -175,7 +175,7 @@
 </section>
 <script src="~/js/controllers/Store-Pedido.js"></script>
 <script>
-    $(document).ready(function () {
+    document.addEventListener('DOMContentLoaded', function () {
         Swal.fire({
             title: "Atenção!",
             text: "Se demorar para realizar a operação do pedido, a página será atualizada automaticamente para evitar que outros atendimentos obtenham o mesmo número de pedido.",

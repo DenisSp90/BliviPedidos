@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    $('.delete-btn').on('click', function (e) {
+    $(document).on('click', '.delete-btn', function (e) {
         e.preventDefault(); 
 
         var url = $(this).attr('href'); 
@@ -19,7 +19,10 @@ $(document).ready(function () {
                 $.ajax({
                     url: url,
                     type: 'POST', 
-                    data: { id: id }, 
+                    data: {
+                        id: id,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val()
+                    }, 
                     success: function (response) {
                         if (response.success) {
                             Swal.fire({
@@ -31,11 +34,10 @@ $(document).ready(function () {
                             });
                             location.reload();                            
                         } else {
-                            console.log('Erro: ' + response.errorMessage);
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Erro!',
-                                text: 'Este produto está vinculado a um pedido. Não pode ser excluído.',
+                                text: response.errorMessage || 'Não foi possível excluir o produto.',
                                 confirmButtonText: 'OK'
                             });
                         }

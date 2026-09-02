@@ -12,6 +12,7 @@ public interface IProdutoService
     Task<ProdutoViewModel> ProcurarProdutoAsync(int id);
     Task<bool> RegistrarProdutoAsync(Produto produto);
     bool VerificarProdutoVinculadoPedido(int produtoId);
+    Task<string?> ExcluirProdutoAsync(int produtoId);
     bool UpdateQuantidade(List<ItemPedido> itens);
     Task<bool> VerificarExistenciaProdutoNoBanco(string nome, decimal precoPago);
     List<ProdutoMovimentacao> GetMovimentacaoEstoque();
