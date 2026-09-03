@@ -12,7 +12,7 @@ using LojaModel = BliviPedidos.Models.Loja;
 namespace BliviPedidos.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Policy = PoliticasAutorizacao.Administracao)]
+[Authorize(Policy = PoliticasAutorizacao.ConsoleGlobal)]
 public class LojaController : Controller
 {
     private readonly ApplicationDbContext _context;

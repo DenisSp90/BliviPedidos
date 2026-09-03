@@ -66,8 +66,13 @@
 <body>
     <div class="cupom">
         <div class="cabecalho">
-            <h1>Cupom Fiscal</h1>
-            <p>@DateTime.Now.ToString("dd/MM/yyyy") - ID:@Model.Pedido.Id </p>
+            @if (!string.IsNullOrWhiteSpace(Model.Loja?.LogoUrl))
+            {
+                <img src="@Model.Loja.LogoUrl" alt="Logo de @Model.Loja.Nome" style="max-width: 90px; max-height: 64px; object-fit: contain;" />
+            }
+            <h1>@(Model.Loja?.Nome ?? "Loja")</h1>
+            <strong>RECIBO DE PEDIDO</strong>
+            <p>@(Model.Pedido.DataPedido?.ToString("dd/MM/yyyy HH:mm") ?? DateTime.Now.ToString("dd/MM/yyyy HH:mm")) - #@(Model.Pedido.CodigoPublico ?? Model.Pedido.Id.ToString())</p>
             <p>
                 <span>@Model.Pedido.Cadastro.Nome.Trim()</span>
             </p>
@@ -98,14 +103,20 @@
         <br />
         <div class="rodape">
             <p>Obrigado pela preferência!</p>
-            <p>Escaneie o código QR o pagamento via PIX.</p>
-            <img src="data:image/png;base64,@Model.PixQRCodeUrl" alt="Código QR PIX" class="img-fluid mb-3">
-            <p>
-                Por favor envie o comprovante do Pagamento no número abaixo:
-            </p>
-            <p>
-                +55 11 94578-4933
-            </p>
+            @if (!string.IsNullOrWhiteSpace(Model.PixQRCodeUrl))
+            {
+                <p>Escaneie o QR Code para realizar o pagamento via PIX.</p>
+                <img src="data:image/png;base64,@Model.PixQRCodeUrl" alt="Código QR PIX" class="img-fluid mb-3" style="max-width: 160px;">
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Loja?.Whatsapp))
+            {
+                <p>Contato: @Model.Loja.Whatsapp</p>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Loja?.EmailContato))
+            {
+                <p>@Model.Loja.EmailContato</p>
+            }
+            <small>Este recibo não substitui nota fiscal.</small>
         </div>
     </div>
     <div style="text-align: center; margin-top: 20px;">

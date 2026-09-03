@@ -5,6 +5,7 @@ namespace BliviPedidos.Seguranca;
 public static class PoliticasAutorizacao
 {
     public const string Administracao = "Administracao";
+    public const string ConsoleGlobal = "ConsoleGlobal";
     public const string Vendas = "Vendas";
     public const string Estoque = "Estoque";
     public const string Relatorios = "Relatorios";
@@ -16,6 +17,12 @@ public static class PoliticasAutorizacao
         {
             options.AddPolicy(Administracao, policy =>
                 policy.RequireRole(InicializadorSistema.PerfilAdministrador));
+
+            options.AddPolicy(ConsoleGlobal, policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.AddRequirements(new AdministradorGlobalRequirement());
+            });
 
             options.AddPolicy(Vendas, policy =>
                 policy.RequireRole(
@@ -35,6 +42,8 @@ public static class PoliticasAutorizacao
                 policy.RequireRole(InicializadorSistema.Perfis));
         });
 
+        services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHandler,
+            AdministradorGlobalHandler>();
         return services;
     }
 }

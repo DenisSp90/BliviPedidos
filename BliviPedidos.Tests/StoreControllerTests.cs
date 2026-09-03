@@ -68,7 +68,10 @@ public class StoreControllerTests
             Mock.Of<IItemPedidoService>(),
             new ConfigurationBuilder().Build(),
             Mock.Of<ICategoriaService>(),
-            NullLogger<StoreController>.Instance)
+            NullLogger<StoreController>.Instance,
+            lojaAtualService: Mock.Of<ILojaAtualService>(),
+            pagamentoService: Mock.Of<IPagamentoService>(),
+            reciboPedidoService: Mock.Of<IReciboPedidoService>())
         {
             ControllerContext = new ControllerContext
             {
@@ -124,7 +127,10 @@ public class StoreControllerTests
             Mock.Of<IItemPedidoService>(),
             new ConfigurationBuilder().Build(),
             Mock.Of<ICategoriaService>(),
-            NullLogger<StoreController>.Instance)
+            NullLogger<StoreController>.Instance,
+            lojaAtualService: Mock.Of<ILojaAtualService>(),
+            pagamentoService: Mock.Of<IPagamentoService>(),
+            reciboPedidoService: Mock.Of<IReciboPedidoService>())
         {
             ControllerContext = new ControllerContext
             {
@@ -174,7 +180,10 @@ public class StoreControllerTests
             Mock.Of<IItemPedidoService>(),
             new ConfigurationBuilder().Build(),
             Mock.Of<ICategoriaService>(),
-            NullLogger<StoreController>.Instance)
+            NullLogger<StoreController>.Instance,
+            lojaAtualService: Mock.Of<ILojaAtualService>(),
+            pagamentoService: Mock.Of<IPagamentoService>(),
+            reciboPedidoService: Mock.Of<IReciboPedidoService>())
         {
             ControllerContext = new ControllerContext
             {

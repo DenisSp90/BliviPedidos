@@ -27,7 +27,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BliviPedidos.Areas.Identity.Pages.Account
 {
-    [Authorize(Policy = PoliticasAutorizacao.Administracao)]
+    [Authorize(Policy = PoliticasAutorizacao.ConsoleGlobal)]
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<IdentityUser> _signInManager;

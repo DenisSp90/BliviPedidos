@@ -16,6 +16,7 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
     private readonly IProdutoService _produtoService;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<PedidoService> _logger;
+    private readonly INotificacaoPedidoService? _notificacao;
 
 
     public PedidoService(IHttpContextAccessor contextAccessor,
@@ -24,7 +25,8 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
         ICadastroService cadastroService,
         IProdutoService produtoService,
         IHttpContextAccessor httpContextAccessor,
-        ILogger<PedidoService> logger) : base(context)
+        ILogger<PedidoService> logger,
+        INotificacaoPedidoService? notificacao = null) : base(context)
     {
         this.contextAccessor = contextAccessor;
         _context = context;
@@ -33,6 +35,7 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
         _produtoService = produtoService;
         _httpContextAccessor = httpContextAccessor;
         _logger = logger;
+        _notificacao = notificacao;
     }
 
     public void AddItem(int id)
@@ -76,6 +79,7 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
                 throw new InvalidOperationException(
                     "O pagamento de um pedido cancelado não pode ser alterado.");
 
+            var statusAnterior = pedido.StatusPagamento;
             pedido.StatusPagamento = novoStatusPagamento;
             pedido.DataPagamento = novoStatusPagamento == StatusPagamento.Pago
                 ? DateTime.Now
@@ -83,6 +87,8 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
             if (novoStatusPagamento == StatusPagamento.Pago)
                 pedido.ReservaExpiraEm = null;
             await _context.SaveChangesAsync();
+            if (statusAnterior != novoStatusPagamento && _notificacao is not null)
+                await _notificacao.NotificarStatusPagamentoAsync(pedidoId, novoStatusPagamento);
         }
         else
         {
@@ -312,6 +318,8 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
+            if (_notificacao is not null)
+                await _notificacao.NotificarStatusPedidoAsync(pedidoId, StatusPedido.Cancelado);
         }
         catch (Exception ex)
         {
@@ -344,8 +352,13 @@ public class PedidoService : BaseService<Pedido>, IPedidoService
             return;
         }
 
+        if (pedido.Status == novoStatus)
+            return;
+
         pedido.Status = novoStatus;
         await _context.SaveChangesAsync();
+        if (_notificacao is not null)
+            await _notificacao.NotificarStatusPedidoAsync(pedidoId, novoStatus);
     }
 
     public async Task ExcluirPedidoAdministrativamenteAsync(int pedidoId, bool devolverEstoque)

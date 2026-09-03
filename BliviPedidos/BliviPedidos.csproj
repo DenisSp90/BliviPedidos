@@ -20,6 +20,7 @@
     <PackageReference Include="DinkToPdfIncludesDependencies" Version="1.0.8" />
     <PackageReference Include="DocX" Version="1.6.0" />
     <PackageReference Include="itext7" Version="7.2.6" />
+    <PackageReference Include="MailKit" Version="4.17.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.19" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.19" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.19" />

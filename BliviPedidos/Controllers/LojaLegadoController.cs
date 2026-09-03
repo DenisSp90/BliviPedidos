@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BliviPedidos.Controllers;
 
-[Authorize(Policy = PoliticasAutorizacao.Administracao)]
+[Authorize(Policy = PoliticasAutorizacao.ConsoleGlobal)]
 public class LojaLegadoController : Controller
 {
     [AcceptVerbs("GET", "POST", "PUT", "PATCH", "DELETE")]

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BliviPedidos.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Policy = PoliticasAutorizacao.Administracao)]
+[Authorize(Policy = PoliticasAutorizacao.ConsoleGlobal)]
 public class HomeController : Controller
 {
     public IActionResult Index()

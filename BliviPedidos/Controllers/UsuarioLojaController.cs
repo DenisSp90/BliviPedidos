@@ -15,7 +15,7 @@ using System.Security.Claims;
 
 namespace BliviPedidos.Controllers;
 
-[Authorize(Policy = PoliticasAutorizacao.Vendas)]
+[Authorize(Policy = PoliticasAutorizacao.Administracao)]
 public sealed class UsuarioLojaController : Controller
 {
     private static readonly string[] PerfisPermitidos =

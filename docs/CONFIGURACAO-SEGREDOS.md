@@ -15,10 +15,6 @@ dotnet user-secrets set "EmailSettings:UsernamePassword" "<SENHA_SMTP>" --projec
 dotnet user-secrets set "EmailSettings:FromEmail" "<REMETENTE>" --project .\BliviPedidos\BliviPedidos.csproj
 dotnet user-secrets set "EmailSettings:ToEmail" "<DESTINATARIO>" --project .\BliviPedidos\BliviPedidos.csproj
 dotnet user-secrets set "EmailSettings:CcEmail" "<DESTINATARIO_COPIA>" --project .\BliviPedidos\BliviPedidos.csproj
-dotnet user-secrets set "PixAppSettings:Responsavel" "<RESPONSAVEL>" --project .\BliviPedidos\BliviPedidos.csproj
-dotnet user-secrets set "PixAppSettings:PixTipo" "<TIPO>" --project .\BliviPedidos\BliviPedidos.csproj
-dotnet user-secrets set "PixAppSettings:PixChave" "<CHAVE_PIX>" --project .\BliviPedidos\BliviPedidos.csproj
-dotnet user-secrets set "PixAppSettings:PixCity" "<CIDADE>" --project .\BliviPedidos\BliviPedidos.csproj
 dotnet user-secrets set "Syncfusion:LicenseKey" "<LICENCA>" --project .\BliviPedidos\BliviPedidos.csproj
 dotnet user-secrets set "BootstrapAdmin:Email" "<EMAIL_ADMIN>" --project .\BliviPedidos\BliviPedidos.csproj
 dotnet user-secrets set "BootstrapAdmin:Password" "<SENHA_FORTE>" --project .\BliviPedidos\BliviPedidos.csproj
@@ -39,16 +35,16 @@ EmailSettings__UsernamePassword
 EmailSettings__FromEmail
 EmailSettings__ToEmail
 EmailSettings__CcEmail
-PixAppSettings__Responsavel
-PixAppSettings__PixTipo
-PixAppSettings__PixChave
-PixAppSettings__PixCity
 Syncfusion__LicenseKey
 BootstrapAdmin__Email
 BootstrapAdmin__Password
 ```
 
-As chaves `BootstrapAdmin` são usadas somente quando o banco ainda não possui usuários. Depois que o primeiro administrador for criado, elas podem ser removidas do ambiente de produção.
+As chaves `BootstrapAdmin` identificam o administrador global. Elas devem permanecer configuradas no User Secrets durante o desenvolvimento e como variáveis de ambiente seguras em produção. Somente o usuário cujo e-mail corresponda a `BootstrapAdmin:Email` pode acessar o console global `/Admin`; `BootstrapAdmin:Password` é usada apenas para criar essa conta quando ela ainda não existe.
+
+Se `BootstrapAdmin:Email` estiver ausente, a aplicação inicia normalmente e mantém o console global bloqueado. Se o e-mail estiver configurado e a conta já existir, a senha não precisa estar presente durante as inicializações seguintes. A senha é obrigatória somente na primeira criação da conta; caso esteja ausente nesse momento, a aplicação também inicia, registra o problema no log e mantém o console global bloqueado.
+
+O arquivo de User Secrets é carregado de forma opcional em todos os ambientes para permitir a execução local com `ASPNETCORE_ENVIRONMENT=Production`. No servidor publicado, prefira `BootstrapAdmin__Email` e `BootstrapAdmin__Password` como variáveis de ambiente, pois o processo do IIS normalmente é executado por uma conta diferente daquela que possui o `secrets.json` do desenvolvedor.
 
 Variaveis de ambiente possuem prioridade sobre `appsettings.Local.json`, User Secrets e `appsettings.json`.
 

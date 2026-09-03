@@ -1,6 +1,11 @@
 ﻿<!DOCTYPE html>
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
 @{
     var administrador = User.IsInRole(BliviPedidos.Services.Implementations.InicializadorSistema.PerfilAdministrador);
+    var administradorGlobal = (await AuthorizationService.AuthorizeAsync(
+        User,
+        BliviPedidos.Seguranca.PoliticasAutorizacao.ConsoleGlobal)).Succeeded;
     var podeVender = administrador || User.IsInRole(BliviPedidos.Services.Implementations.InicializadorSistema.PerfilVendedor);
     var podeGerenciarEstoque = podeVender || User.IsInRole(BliviPedidos.Services.Implementations.InicializadorSistema.PerfilEstoquista);
 }
@@ -224,7 +229,7 @@
                 </li>
             }
 
-            @if (administrador)
+            @if (administradorGlobal)
             {
                 <li class="nav-heading">Administração</li>
 

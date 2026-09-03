@@ -57,11 +57,11 @@ public class RelatorioService : IRelatorioService
             // Adicionar linhas de movimentações
             foreach (var movimentacao in movimentacoes)
             {
-                table.AddCell(new Cell().Add(new Paragraph(movimentacao.Produto.Nome).SetFontSize(10))); // Reduz a fonte
+                table.AddCell(new Cell().Add(new Paragraph(movimentacao.Produto?.Nome ?? "Produto excluído").SetFontSize(10))); // Reduz a fonte
                 table.AddCell(new Cell().Add(new Paragraph(movimentacao.Data.ToString("dd/MM/yyyy HH:mm")).SetFontSize(10))); // Reduz a fonte
                 table.AddCell(new Cell().Add(new Paragraph(movimentacao.Quantidade.ToString()).SetFontSize(10))); // Reduz a fonte
                 table.AddCell(new Cell().Add(new Paragraph(movimentacao.Tipo).SetFontSize(10))); // Reduz a fonte
-                table.AddCell(new Cell().Add(new Paragraph(movimentacao.Observacao).SetFontSize(10))); // Reduz a fonte
+                table.AddCell(new Cell().Add(new Paragraph(movimentacao.Observacao ?? string.Empty).SetFontSize(10))); // Reduz a fonte
             }
 
             // Adicionar tabela ao documento

@@ -8,9 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using BliviPedidos.Seguranca;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QRCoder;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -28,9 +25,12 @@ public class StoreController : Controller
     private readonly IClienteService _clienteService;
     private const long TamanhoMaximoImagem = 5 * 1024 * 1024;
     private readonly string _imagemPasta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "produtos");
-    private readonly IConfiguration _configuration;
+    private readonly ILojaAtualService _lojaAtualService;
+    private readonly IPagamentoService _pagamentoService;
+    private readonly IReciboPedidoService _reciboPedidoService;
     private readonly ICategoriaService _categoriaService;
     private readonly ILogger<StoreController> _logger;
+    private readonly INotificacaoPedidoService? _notificacaoPedido;
 
     public StoreController(
         ApplicationDbContext context,
@@ -42,7 +42,11 @@ public class StoreController : Controller
         IItemPedidoService itemPedidoService,
         IConfiguration configuration,
         ICategoriaService categoriaService,
-        ILogger<StoreController> logger)
+        ILogger<StoreController> logger,
+        INotificacaoPedidoService? notificacaoPedido = null,
+        ILojaAtualService? lojaAtualService = null,
+        IPagamentoService? pagamentoService = null,
+        IReciboPedidoService? reciboPedidoService = null)
     {
         _context = context;
         _mapper = mapper;
@@ -57,9 +61,15 @@ public class StoreController : Controller
         }
 
         _itemPedidoService = itemPedidoService;
-        _configuration = configuration;
+        _lojaAtualService = lojaAtualService
+            ?? throw new ArgumentNullException(nameof(lojaAtualService));
+        _pagamentoService = pagamentoService
+            ?? throw new ArgumentNullException(nameof(pagamentoService));
+        _reciboPedidoService = reciboPedidoService
+            ?? throw new ArgumentNullException(nameof(reciboPedidoService));
         _categoriaService = categoriaService;
         _logger = logger;
+        _notificacaoPedido = notificacaoPedido;
     }
 
     [HttpPost]
@@ -277,52 +287,20 @@ public class StoreController : Controller
                 return View("PedidoNaoEncontrado");
             }
 
-            var responsavel = _configuration["PixAppSettings:Responsavel"];
-            var pixTipo = _configuration["PixAppSettings:PixTipo"];
-            var pixChave = _configuration["PixAppSettings:PixChave"];
-            var pixCity = _configuration["PixAppSettings:PixCity"];
-
-            PixModel.PixType pixType = PixModel.PixType.cnpj;
-
-            switch (pixTipo)
-            {
-                case "CPF":
-                    pixType = PixModel.PixType.cpf;
-                    break;
-
-                case "CNPJ":
-                    pixType = PixModel.PixType.cnpj;
-                    break;
-
-                case "Telefone":
-                    pixType = PixModel.PixType.celular;
-                    break;
-
-                case "Email":
-                    pixType = PixModel.PixType.email;
-                    break;
-
-                default:
-                    pixType = PixModel.PixType.chaveAleatoria;
-                    break;
-            }
-
-            Pix pixObj = new Pix(
-               responsavel,
-               pixType,
-               pixChave,
-               pixCity,
-               "_boleto.NumeroTitulo",
-               String.Format("{0:C}", pedido.ValorTotalPedido));
-
-            string qrCodeValue = pixObj.GetPayLoad();
-            string qrCodeImageBase64 = GenerateQrCode(qrCodeValue);
+            var loja = await _lojaAtualService.ObterLojaAsync();
+            var pagamentoPix = loja.PixAtivo
+                ? _pagamentoService.GerarPix(
+                    loja,
+                    pedido.ValorTotalPedido,
+                    pedido.CodigoPublico ?? pedido.Id.ToString(CultureInfo.InvariantCulture))
+                : null;
 
             StoreViewModel viewModel = new StoreViewModel
             {
                 Pedido = pedido,
-                PixKey = qrCodeValue,
-                PixQRCodeUrl = qrCodeImageBase64 // Substitua pela URL real do QR code
+                Loja = loja,
+                PixKey = pagamentoPix?.CopiaECola ?? string.Empty,
+                PixQRCodeUrl = pagamentoPix?.QrCodeBase64 ?? string.Empty
             };
 
             return View(viewModel);
@@ -418,52 +396,19 @@ public class StoreController : Controller
             if (pedido.Status == StatusPedido.Carrinho)
                 return RedirectToAction("PedidoLista", "Store");
 
-            var responsavel = _configuration["PixAppSettings:Responsavel"];
-            var pixTipo = _configuration["PixAppSettings:PixTipo"];
-            var pixChave = _configuration["PixAppSettings:PixChave"];
-            var pixCity = _configuration["PixAppSettings:PixCity"];
-
-            PixModel.PixType pixType = PixModel.PixType.cnpj;
-
-            switch (pixTipo)
-            {
-                case "CPF":
-                    pixType = PixModel.PixType.cpf;
-                    break;
-
-                case "CNPJ":
-                    pixType = PixModel.PixType.cnpj;
-                    break;
-
-                case "Telefone":
-                    pixType = PixModel.PixType.celular;
-                    break;
-
-                case "Email":
-                    pixType = PixModel.PixType.email;
-                    break;
-
-                default:
-                    pixType = PixModel.PixType.chaveAleatoria;
-                    break;
-            }
-
-            Pix pixObj = new Pix(
-               responsavel,
-               pixType,
-               pixChave,
-               pixCity,
-               "_boleto.NumeroTitulo",
-               String.Format("{0:C}", pedido.ValorTotalPedido));
-
-            string qrCodeValue = pixObj.GetPayLoad();
-            string qrCodeImageBase64 = GenerateQrCode(qrCodeValue);
+            var loja = await _lojaAtualService.ObterLojaAsync();
+            var pagamentoPix = loja.PixAtivo
+                ? _pagamentoService.GerarPix(
+                    loja,
+                    pedido.ValorTotalPedido,
+                    pedido.CodigoPublico ?? pedido.Id.ToString(CultureInfo.InvariantCulture))
+                : null;
 
             StoreViewModel viewModel = new StoreViewModel
             {
                 Pedido = pedido,
-                PixKey = qrCodeValue,
-                PixQRCodeUrl = qrCodeImageBase64
+                PixKey = pagamentoPix?.CopiaECola ?? string.Empty,
+                PixQRCodeUrl = pagamentoPix?.QrCodeBase64 ?? string.Empty
             };
 
             return View(viewModel);
@@ -578,8 +523,8 @@ public class StoreController : Controller
                 cadastro.Pedido.DataPedido = DateTime.Now;
 
                 _pedidoService.UpdateCadastro(cadastro);
-                if (!cadastro.VendaAvulsa && !string.IsNullOrWhiteSpace(cadastro.Email))
-                    await EnviarEmailPedido(cadastro);
+                if (_notificacaoPedido is not null)
+                    await _notificacaoPedido.NotificarPedidoCriadoAsync(cadastro.Pedido.Id);
 
                 _pedidoService.ClearPedido();
 
@@ -675,7 +620,7 @@ public class StoreController : Controller
     }
 
     [HttpPost]
-    [Authorize(Policy = PoliticasAutorizacao.Administracao)]
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ProdutoDelete(int id)
     {
@@ -709,8 +654,30 @@ public class StoreController : Controller
         }
     }
 
+    [HttpGet]
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
+    public async Task<IActionResult> BaixarReciboA4(int id)
+    {
+        var pedido = await _pedidoService.GetPedidoByIdAsync(id);
+        if (pedido == null)
+            return NotFound();
+
+        var loja = await _lojaAtualService.ObterLojaAsync();
+        if (pedido.LojaId != loja.Id)
+            return NotFound();
+
+        var arquivo = _reciboPedidoService.GerarWordA4(pedido, loja);
+        var codigo = string.IsNullOrWhiteSpace(pedido.CodigoPublico)
+            ? pedido.Id.ToString(CultureInfo.InvariantCulture)
+            : pedido.CodigoPublico;
+        return File(
+            arquivo,
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            $"recibo-pedido-{codigo}.docx");
+    }
+
     [HttpPost]
-    [Authorize(Policy = PoliticasAutorizacao.Administracao)]
+    [Authorize(Policy = PoliticasAutorizacao.Vendas)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> PedidoDelete(int id, bool devolverEstoque)
     {
@@ -1220,26 +1187,6 @@ public class StoreController : Controller
         catch (Exception ex)
         {
             throw ex;
-        }
-    }
-
-    private string GenerateQrCode(string text)
-    {
-        using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
-        {
-            QRCodeData qrCodeData = qrGenerator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
-            using (QRCode qrCode = new QRCode(qrCodeData))
-            {
-                using (Bitmap qrCodeImage = qrCode.GetGraphic(2)) // Tamanho do pixel ajustado para 2
-                {
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        qrCodeImage.Save(ms, ImageFormat.Png);
-                        byte[] byteImage = ms.ToArray();
-                        return Convert.ToBase64String(byteImage);
-                    }
-                }
-            }
         }
     }
 

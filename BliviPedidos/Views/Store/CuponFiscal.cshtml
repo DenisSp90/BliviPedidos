@@ -1,18 +1,22 @@
 ﻿@{
-    ViewData["Title"] = "Cupom fiscal do Pedido | Store (Loja)";
+    ViewData["Title"] = "Recibo do pedido";
 }
 
 @model BliviPedidos.Models.ViewModels.StoreViewModel
 
 <div class="pagetitle">
-    <h1>Cupom fiscal do Pedido</h1>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <h1>Recibo do pedido</h1>
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Página Inicial</a></li>
-            <li class="breadcrumb-item"><a asp-controller="Store" asp-action="ProdutoLista">Pedidos</a></li>
-            <li class="breadcrumb-item active">Cadastrar Pedido</li>
+            <li class="breadcrumb-item"><a asp-controller="Store" asp-action="PedidoLista" asp-route-filtro="1">Pedidos</a></li>
+            <li class="breadcrumb-item active">Pedido #@(Model.Pedido.CodigoPublico ?? Model.Pedido.Id.ToString())</li>
         </ol>
-    </nav>
+            </nav>
+        </div>
+    </div>
 </div>
 
 <section class="section dashboard">
@@ -20,10 +24,10 @@
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-header">
-                    Cupom fiscal
+                    <span class="badge text-bg-light">Pré-visualização térmica</span>
                 </div>
                 <div class="card-body">
-                    <h5 class="card-title">Itens do pedido <span>| (@Model.Pedido.Itens.Count) Itens</span></h5>
+                    <h5 class="card-title">Recibo compacto <span>| (@Model.Pedido.Itens.Sum(item => item.Quantidade)) unidades</span></h5>
 
                     <partial name="~/Views/Store/_partialCupomFiscal.cshtml" model="@Model" view-data="ViewData" />
                 </div>
@@ -60,7 +64,7 @@
                                 <input asp-for="@Model.Pedido.Cadastro.Turma" type="text" class="form-control" disabled>
                             </div>
                         </div>
-                        @* <div class="row mb-3">
+                        <div class="row mb-3">
                             <label asp-for="@Model.Pedido.Cadastro.CEP" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
                                 <input asp-for="@Model.Pedido.Cadastro.CEP" type="text" class="form-control" disabled>
@@ -125,20 +129,34 @@
                                     <option value="TO">Tocantins</option>
                                 </select>
                             </div>
-                        </div> *@
+                        </div>
                     </form>
                 </div>
-                <div class="card-footer">
-                    <a asp-action="PedidoLista" asp-route-filtro="1" class="btn btn-secondary btn-sm">
-                        <i class="bi bi-arrow-left"></i> Voltar lista de pedidos shopping
+                <div class="card-footer d-flex flex-column flex-md-row justify-content-between gap-2">
+                    <a asp-action="PedidoDetalhe" asp-route-id="@Model.Pedido.Id" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-arrow-left"></i> Voltar ao pedido
                     </a>
+                    <div class="d-flex flex-wrap justify-content-md-end gap-2">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="window.print()">
+                            <i class="bi bi-printer"></i> Imprimir térmico
+                        </button>
+                        <a asp-action="BaixarReciboA4" asp-route-id="@Model.Pedido.Id" class="btn btn-primary btn-sm">
+                            <i class="bi bi-file-earmark-word"></i> Baixar A4
+                        </a>
+                        @if (!string.IsNullOrWhiteSpace(Model.PixQRCodeUrl))
+                        {
+                            <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#pixModal">
+                                <i class="bi bi-qr-code"></i> PIX
+                            </button>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    # @Model.Pedido.Id
+                    Pedido #@(Model.Pedido.CodigoPublico ?? Model.Pedido.Id.ToString())
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -236,5 +254,30 @@
         </div>
     </div>
 </section>
+
+@if (!string.IsNullOrWhiteSpace(Model.PixQRCodeUrl))
+{
+    <div class="modal fade" id="pixModal" tabindex="-1" aria-labelledby="pixModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pixModalLabel">Pagamento via PIX</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Escaneie o código QR para realizar o pagamento.</p>
+                    <img src="data:image/png;base64,@Model.PixQRCodeUrl" alt="Código QR PIX" class="img-fluid mb-3" style="max-width: 280px;" />
+                    <div class="alert alert-info text-break">
+                        <strong>PIX copia e cola:</strong>
+                        <span id="pixKeyCupom">@Model.PixKey</span>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('pixKeyCupom').innerText)">
+                        <i class="bi bi-copy"></i> Copiar código
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 <script src="~/js/controllers/Store-Pedido.js"></script>
 <script src="~/js/controllers/Store-Cadastro.js"></script>

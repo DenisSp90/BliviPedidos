@@ -100,7 +100,8 @@
                                             <a asp-action="PedidoDetalhe" asp-route-id="@p.Id" class="btn btn-primary btn-sm">
                                                 <i class="bi bi-info-circle"></i>
                                             </a>
-                                            @if (User.IsInRole(BliviPedidos.Services.Implementations.InicializadorSistema.PerfilAdministrador))
+                                            @if (User.IsInRole(BliviPedidos.Services.Implementations.InicializadorSistema.PerfilAdministrador)
+                                                || User.IsInRole(BliviPedidos.Services.Implementations.InicializadorSistema.PerfilVendedor))
                                             {
                                                 <button type="button" class="btn btn-danger btn-sm pedido-delete-btn" data-id="@p.Id" data-status="@p.Status" title="Excluir pedido">
                                                     <i class="bi bi-trash"></i>

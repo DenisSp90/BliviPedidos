@@ -17,6 +17,7 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
     private readonly ReservaEstoqueOptions _reservaOptions;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IConfiguracaoReservaLojaService? _configuracaoReservaLojaService;
+    private readonly INotificacaoPedidoService? _notificacaoPedido;
 
     public ConfirmacaoCheckoutService(
         ApplicationDbContext context,
@@ -25,7 +26,8 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
         ILogger<ConfirmacaoCheckoutService> logger,
         IOptions<ReservaEstoqueOptions> reservaOptions,
         IHttpContextAccessor httpContextAccessor,
-        IConfiguracaoReservaLojaService? configuracaoReservaLojaService = null)
+        IConfiguracaoReservaLojaService? configuracaoReservaLojaService = null,
+        INotificacaoPedidoService? notificacaoPedido = null)
     {
         _context = context;
         _carrinhoService = carrinhoService;
@@ -34,6 +36,7 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
         _reservaOptions = reservaOptions.Value;
         _httpContextAccessor = httpContextAccessor;
         _configuracaoReservaLojaService = configuracaoReservaLojaService;
+        _notificacaoPedido = notificacaoPedido;
     }
 
     public async Task<ResultadoConfirmacaoCheckout> ConfirmarAsync(
@@ -145,6 +148,9 @@ public sealed class ConfirmacaoCheckoutService : IConfirmacaoCheckoutService
             }
             await _context.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
+
+            if (_notificacaoPedido is not null)
+                await _notificacaoPedido.NotificarPedidoCriadoAsync(pedido.Id, cancellationToken);
 
             _carrinhoService.Limpar(lojaId);
             _dadosService.Limpar(lojaId);

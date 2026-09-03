@@ -236,16 +236,3 @@ public class PixModel
     public string IdReferenciaPagamento { get; set; }
 }
 
-public class PixAppSettingsModel
-{
-    public PixAppSettingsModel()
-    {
-    }
-
-    public string Responsavel { get; set; }
-    public string PixTipo { get; set; }
-    public string PixChave { get; set; }
-    public string PixCity { get; set; }
-    public string PixQRCodeUrl { get; set; }
-
-}

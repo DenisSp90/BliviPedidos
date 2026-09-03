@@ -3,6 +3,7 @@ $(document).ready(function () {
         const id = $(this).data('id');
         const status = String($(this).data('status'));
         const podeDevolver = status !== 'Cancelado' && status !== 'Carrinho';
+        let devolverEstoque = podeDevolver;
 
         Swal.fire({
             title: 'Excluir o pedido definitivamente?',
@@ -14,8 +15,14 @@ $(document).ready(function () {
             confirmButtonColor: '#d33',
             confirmButtonText: 'Excluir definitivamente',
             cancelButtonText: 'Cancelar',
-            preConfirm: function () {
-                return podeDevolver && document.getElementById('devolverEstoque').checked;
+            didOpen: function () {
+                const checkbox = document.getElementById('devolverEstoque');
+                if (checkbox) {
+                    devolverEstoque = checkbox.checked;
+                    checkbox.addEventListener('change', function () {
+                        devolverEstoque = checkbox.checked;
+                    });
+                }
             }
         }).then(function (resultado) {
             if (!resultado.isConfirmed) return;
@@ -25,7 +32,7 @@ $(document).ready(function () {
                 type: 'POST',
                 data: {
                     id: id,
-                    devolverEstoque: resultado.value === true,
+                    devolverEstoque: devolverEstoque,
                     __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val()
                 },
                 success: function (response) {
@@ -37,7 +44,7 @@ $(document).ready(function () {
                     Swal.fire({
                         icon: 'success',
                         title: 'Pedido excluído',
-                        text: resultado.value === true ? 'Os itens foram devolvidos ao estoque.' : 'O estoque não foi alterado.',
+                        text: devolverEstoque ? 'Os itens foram devolvidos ao estoque.' : 'O estoque não foi alterado.',
                         showConfirmButton: false,
                         timer: 1800
                     }).then(function () { location.reload(); });

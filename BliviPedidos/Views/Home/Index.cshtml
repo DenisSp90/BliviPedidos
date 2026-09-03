@@ -309,7 +309,7 @@
                             {
                                 <tr>
                                     <th scope="row">@m.Data</th>
-                                    <td>@m.Produto.Nome.Trim()</td>
+                                    <td>@(m.Produto?.Nome?.Trim() ?? "Produto excluído")</td>
 
                                     <td>
                                         @if (m.Tipo == "Entrada")

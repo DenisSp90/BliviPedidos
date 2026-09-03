@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace BliviPedidos.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Policy = PoliticasAutorizacao.Administracao)]
+[Authorize(Policy = PoliticasAutorizacao.ConsoleGlobal)]
 public sealed class UsuarioController : Controller
 {
     private readonly ApplicationDbContext _context;

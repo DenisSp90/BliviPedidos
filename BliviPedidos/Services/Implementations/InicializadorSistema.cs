@@ -30,44 +30,66 @@ public static class InicializadorSistema
 
         await CriarPerfisAsync(roleManager);
 
-        if (await userManager.Users.AnyAsync(cancellationToken))
-        {
-            return;
-        }
-
         var settings = configuration
             .GetSection("BootstrapAdmin")
             .Get<BootstrapAdminSettings>() ?? new BootstrapAdminSettings();
 
-        if (string.IsNullOrWhiteSpace(settings.Email) || string.IsNullOrWhiteSpace(settings.Password))
+        if (string.IsNullOrWhiteSpace(settings.Email))
         {
-            throw new InvalidOperationException(
-                "O banco não possui usuários. Configure BootstrapAdmin:Email e BootstrapAdmin:Password para criar o primeiro administrador.");
+            logger.LogCritical(
+                "BootstrapAdmin:Email não está configurado. O console global permanecerá bloqueado, mas a aplicação continuará disponível.");
+            return;
         }
 
-        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-
         var email = settings.Email.Trim().ToLowerInvariant();
-        var usuario = new IdentityUser
+        var usuario = await userManager.FindByEmailAsync(email);
+        var usuarioCriado = usuario is null;
+        if (usuario is null)
         {
-            UserName = email,
-            Email = email,
-            EmailConfirmed = true
-        };
+            if (string.IsNullOrWhiteSpace(settings.Password))
+            {
+                logger.LogCritical(
+                    "O administrador global {Email} ainda não existe e BootstrapAdmin:Password não está configurado. " +
+                    "A conta não será criada e o console global permanecerá bloqueado.",
+                    email);
+                return;
+            }
 
-        ValidarResultado(await userManager.CreateAsync(usuario, settings.Password), "criar o administrador inicial");
-        ValidarResultado(await userManager.AddToRoleAsync(usuario, PerfilAdministrador), "atribuir o papel Administrador");
+            usuario = new IdentityUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true
+            };
+            ValidarResultado(
+                await userManager.CreateAsync(usuario, settings.Password),
+                "criar o administrador global");
+        }
 
-        context.DefinirLojaAtual(Loja.PadraoId);
-        context.UsuarioLoja.Add(new UsuarioLoja
+        if (!await userManager.IsInRoleAsync(usuario, PerfilAdministrador))
+            ValidarResultado(
+                await userManager.AddToRoleAsync(usuario, PerfilAdministrador),
+                "atribuir o papel Administrador ao administrador global");
+
+        var possuiVinculo = await context.UsuarioLoja
+            .IgnoreQueryFilters()
+            .AnyAsync(item => item.UsuarioId == usuario.Id, cancellationToken);
+        if (!possuiVinculo)
         {
-            UsuarioId = usuario.Id,
-            LojaId = Loja.PadraoId
-        });
-        await context.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
+            context.DefinirLojaAtual(Loja.PadraoId);
+            context.UsuarioLoja.Add(new UsuarioLoja
+            {
+                UsuarioId = usuario.Id,
+                LojaId = Loja.PadraoId
+            });
+            await context.SaveChangesAsync(cancellationToken);
+        }
 
-        logger.LogInformation("Administrador inicial criado e associado à loja padrão. Email: {Email}", email);
+        logger.LogInformation(
+            usuarioCriado
+                ? "Administrador global criado. Email: {Email}"
+                : "Administrador global validado. Email: {Email}",
+            email);
     }
 
     private static async Task CriarPerfisAsync(RoleManager<IdentityRole> roleManager)

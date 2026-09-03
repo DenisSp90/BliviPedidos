@@ -16,10 +16,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
-if (builder.Environment.IsDevelopment())
-{
-    builder.Configuration.AddUserSecrets(typeof(Program).Assembly, optional: true);
-}
+// O arquivo é opcional: quando existir na conta que executa o processo, fornece
+// os segredos também fora de Development. Em produção, variáveis de ambiente
+// continuam sendo a fonte recomendada e têm prioridade por serem adicionadas depois.
+builder.Configuration.AddUserSecrets(typeof(Program).Assembly, optional: true);
 
 builder.Configuration.AddEnvironmentVariables();
 builder.Configuration.AddCommandLine(args);
@@ -39,7 +39,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-builder.Services.Configure<PixAppSettingsModel>(builder.Configuration.GetSection("PixAppSettings"));
 builder.Services.Configure<ReservaEstoqueOptions>(builder.Configuration.GetSection(ReservaEstoqueOptions.Secao));
 builder.Services.Configure<ConfirmacaoConsumidorOptions>(builder.Configuration.GetSection(ConfirmacaoConsumidorOptions.Secao));
 
@@ -73,6 +72,7 @@ builder.Services.AddTransient<IPedidoService, PedidoService>();
 builder.Services.AddTransient<IItemPedidoService, ItemPedidoService>();
 builder.Services.AddTransient<ICadastroService, CadastroService>();
 builder.Services.AddTransient<IEmailEnviarService, EmailEnviarService>();
+builder.Services.AddScoped<INotificacaoPedidoService, NotificacaoPedidoService>();
 builder.Services.AddTransient<IEmailSender, IdentityEmailSender>();
 builder.Services.AddHttpClient<IEnvioSmsService, EnvioSmsService>();
 builder.Services.AddTransient<IClienteService, ClienteService>();
@@ -89,6 +89,7 @@ builder.Services.AddScoped<IDadosConsumidorCheckoutService, DadosConsumidorCheck
 builder.Services.AddScoped<IConfirmacaoCheckoutService, ConfirmacaoCheckoutService>();
 builder.Services.AddSingleton<IConfiguracaoReservaLojaService, ConfiguracaoReservaLojaService>();
 builder.Services.AddScoped<IPagamentoService, PagamentoPixService>();
+builder.Services.AddScoped<IReciboPedidoService, ReciboPedidoWordService>();
 builder.Services.AddHostedService<ExpiracaoReservaService>();
 
 builder.Services.AddHttpContextAccessor();

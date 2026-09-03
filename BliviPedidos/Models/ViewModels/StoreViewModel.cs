@@ -8,6 +8,7 @@ public class StoreViewModel
     public List<ClienteViewModel>? Clientes { get; set; }
     public CarrinhoViewModel? CarrinhoViewModel { get; set; }
     public Pedido? Pedido { get; set; }
+    public Loja? Loja { get; set; }
     public IList<Pedido>? Pedidos { get; set; }
 
     public ClienteViewModel? Cliente { get; set; }
